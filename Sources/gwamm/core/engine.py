@@ -5,6 +5,7 @@ and carries out the step it returns.
 """
 import math
 
+from . import consumables as _consumables
 from .cartography import CartoPlan
 from .geometry import NavGraph
 from .memory import SEARCHED, SEEN, UNKNOWN, InstanceMemory
@@ -71,16 +72,23 @@ class Config:
     capture_elites = True        # use Signet of Capture on bosses carrying an elite we lack
     multibox = False             # set by the bot: other players are in the party, so leave the party as it is
     party_mode = 0               # 0 work it out from the party, 1 always treat as heroes only, 2 always as shared
-    pcons_mode = 0               # consumables: 0 never, 1 once the area proves hard, 2 from the start
-    pcons_after_deaths = 2       # mode 1: deaths in this run before they are used
-    pcons_min_foes = 25          # not for the tail of an area
-    pcons_conset = True
-    pcons_pcons = True
+    pcons_on = False             # consumables at all. Each item also has its own switch (pc_<item>, added below)
+    pcons_after_deaths = 2       # deaths in this area that make it "going badly"
+    pcons_min_foes = 25          # timed bonuses are not started with fewer foes left than this
+    pcons_dp_threshold = 30      # death penalty (%) at which a morale item is worth using
+    pcons_dp_members = 3         # party members that far down before a whole-party morale item is used
     buy_signets = True           # campaigns: top the bar back up with signets between areas
     change_secondary = True      # campaigns: switch secondary in the outpost for the best elites
     unlock_outposts = True       # campaigns: after a vanquish, walk into a locked outpost if one is reachable
     do_vanquish = True
     do_cartography = True
+
+
+
+# One switch per consumable (see core/consumables.py): pc_<key>. Timed bonuses are 0 off,
+# 1 when the area is going badly, 2 always; morale items are simply on or off. All start off.
+for _item in _consumables.CATALOGUE:
+    setattr(Config, _item.setting, 0 if _item.kind == _consumables.EFFECT else False)
 
 
 class Objective:

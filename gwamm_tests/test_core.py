@@ -103,6 +103,40 @@ def test_detour_on_wall():
     assert eng.next_step() is not None and eng.objective.kind != "guide"
 
 
+def test_consumables():
+    """Nothing is used unless switched on; death penalty comes first; each bonus obeys its own setting."""
+    from Sources.gwamm.core import consumables as C
+    from Sources.gwamm.core.engine import Config
+    all_keys = [i.key for i in C.CATALOGUE]
+    cfg = Config()
+    f = C.Facts(deaths=5, foes_left=100, my_morale=40, party_morale=[40] * 8, in_bags=all_keys)
+    assert C.decide(cfg, f) == (None, "off")                       # master switch off
+    cfg.pcons_on = True
+    assert C.decide(cfg, f)[0] is None                             # on, but no item chosen: still nothing
+    cfg.pc_birthday_cupcake = C.HARD
+    cfg.pc_essence_of_celerity = C.ALWAYS
+    cfg.pc_four_leaf_clover = True
+    cfg.pc_peppermint_candy_cane = True
+    assert C.decide(cfg, f)[0].key == "four_leaf_clover"            # party penalised: that first
+    f = C.Facts(deaths=0, foes_left=100, my_morale=60, party_morale=[60, 100, 100, 100], in_bags=all_keys,
+                targets={"four_leaf_clover": 100, "peppermint_candy_cane": 100})
+    assert C.decide(cfg, f)[0].key == "peppermint_candy_cane"       # only me: the personal one
+    f = C.Facts(deaths=0, foes_left=100, my_morale=85, party_morale=[85] * 8, in_bags=all_keys)
+    assert C.decide(cfg, f)[0].key == "essence_of_celerity"         # mild penalty: no morale item, the 'always' bonus
+    f.running = {"essence_of_celerity"}
+    it, why = C.decide(cfg, f)
+    assert it is None and "Cupcake" in why                          # running already; cupcake waits for trouble
+    f.deaths = 2
+    assert C.decide(cfg, f)[0].key == "birthday_cupcake"
+    f = C.Facts(deaths=0, foes_left=10, in_bags=all_keys)
+    assert C.decide(cfg, f)[0] is None                              # not for the last few foes
+    f = C.Facts(deaths=0, foes_left=100, in_bags=[])
+    assert C.decide(cfg, f)[0] is None                              # nothing in the bags
+    # every item in the catalogue has a setting on Config, off by default
+    fresh = Config()
+    assert all(not getattr(fresh, i.setting) for i in C.CATALOGUE)
+
+
 if __name__ == "__main__":
     test_geometry()
     test_cartography()
@@ -110,4 +144,5 @@ if __name__ == "__main__":
     test_full_runs()
     test_route_and_trap_together()
     test_detour_on_wall()
+    test_consumables()
     print("ALL PASSED")

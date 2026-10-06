@@ -613,6 +613,22 @@ def player_dead_safe():
         return True
 
 
+def my_morale():
+    """The game's morale number: 100 is neutral, 40 is the -60% limit, above 100 is a bonus."""
+    try:
+        return int(Player.GetMorale() or 100)
+    except Exception:
+        return 100
+
+
+def party_low_morale():
+    try:
+        vals = [int(m) for _a, m in Party.GetPartyMorale() if m]
+        return min(vals) if vals else my_morale()
+    except Exception:
+        return my_morale()
+
+
 def party_makeup():
     """Who is in the party, as the game reports it: human players (you included), heroes
     (anyone's) and henchmen."""

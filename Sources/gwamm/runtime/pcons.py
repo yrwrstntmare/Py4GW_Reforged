@@ -1,98 +1,119 @@
-"""Consumables ("pcons") kept up during a vanquish.
+"""Consumables at run time: gather the facts, ask core/consumables.decide, use one item.
 
-Uses the Reforged library's own helpers (routines_src/behaviourtrees_src/botting_consumables):
-which item gives which effect, the check that the effect is not already on, and the message that
-asks the other accounts of a multibox party to use theirs. Nothing is bought or moved: an item
-that is not in the bags is simply skipped.
-
-When they are used is this module's rule (cfg.pcons_mode):
-  0  never
-  1  only once the area is proving hard: after cfg.pcons_after_deaths deaths in this run
-  2  from the first fight on
-and never for the tail of an area (fewer than cfg.pcons_min_foes foes left), so a half-hour
-item is not spent on the last few foes.
+Item and effect ids come from the Reforged library's own table
+(BTUpkeepers.CONSUMABLE_UPKEEP_PRESETS); the rule for when is in core/consumables.py.
+Nothing is bought or moved, and an item the player has not switched on is never touched.
 """
 import time
 
-GROUPS = (("conset", "Conset (Essence, Grail, Armor): whole party, used by you"),
-          ("pcons", "Personal items (cupcake, egg, candy, pie, kabob, soup, salad, war supplies)"))
+from ..core import consumables as C
 
 
-def _specs(group):
-    from Py4GWCoreLib.routines_src.behaviourtrees_src import botting_consumables as bc
-    return bc.consumable_specs(group)
+def _presets():
+    from Py4GWCoreLib.routines_src.behaviourtrees_src.upkeepers import BTUpkeepers
+    return BTUpkeepers.CONSUMABLE_UPKEEP_PRESETS
 
 
 class Pcons:
     def __init__(self, session):
         self.session = session
         self._next = 0.0
-        self._sent = {}          # model id -> when the other accounts were last asked
-        self._specs = None
-        self._missing = set()
+        self._ids = None             # key -> (model id, effect id or 0, morale target or None)
+        self._sent = {}              # key -> when the other accounts were last asked
+        self._last_morale_use = 0.0
         self.note = ""
         self.used = 0
+        self.last = ""
 
-    def wanted(self, eng):
-        cfg = self.session.cfg
-        if cfg.pcons_mode <= 0 or not cfg.do_vanquish:
-            return False, "off"
-        left = eng.foes_remaining
-        if left is None or left <= 0:
-            return False, "nothing left to fight"
-        if left < cfg.pcons_min_foes and eng.deaths < cfg.pcons_after_deaths:
-            return False, f"only {left} foes left"
-        if cfg.pcons_mode == 1 and eng.deaths < cfg.pcons_after_deaths:
-            return False, f"held back until {cfg.pcons_after_deaths} deaths (now {eng.deaths})"
-        return True, "in use"
-
-    def _load(self):
-        from Py4GWCoreLib import GLOBAL_CACHE
-        cfg, out = self.session.cfg, []
-        for group, _label in GROUPS:
-            if not getattr(cfg, "pcons_" + group):
-                continue
-            for model_id, effect_name in _specs(group):
-                effect_id = int(GLOBAL_CACHE.Skill.GetID(effect_name) or 0)
-                if effect_id > 0:
-                    out.append((group, int(model_id), effect_id, effect_name))
-        return out
+    # ---- ids, from the library ----
+    def ids(self):
+        if self._ids is None:
+            from Py4GWCoreLib import GLOBAL_CACHE
+            out, table = {}, _presets()
+            for it in C.CATALOGUE:
+                p = table.get(it.key)
+                if not p:
+                    continue
+                name = str(p.get("effect_name", "") or "")
+                effect = int(p.get("effect_id", 0) or 0) or (int(GLOBAL_CACHE.Skill.GetID(name) or 0) if name else 0)
+                target = p.get("target_morale")
+                out[it.key] = (int(p["model_id"]), effect, int(target) if target is not None else None)
+            self._ids = out
+        return self._ids
 
     def reset(self):
-        self._specs, self._missing, self._sent = None, set(), {}
+        self._sent, self._last_morale_use = {}, 0.0
 
-    def tick(self, eng, in_fight_or_walking=True):
-        """Call every tick while vanquishing. Uses at most one item per call, a few seconds apart."""
+    def count(self, key):
+        """How many of this item are in the bags (for the options window)."""
+        try:
+            from Py4GWCoreLib import GLOBAL_CACHE
+            return int(GLOBAL_CACHE.Inventory.GetModelCount(self.ids()[key][0]) or 0)
+        except Exception:
+            return 0
+
+    # ---- facts ----
+    def facts(self, eng):
+        from Py4GWCoreLib import GLOBAL_CACHE, Party, Player
+        from Py4GWCoreLib.routines_src.behaviourtrees_src import botting_consumables as bc
+        cfg, ids = self.session.cfg, self.ids()
+        in_bags, running, targets = set(), set(), {}
+        for it in C.CATALOGUE:
+            if it.key not in ids or not getattr(cfg, it.setting):
+                continue                              # switched off: not even looked at
+            model, effect, target = ids[it.key]
+            if int(GLOBAL_CACHE.Inventory.GetFirstModelID(model) or 0) > 0:
+                in_bags.add(it.key)
+            if effect and bc.local_effect_active(effect):
+                running.add(it.key)
+            if target is not None:
+                targets[it.key] = target
+        try:
+            party = [int(m) for _agent, m in Party.GetPartyMorale()]
+        except Exception:
+            party = []
+        return C.Facts(deaths=eng.deaths, foes_left=eng.foes_remaining, my_morale=int(Player.GetMorale() or 100),
+                       party_morale=party, in_bags=in_bags, running=running, targets=targets)
+
+    # ---- act ----
+    def tick(self, eng):
+        """Call every tick while vanquishing. At most one item per call, a few seconds apart."""
         now = time.time()
         if now < self._next:
             return
         self._next = now + 3.0
-        ok, why = self.wanted(eng)
-        self.note = why
-        if not ok:
-            return
-        from Py4GWCoreLib.routines_src.behaviourtrees_src import botting_consumables as bc
-        if self._specs is None:
-            self._specs = self._load()
         cfg, log = self.session.cfg, self.session.log
-        for group, model_id, effect_id, name in self._specs:
-            if cfg.multibox and group == "pcons" and now - self._sent.get(model_id, 0.0) > 90.0:
-                # each account eats its own; the receiving side skips it if the effect is already on
-                self._sent[model_id] = now
-                try:
-                    refs = bc.send_consumable_to_accounts(model_id, effect_id)
-                    if refs:
-                        log.event("pcon", item=name, sent_to=len(refs))
-                except Exception as e:
-                    log.event("pcon", item=name, error=repr(e))
-            if bc.local_effect_active(effect_id):
-                continue
-            if bc.use_local_consumable(model_id, effect_id):
-                self.used += 1
-                self._missing.discard(model_id)
-                log.event("pcon", item=name, used=True, deaths=eng.deaths, foes=eng.foes_remaining)
-                self._next = now + 1.5           # one at a time: the game drops uses sent together
-                return
-            if model_id not in self._missing:
-                self._missing.add(model_id)
-                log.event("pcon", item=name, used=False, note="none in the bags")
+        if not cfg.pcons_on:
+            self.note = "off"
+            return
+        facts = self.facts(eng)
+        item, why = C.decide(cfg, facts)
+        self.note = why if item is None else f"using {item.name}: {why}"
+        if item is None:
+            return
+        if item.kind != C.EFFECT and now - self._last_morale_use < 20.0:
+            return                                    # give the game time to show the new morale
+        from Py4GWCoreLib import GLOBAL_CACHE
+        from Py4GWCoreLib.routines_src.behaviourtrees_src import botting_consumables as bc
+        model, effect, _target = self.ids()[item.key]
+        item_id = int(GLOBAL_CACHE.Inventory.GetFirstModelID(model) or 0)
+        if item_id <= 0:
+            return
+        GLOBAL_CACHE.Inventory.UseItem(item_id)
+        self.used += 1
+        self.last = item.name
+        if item.kind != C.EFFECT:
+            self._last_morale_use = now
+        log.event("pcon", item=item.name, kind=item.kind, why=why, deaths=facts.deaths, foes=facts.foes_left,
+                  my_morale=facts.my_morale, party_morale=facts.party_morale)
+        self._next = now + 1.5                        # one at a time: the game drops uses sent together
+        # A bonus that only covers its user: the other accounts of a shared party each use their
+        # own. Their side checks that the bonus is not already running before using anything.
+        if cfg.multibox and item.kind == C.EFFECT and item.helps == "self" and now - self._sent.get(item.key, 0.0) > 90.0:
+            self._sent[item.key] = now
+            try:
+                refs = bc.send_consumable_to_accounts(model, effect)
+                if refs:
+                    log.event("pcon", item=item.name, sent_to=len(refs))
+            except Exception as e:
+                log.event("pcon", item=item.name, error=repr(e))

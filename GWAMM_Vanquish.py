@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.30.1"
+SCRIPT_VERSION = "0.31.0"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
@@ -105,6 +105,7 @@ class View:
     main_sized = False
     show_reforged = False
     show_map = True
+    pc_counts = {}
     last_dump = ""
     last_error = ""
     search = ""
@@ -301,8 +302,10 @@ def draw_status():
         _line("PARTY", f"you + {max(0, p['players'] - 1)} other player(s), {p['heroes']} hero(es), {p['henchmen']} henchmen")
         if session.cfg.multibox:
             _line("SHARED", session.party_note or f"{len(game.party_accounts_cached())} of the other accounts run Py4GW")
-        if session.cfg.pcons_mode > 0:
-            _line("CONSUMABLES", f"{session.pcons.note or '-'} ({session.pcons.used} used this session)")
+        if session.cfg.pcons_on:
+            _line("CONSUMABLES", f"{session.pcons.note or '-'} ({session.pcons.used} used this session"
+                                 + (f", last {session.pcons.last})" if session.pcons.last else ")"))
+            _line("MORALE", f"yours {game.my_morale()}, party lowest {game.party_low_morale()} (100 is no penalty, 40 ends the run)")
         else:
             _line("CONSUMABLES", "off (Options tab)")
 
@@ -412,6 +415,42 @@ def draw_developer():
         session.drop()
 
 
+
+_PC_MODES = ["Off", "When the area is going badly", "Always"]
+
+
+def draw_consumables():
+    """One row per consumable: what it does, how many you carry, and when it may be used."""
+    from Sources.gwamm.core import consumables as C
+    cfg, pc = session.cfg, session.pcons
+    cfg.pcons_after_deaths = PyImGui.slider_int('Deaths in an area that count as "going badly"', cfg.pcons_after_deaths, 1, 10)
+    cfg.pcons_min_foes = PyImGui.slider_int("Do not start a timed bonus with fewer foes left than", cfg.pcons_min_foes, 0, 80)
+    groups = (("Timed bonuses for the whole party (you use them)", lambda i: i.kind == C.EFFECT and i.helps == "party"),
+              ("Timed bonuses for one character", lambda i: i.kind == C.EFFECT and i.helps == "self"),
+              ("Death penalty: whole party", lambda i: i.kind == C.PARTY_MORALE),
+              ("Death penalty: yourself", lambda i: i.kind == C.SELF_MORALE))
+    for title, pick in groups:
+        PyImGui.separator()
+        PyImGui.text(title)
+        if "Death penalty: whole party" == title:
+            cfg.pcons_dp_threshold = PyImGui.slider_int("Use at this much death penalty (%)", cfg.pcons_dp_threshold, 15, 55)
+            cfg.pcons_dp_members = PyImGui.slider_int("...when this many of the party are that far down", cfg.pcons_dp_members, 1, 8)
+        for it in [i for i in C.CATALOGUE if pick(i)]:
+            have = View.pc_counts.get(it.key, 0)
+            label = f"{it.name} (you have {have}): {it.what}"
+            if it.kind == C.EFFECT:
+                setattr(cfg, it.setting, PyImGui.combo(f"{label}##{it.key}", int(getattr(cfg, it.setting)), _PC_MODES))
+            else:
+                setattr(cfg, it.setting, PyImGui.checkbox(f"{label}##{it.key}", bool(getattr(cfg, it.setting))))
+    import time as _t
+    if _t.time() - View.pc_counts.get("t", 0) > 5.0:          # recount the bags every few seconds
+        View.pc_counts = {"t": _t.time()}
+        for it in C.CATALOGUE:
+            View.pc_counts[it.key] = pc.count(it.key)
+    if cfg.multibox:
+        PyImGui.text_wrapped("Shared party: single-character bonuses are also requested from the other accounts, "
+                             "which use their own. Death-penalty items for one character are yours only.")
+
 def draw_options():
     cfg = session.cfg
     PyImGui.text("Changes apply the next time you enter an area.")
@@ -440,17 +479,9 @@ def draw_options():
         PyImGui.text_wrapped("Only you, heroes and henchmen: the bot loads the team saved under Builds for each area.")
     PyImGui.separator()
     PyImGui.text("CONSUMABLES")
-    cfg.pcons_mode = PyImGui.combo("Use consumables", int(cfg.pcons_mode),
-                                   ["Never", "Only when an area is going badly", "From the start of every area"])
-    if cfg.pcons_mode > 0:
-        cfg.pcons_conset = PyImGui.checkbox("Conset: Essence of Celerity, Grail of Might, Armor of Salvation", cfg.pcons_conset)
-        cfg.pcons_pcons = PyImGui.checkbox("Personal: cupcake, golden egg, candy corn/apple, pumpkin pie, kabob, soup, salad, war supplies", cfg.pcons_pcons)
-        if cfg.pcons_mode == 1:
-            cfg.pcons_after_deaths = PyImGui.slider_int("Deaths in an area before they are used", cfg.pcons_after_deaths, 1, 10)
-        cfg.pcons_min_foes = PyImGui.slider_int("Do not start them with fewer foes left than", cfg.pcons_min_foes, 0, 80)
-        PyImGui.text_wrapped("Only what is already in your bags is used; nothing is bought or taken from storage. "
-                             "An item whose effect is still running is not used again."
-                             + (" Other accounts are asked to use their own personal items." if cfg.multibox else ""))
+    cfg.pcons_on = PyImGui.checkbox("Use consumables (only the ones switched on below, only from your bags)", cfg.pcons_on)
+    if cfg.pcons_on and PyImGui.collapsing_header("Choose consumables", PyImGui.TreeNodeFlags.DefaultOpen):
+        safe("consumables list", draw_consumables)()
     PyImGui.separator()
     cfg.do_vanquish = PyImGui.checkbox("Vanquish", cfg.do_vanquish)
     cfg.do_cartography = PyImGui.checkbox("Cartography", cfg.do_cartography)

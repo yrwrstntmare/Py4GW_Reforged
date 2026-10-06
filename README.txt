@@ -1,4 +1,4 @@
-GWAMM Vanquish 0.30.1 (pre-release: not yet completed a live run)
+GWAMM Vanquish 0.31.0
 
 INSTALL
   1. Copy the folder  Sources/gwamm  into your Py4GW Reforged  Sources  folder.
@@ -27,9 +27,11 @@ leader only. Every account needs the outposts on the route unlocked. Options > P
 overrides the detection. Not yet tested with real multibox parties: please report.
 
 CONSUMABLES
-Options > "Use consumables": never, only when an area is going badly (after N deaths), or
-from the start. Uses only what is in your bags. Conset is used by the leader for the party;
-personal items are used by each account for itself.
+Options > "Use consumables", then switch on the ones you want. Nothing is used unless you
+chose it, and only from your bags. Each timed bonus has its own setting: off, when the area
+is going badly (after N deaths), or always. Death-penalty items are used when the penalty
+passes the level you set: whole-party items when several members are that far down, personal
+ones for you. The list shows what each item does and how many you carry.
 
 RUN LOG
   Every run writes  gwamm_logs/run_<map id>_<date>_<time>.jsonl  in your Py4GW folder.

@@ -39,6 +39,9 @@ no game running. If a planning change needs something from the game, add a funct
   - `goto=(x, y)` turns the same planner into "get to this point" (used for crossing areas)
 - `cartography.py` – which map cells are still fogged and where to stand to clear them.
 - `tactics.py` – target choice, crowd size, where to fall back to.
+- `consumables.py` – the catalogue of consumables (what each is for, who it helps) and
+  `decide(cfg, facts)`: the one item to use now, or none. Nothing is used unless the player
+  switched that item on. Ids and rule kinds come from the Reforged library's own table.
 - `elites.py`, `builds.py`, `world.py` – elite/boss tables, skill templates and team builds,
   the world graph (which area connects to which, which outpost serves it).
 
@@ -60,7 +63,7 @@ no game running. If a planning change needs something from the game, add a funct
 - `maprun.py` – `MapRunNode`: one queued area from start to finish (travel, walk in, vanquish,
   leave). Its outpost preparation is a mixin:
   - `maprun_setup.py` – secondary profession, team and hero bars, signets, shared-party checks
-- `pcons.py` – consumables. `guard.py` – keeps one bad tick from killing the run.
+- `pcons.py` – gathers the facts for `core/consumables.decide` and uses the item it names. `guard.py` – keeps one bad tick from killing the run.
 - `runlog.py` – the JSON-lines run log. **Observability first:** anything the bot decides that
   a person might later ask "why?" about gets a `log.event(...)`.
 
