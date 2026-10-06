@@ -1,0 +1,2298 @@
+[
+ {
+  "profession": "Monk",
+  "skill": "Blessed Light",
+  "campaign": "",
+  "boss": "Amalek the Unmerciful",
+  "location": "Watchtower Coast (War in Kryta)",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Blessed Light",
+  "campaign": "",
+  "boss": "Ssuns, Blessed of Dwayna",
+  "location": "Archipelagos",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Boon Signet",
+  "campaign": "",
+  "boss": "Mungri Magicbox",
+  "location": "Ferndale",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healer's Boon",
+  "campaign": "",
+  "boss": "Josinq the Whisperer",
+  "location": "Resplendent Makuun",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Peace and Harmony",
+  "campaign": "",
+  "boss": "Marnta Doomspeaker",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Scribe's Insight",
+  "campaign": "",
+  "boss": "Ajamahn, Servant of the Sands",
+  "location": "Crystal Overlook",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Prophecies",
+  "boss": "Raptorhawk",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Factions",
+  "boss": "Bound Karei",
+  "location": "Tahnnakai Temple",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Factions",
+  "boss": "Untouched Ancient Ky",
+  "location": "Raisu Palace and Raisu Palace (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Nightfall",
+  "boss": "Priest Zein Zuu",
+  "location": "Nundu Bay",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Nightfall",
+  "boss": "Preceptor Zunark",
+  "location": "Vehjin Mines",
+  "note": "during quest To the Rescue"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Nightfall",
+  "boss": "Topo the Protector",
+  "location": "Depths of Madness",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Nightfall",
+  "boss": "General Nimtak",
+  "location": "Dzagonur Bastion",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "campaign": "Nightfall",
+  "boss": "Zadukar the Blessed",
+  "location": "Joko's Domain",
+  "note": "during quest A Deal's a Deal"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Unyielding Aura",
+  "campaign": "",
+  "boss": "Ipillo Wupwup",
+  "location": "Witman's Folly",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Unyielding Aura",
+  "campaign": "",
+  "boss": "Kaia Wupwup",
+  "location": "Spearhead Peak",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Withdraw Hexes",
+  "campaign": "Factions",
+  "boss": "Hukhrah Earthslove",
+  "location": "Mount Qinkai",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Withdraw Hexes",
+  "campaign": "Eye of the North",
+  "boss": "Kaykitt Hidemender",
+  "location": "Verdant Cascades",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Glimmer of Light",
+  "campaign": "",
+  "boss": "Chiossen, Soothing Breeze",
+  "location": "Turai's Procession",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healer's Covenant",
+  "campaign": "",
+  "boss": "Bringer of Deceit",
+  "location": "Domain of Pain",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healing Burst",
+  "campaign": "",
+  "boss": "The Scar Eater",
+  "location": "The Eternal Grove (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healing Burst",
+  "campaign": "",
+  "boss": "Incetol, Devout of Depths",
+  "location": "Rhea's Crater",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healing Hands",
+  "campaign": "",
+  "boss": "Rull Browbeater",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healing Light",
+  "campaign": "Factions",
+  "boss": "KaySey Stormray",
+  "location": "Archipelagos",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Healing Light",
+  "campaign": "Eye of the North",
+  "boss": "Elmohr Snowmender",
+  "location": "Blood Washes Blood",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Light of Deliverance",
+  "campaign": "",
+  "boss": "Chidehkir, Light of the Blind",
+  "location": "Marga Coast",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Light of Deliverance",
+  "campaign": "",
+  "boss": "Kehmak the Tranquil",
+  "location": "Moddok Crevice",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Core",
+  "boss": "Priest of Menzies",
+  "location": "Fissure of Woe",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Prophecies",
+  "boss": "Dassk Arossyss",
+  "location": "Dunes of Despair",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Prophecies",
+  "boss": "Wissper Inssani",
+  "location": "Elona Reach",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Prophecies",
+  "boss": "Josso Essher",
+  "location": "Thirsty River",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Factions",
+  "boss": "Ziinfaun Lifeforce",
+  "location": "Xaquang Skyway",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Nightfall",
+  "boss": "Hahan, Faithful Protector",
+  "location": "Garden of Seborhin",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "campaign": "Eye of the North",
+  "boss": "Flannuss Broadwing",
+  "location": "Arbor Bay",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Air of Enchantment",
+  "campaign": "",
+  "boss": "Jayne Forestlight",
+  "location": "The Eternal Grove (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Air of Enchantment",
+  "campaign": "",
+  "boss": "Miella Lightwing",
+  "location": "Silent Surf",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Amity",
+  "campaign": "",
+  "boss": "Pravus Obsideo",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Aura of Faith",
+  "campaign": "",
+  "boss": "Demetrios the Enduring",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Aura of Faith",
+  "campaign": "",
+  "boss": "Mursaat Monk (boss)",
+  "location": "Ice Floe",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Aura of Faith",
+  "campaign": "",
+  "boss": "Coventina the Matron",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Aura of Faith",
+  "campaign": "",
+  "boss": "Willa the Unpleasant",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Divert Hexes",
+  "campaign": "",
+  "boss": "Amiresh the Pious",
+  "location": "The Alkali Pan",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Life Barrier",
+  "campaign": "",
+  "boss": "Esnhal Hardwood",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Life Barrier",
+  "campaign": "",
+  "boss": "Quickroot",
+  "location": "Lornar's Pass",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "campaign": "Factions",
+  "boss": "Seaguard Gita",
+  "location": "Boreas Seabed",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "campaign": "Factions",
+  "boss": "Monk's Construct",
+  "location": "Sunjiang District",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "campaign": "Eye of the North",
+  "boss": "Chaelse Flameshielder",
+  "location": "Grothmar Wardowns",
+  "note": "after Against the Charr but not before The Dawn of Rebellion"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Kepkhet Marrowfeast",
+  "location": "Prophet's Path",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Darda Goldenchief",
+  "location": "Ice Caves of Sorrow",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Lokar Icemender",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Bolis Hillshaker",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Wroth Yakslapper",
+  "location": "Grenth's Footprint",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Mesqul Ironhealer",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "campaign": "",
+  "boss": "Gulnar Irontoe",
+  "location": "Sorrow's Furnace",
+  "note": "during quest Kilroy Stonekin"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Restore Condition",
+  "campaign": "",
+  "boss": "Spindle Agonyvein",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Deflection",
+  "campaign": "",
+  "boss": "Grun Galesurge",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "campaign": "Prophecies",
+  "boss": "Facet of Light",
+  "location": "The Dragon's Lair",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "campaign": "Factions",
+  "boss": "Meril Stoneweaver",
+  "location": "Arborstone (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "campaign": "Factions",
+  "boss": "Ennsa Stoneweaver",
+  "location": "Altrumm Ruins",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "campaign": "Nightfall",
+  "boss": "Banor Greenbranch",
+  "location": "Holdings of Chokhin",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "campaign": "Eye of the North",
+  "boss": "Horai Wingshielder",
+  "location": "Dalada Uplands",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "campaign": "Eye of the North",
+  "boss": "Facet of Existence",
+  "location": "Riven Earth",
+  "note": "during The Cipher of Dwayna"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Zealous Benediction",
+  "campaign": "",
+  "boss": "Taskmaster Sadi-Belai",
+  "location": "Kodonur Crossroads",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Zealous Benediction",
+  "campaign": "",
+  "boss": "Commander Sadi-Belai",
+  "location": "Forum Highlands",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Balthazar's Pendulum",
+  "campaign": "",
+  "boss": "Riseh the Harmless",
+  "location": "Bahdok Caverns",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Balthazar's Pendulum",
+  "campaign": "",
+  "boss": "Captain Shehnahr",
+  "location": "Cliffs of Dohjok",
+  "note": "only during quest A Land of Heroes"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Defender's Zeal",
+  "campaign": "",
+  "boss": "Flame of Fervor",
+  "location": "Domain of Fear",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "campaign": "Factions",
+  "boss": "The Afflicted Miju",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "campaign": "Factions",
+  "boss": "The Afflicted Cho",
+  "location": "Dragon's Throat",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "campaign": "Factions",
+  "boss": "The Afflicted Jingme",
+  "location": "Unwaking Waters",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "campaign": "Eye of the North",
+  "boss": "Gorlos Skinflayer",
+  "location": "Heart of the Shiverpeaks",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Shield of Judgment",
+  "campaign": "",
+  "boss": "Myd Springclaw",
+  "location": "Mineral Springs",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Prophecies",
+  "boss": "Balt Duskstrider",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Prophecies",
+  "boss": "Fawl Driftstalker",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Prophecies",
+  "boss": "Frostbite",
+  "location": "Ice Floe & Talus Chute",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Factions",
+  "boss": "Kaijun Don",
+  "location": "Nahpui Quarter",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Factions",
+  "boss": "Scourgewind, Elder Guardian",
+  "location": "Silent Surf",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Nightfall",
+  "boss": "Hamlen the Fallen",
+  "location": "The Ruptured Heart",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "campaign": "Nightfall",
+  "boss": "Rukkassa",
+  "location": "Nightfallen Jahai",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Censure",
+  "campaign": "",
+  "boss": "Shen, the Magistrate",
+  "location": "Wajjun Bazaar",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Word of Censure",
+  "campaign": "",
+  "boss": "Quufu",
+  "location": "Wajjun Bazaar",
+  "note": "only during quest Straight to the Top"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Empathic Removal",
+  "campaign": "",
+  "boss": "Byzzr Wingmender",
+  "location": "Melandru's Hope",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Martyr",
+  "campaign": "Prophecies",
+  "boss": "Dwayna's Cursed",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Martyr",
+  "campaign": "Factions",
+  "boss": "Am Fah Leader",
+  "location": "The Undercity",
+  "note": "only during Capturing the Orrian Tome"
+ },
+ {
+  "profession": "Monk",
+  "skill": "Martyr",
+  "campaign": "Factions",
+  "boss": "Rien, the Martyr",
+  "location": "Shenzun Tunnels",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Martyr",
+  "campaign": "Nightfall",
+  "boss": "Dunshek the Purifier",
+  "location": "The Shattered Ravines",
+  "note": ""
+ },
+ {
+  "profession": "Monk",
+  "skill": "Signet of Removal",
+  "campaign": "",
+  "boss": "Commander Noss",
+  "location": "The Floodplain of Mahnkelon",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "campaign": "Prophecies",
+  "boss": "Cry Darkday",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "campaign": "Factions",
+  "boss": "Chan the Dragon's Blood",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "campaign": "Nightfall",
+  "boss": "Overseer Haubeh",
+  "location": "Kodonur Crossroads",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "campaign": "Nightfall",
+  "boss": "Taskmaster Vanahk",
+  "location": "Kodonur Crossroads",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "campaign": "Nightfall",
+  "boss": "Lieutenant Vanahk",
+  "location": "Yatendi Canyons",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Cultist's Fervor",
+  "campaign": "",
+  "boss": "Cultist Milthuran",
+  "location": "Rhea's Crater",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Cultist's Fervor",
+  "campaign": "",
+  "boss": "Cultist Rajazan",
+  "location": "Unwaking Waters (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Cultist's Fervor",
+  "campaign": "",
+  "boss": "Kyril Oathwarden",
+  "location": "Morostav Trail",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Prophecies",
+  "boss": "Mursaat Necromancer (boss)",
+  "location": "Ice Floe",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Prophecies",
+  "boss": "Feodor the Baneful",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Prophecies",
+  "boss": "Argyris the Scoundrel",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Prophecies",
+  "boss": "Odelyn the Displeased",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Prophecies",
+  "boss": "Sarlic the Judge",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Prophecies",
+  "boss": "Lugg the Malignant",
+  "location": "Dragon's Gullet",
+  "note": "only during The Titan Source"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Eye of the North",
+  "boss": "Katye Bloodburner",
+  "location": "Sacnoth Valley",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Eye of the North",
+  "boss": "The Keeper",
+  "location": "Cathedral of Flames",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "campaign": "Eye of the North",
+  "boss": "Tanto the Grim",
+  "location": "Varajar Fells",
+  "note": "only during Haunted"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "campaign": "",
+  "boss": "Tonfor Copperblood",
+  "location": "Lornar's Pass",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "campaign": "",
+  "boss": "Jollen Steelblight",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "campaign": "",
+  "boss": "Morgriff Shadestone",
+  "location": "Grenth's Footprint",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "campaign": "",
+  "boss": "Hormak Ironcurse",
+  "location": "Ice Caves of Sorrow",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "campaign": "",
+  "boss": "Riine Windrot",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of the Vampire",
+  "campaign": "",
+  "boss": "Byssha Hisst",
+  "location": "Dunes of Despair",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of the Vampire",
+  "campaign": "",
+  "boss": "Uussh Visshta",
+  "location": "Elona Reach",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of the Vampire",
+  "campaign": "",
+  "boss": "Hessper Sasso",
+  "location": "Thirsty River",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Ravenous Gaze",
+  "campaign": "",
+  "boss": "Moa'vu'Kaal",
+  "location": "Issnur Isles",
+  "note": "only during Moa'vu'Kaal, Awakened quest"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Ravenous Gaze",
+  "campaign": "",
+  "boss": "Shelboh the Ravenous",
+  "location": "Jahai Bluffs",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Signet of Suffering",
+  "campaign": "",
+  "boss": "Fondalz the Spiteful",
+  "location": "Poisoned Outcrops",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Signet of Suffering",
+  "campaign": "",
+  "boss": "Nehmak the Unpleasant",
+  "location": "Gate of Desolation",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Soul Leech",
+  "campaign": "Prophecies",
+  "boss": "Goss Darkweb",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Soul Leech",
+  "campaign": "Eye of the North",
+  "boss": "Flesh of Destruction",
+  "location": "Glint's Challenge",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Spoil Victor",
+  "campaign": "",
+  "boss": "Foalcrest Darkwish",
+  "location": "Mourning Veil Falls",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Spoil Victor",
+  "campaign": "",
+  "boss": "Sourbeak Rotshell",
+  "location": "Silent Surf",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Vampiric Spirit",
+  "campaign": "",
+  "boss": "Dark Fang",
+  "location": "Arborstone",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Vampiric Spirit",
+  "campaign": "",
+  "boss": "Kaswa Webstrider",
+  "location": "Arborstone (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Well of Power",
+  "campaign": "",
+  "boss": "Nhy Darkclaw",
+  "location": "Mineral Springs",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "campaign": "Nightfall",
+  "boss": "Hauseh the Defiler",
+  "location": "The Sulfurous Wastes",
+  "note": "only during A Show of Force"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "campaign": "Nightfall",
+  "boss": "Razakel",
+  "location": "Domain of Secrets",
+  "note": "only during Blueprint of the Fall"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "campaign": "Nightfall",
+  "boss": "Rebirther Jirath",
+  "location": "The Ruptured Heart",
+  "note": "only during A Tasty Morsel"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "campaign": "Nightfall",
+  "boss": "Tain the Corrupter",
+  "location": "Yatendi Canyons",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "campaign": "Nightfall",
+  "boss": "Torment Weaver",
+  "location": "Turai's Procession",
+  "note": "only during Battle of Turai's Procession"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "campaign": "Eye of the North",
+  "boss": "Murakai's Steward",
+  "location": "Cathedral of Flames",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Depravity",
+  "campaign": "",
+  "boss": "Modti Darkflower",
+  "location": "Arkjok Ward",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "campaign": "Southern Shiverpeaks",
+  "boss": "Maw the Mountain Heart",
+  "location": "Dreadnought's Drift",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "campaign": "Southern Shiverpeaks",
+  "boss": "Maw the Mountain Heart",
+  "location": "Mineral Springs",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "campaign": "Southern Shiverpeaks",
+  "boss": "Maw the Mountain Heart",
+  "location": "Grenth's Footprint",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "campaign": "Southern Shiverpeaks",
+  "boss": "Maw the Mountain Heart",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Lingering Curse",
+  "campaign": "Prophecies",
+  "boss": "Grenth's Cursed",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Lingering Curse",
+  "campaign": "Factions",
+  "boss": "Craw Stonereap",
+  "location": "Arborstone (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Lingering Curse",
+  "campaign": "Nightfall",
+  "boss": "Creo Vulnero",
+  "location": "Domain of Secrets",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "campaign": "",
+  "boss": "The Afflicted Huan",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "campaign": "",
+  "boss": "The Afflicted Xi",
+  "location": "Dragon's Throat",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "campaign": "",
+  "boss": "The Afflicted Lau",
+  "location": "Unwaking Waters",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "campaign": "",
+  "boss": "The Afflicted Thu",
+  "location": "Vizunah Square",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Pain of Disenchantment",
+  "campaign": "",
+  "boss": "Nehpek the Remorseless",
+  "location": "Vehjin Mines",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "campaign": "Prophecies",
+  "boss": "Allobo Dimdim",
+  "location": "Spearhead Peak",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "campaign": "Prophecies",
+  "boss": "Allobo Dimdim",
+  "location": "Talus Chute",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "campaign": "Prophecies",
+  "boss": "Karobo Dimdim",
+  "location": "Witman's Folly",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "campaign": "Factions",
+  "boss": "Hargg Plaguebinder",
+  "location": "Ferndale",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "campaign": "Nightfall",
+  "boss": "Wioli the Infectious",
+  "location": "Crystal Overlook",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "campaign": "Eye of the North",
+  "boss": "Bredyss Longstride",
+  "location": "Magus Stones",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Soul Bind",
+  "campaign": "",
+  "boss": "Necromancer's Construct",
+  "location": "Sunjiang District",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Soul Bind",
+  "campaign": "",
+  "boss": "Necromancer's Construct",
+  "location": "Sunjiang District (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Spiteful Spirit",
+  "campaign": "",
+  "boss": "Sapph Blacktracker",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Spiteful Spirit",
+  "campaign": "",
+  "boss": "Nighh SpineChill",
+  "location": "Talus Chute",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Spiteful Spirit",
+  "campaign": "",
+  "boss": "Ceru Gloomrunner",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Weaken Knees",
+  "campaign": "",
+  "boss": "Froth Stonereap",
+  "location": "Altrumm Ruins",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Weaken Knees",
+  "campaign": "",
+  "boss": "Rot Foulbelly",
+  "location": "Melandru's Hope",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "campaign": "",
+  "boss": "Ignis Effigia",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "campaign": "",
+  "boss": "Evirso Sectus",
+  "location": "Mineral Springs",
+  "note": "only during Defend Droknar's Forge"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "campaign": "",
+  "boss": "Ludo Ossidi",
+  "location": "Dragon's Gullet",
+  "note": "only during The Titan Source"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "campaign": "",
+  "boss": "Mentanl Arobo",
+  "location": "North Kryta Province",
+  "note": "only during Defend North Kryta Province"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "campaign": "",
+  "boss": "Desnas Hubor",
+  "location": "Tangle Root",
+  "note": "only during Defend Denravi"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Animate Flesh Golem",
+  "campaign": "",
+  "boss": "Ghial the Bone Dancer",
+  "location": "Xaquang Skyway",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Aura of the Lich",
+  "campaign": "",
+  "boss": "Maligo Libens",
+  "location": "Hell's Precipice",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Aura of the Lich",
+  "campaign": "",
+  "boss": "Cerris",
+  "location": "Nebo Terrace (War in Kryta)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "campaign": "",
+  "boss": "Terob Roundback",
+  "location": "The Floodplain of Mahnkelon",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "campaign": "",
+  "boss": "Brokk Ripsnort",
+  "location": "Wilderness of Bahdza",
+  "note": "only before Extinction quest completion"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "campaign": "",
+  "boss": "Harrk Facestab",
+  "location": "Forum Highlands",
+  "note": "only during Desperate Measures"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "campaign": "",
+  "boss": "Mabah Heardheart",
+  "location": "Garden of Seborhin",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Discord",
+  "campaign": "",
+  "boss": "Sessk, Woe Spreader",
+  "location": "Maishang Hills",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Discord",
+  "campaign": "",
+  "boss": "Xiriss Stickleback",
+  "location": "Archipelagos",
+  "note": "only during Night Raiders quest"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "campaign": "Nightfall",
+  "boss": "Master of Misery",
+  "location": "Depths of Madness",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "campaign": "Nightfall",
+  "boss": "Shadow of Fear (boss)",
+  "location": "Nightfallen Jahai",
+  "note": "only during Breaking the Broken"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "campaign": "Nightfall",
+  "boss": "Emissary of Dhuum",
+  "location": "Nightfallen Jahai",
+  "note": "only during Dark Gateway"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "campaign": "Eye of the North",
+  "boss": "Avarr the Fallen",
+  "location": "Jaga Moraine",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "campaign": "Eye of the North",
+  "boss": "Taskmaster Bellok",
+  "location": "Vloxen Excavations level 2",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "campaign": "Eye of the North",
+  "boss": "The Master",
+  "location": "Cathedral of Flames",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Order of Undeath",
+  "campaign": "",
+  "boss": "Bohdabi the Destructive",
+  "location": "The Sulfurous Wastes",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "campaign": "Prophecies",
+  "boss": "Dosakaru Fevertouch",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "campaign": "Factions",
+  "boss": "Konrru, Tainted Stone",
+  "location": "Morostav Trail",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "campaign": "Factions",
+  "boss": "Lukrker Foulfist",
+  "location": "Gyala Hatchery (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "campaign": "Nightfall",
+  "boss": "Jerneh Nightbringer",
+  "location": "The Floodplain of Mahnkelon",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Toxic Chill",
+  "campaign": "Nightfall",
+  "boss": "Eshekibeh Longneck",
+  "location": "Wilderness of Bahdza",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Toxic Chill",
+  "campaign": "Eye of the North",
+  "boss": "Jacado the Putrid",
+  "location": "Heart of the Shiverpeaks",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Toxic Chill",
+  "campaign": "Eye of the North",
+  "boss": "Flesheater",
+  "location": "Rragar's Menagerie",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Virulence",
+  "campaign": "Prophecies",
+  "boss": "Unthet Rotwood",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Virulence",
+  "campaign": "Eye of the North",
+  "boss": "Jacado the Putrid",
+  "location": "Heart of the Shiverpeaks",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Icy Veins",
+  "campaign": "",
+  "boss": "Bazzr Icewing",
+  "location": "Drazach Thicket",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "campaign": "Nightfall",
+  "boss": "Commander Sehden",
+  "location": "Bahdok Caverns",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "campaign": "Nightfall",
+  "boss": "Midshipman Beraidun",
+  "location": "Cliffs of Dohjok",
+  "note": "only during A Land of Heroes"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "campaign": "Eye of the North",
+  "boss": "Rend Ragemauler",
+  "location": "Sacnoth Valley",
+  "note": "only during The Assassin's Revenge"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "campaign": "Eye of the North",
+  "boss": "Vyrrgis the Pestilent",
+  "location": "Sacnoth Valley",
+  "note": "only during Single Ugly Grawl quest"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wail of Doom",
+  "campaign": "",
+  "boss": "Bound Naku",
+  "location": "Tahnnakai Temple",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wail of Doom",
+  "campaign": "",
+  "boss": "Doomed Ancient Kkraz",
+  "location": "Raisu Palace",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Wail of Doom",
+  "campaign": "",
+  "boss": "Doomed Ancient Kkraz",
+  "location": "Raisu Palace (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Prophecies",
+  "boss": "Facet of Darkness",
+  "location": "The Dragon's Lair",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Prophecies",
+  "boss": "Mragga",
+  "location": "Frozen Forest",
+  "note": "during The Hero's Challenge"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Prophecies",
+  "boss": "Grentchus Magnus",
+  "location": "",
+  "note": "during The Greatest Snowman Ever Made"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Factions",
+  "boss": "Kuonghsang",
+  "location": "Nahpui Quarter",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Nightfall",
+  "boss": "Armind the Balancer",
+  "location": "Bahdok Caverns",
+  "note": ""
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Eye of the North",
+  "boss": "Facet of Death",
+  "location": "Sparkfly Swamp",
+  "note": "during The Cipher of Grenth"
+ },
+ {
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "campaign": "Eye of the North",
+  "boss": "Facet of Death",
+  "location": "Varajar Fells",
+  "note": "during The Path to Revelations"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Enchanter's Conundrum",
+  "campaign": "",
+  "boss": "Captain Chichor",
+  "location": "Arkjok Ward",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Enchanter's Conundrum",
+  "campaign": "",
+  "boss": "Lieutenant Nali",
+  "location": "Pogahn Passage",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Prophecies",
+  "boss": "Balasi the Arcane",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Prophecies",
+  "boss": "Pantheras The Deceiver",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Prophecies",
+  "boss": "Melek the Virtuous",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Prophecies",
+  "boss": "Mercia the Smug",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Prophecies",
+  "boss": "Mursaat Mesmer (boss)",
+  "location": "Ice Floe",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Prophecies",
+  "boss": "The Darkness",
+  "location": "The Hall of Heroes (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Factions",
+  "boss": "Milefaun Mindflayer",
+  "location": "Arborstone and Mourning Veil Falls",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Nightfall",
+  "boss": "Yammiron, Ether Lord",
+  "location": "The Mirror of Lyss",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "campaign": "Nightfall",
+  "boss": "Yammirvu, Ether Guardian",
+  "location": "",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Hex Eater Vortex",
+  "campaign": "Nightfall",
+  "boss": "Amind the Bitter",
+  "location": "Gate of Desolation",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Hex Eater Vortex",
+  "campaign": "Nightfall",
+  "boss": "Shelkeh the Hungry",
+  "location": "The Alkali Pan",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Hex Eater Vortex",
+  "campaign": "Eye of the North",
+  "boss": "Mind of Destruction",
+  "location": "Glint's Challenge",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Panic",
+  "campaign": "",
+  "boss": "Moles Quibus",
+  "location": "Hell's Precipice",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Panic",
+  "campaign": "",
+  "boss": "Mallus Funo",
+  "location": "Dragon's Gullet",
+  "note": "only during the quest The Titan Source"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Power Block",
+  "campaign": "Prophecies",
+  "boss": "Lyssa's Cursed",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Power Block",
+  "campaign": "Eye of the North",
+  "boss": "Faze Magekiller",
+  "location": "Cathedral of Flames",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Power Block",
+  "campaign": "Eye of the North",
+  "boss": "Anmat the Trickster",
+  "location": "Sacnoth Valley",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Power Flux",
+  "campaign": "",
+  "boss": "Vision of Despair",
+  "location": "Domain of Pain",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Power Flux",
+  "campaign": "",
+  "boss": "Demonic Fortune Teller",
+  "location": "Domain of Fear",
+  "note": "Only during Bad Fortune"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Psychic Distraction",
+  "campaign": "",
+  "boss": "Mesmer's Construct",
+  "location": "Sunjiang District",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Simple Thievery",
+  "campaign": "",
+  "boss": "Midshipman Morolah",
+  "location": "Barbarous Shore",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Visions of Regret",
+  "campaign": "",
+  "boss": "Korrub, Flame of Dreams",
+  "location": "Wilderness of Bahdza",
+  "note": "only after the quest Destroy the Harpies"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Arcane Languor",
+  "campaign": "",
+  "boss": "Arcane Ancient Phi",
+  "location": "Raisu Palace",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Arcane Languor",
+  "campaign": "",
+  "boss": "Bound Kitah",
+  "location": "Tahnnakai Temple",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Keystone Signet",
+  "campaign": "",
+  "boss": "Rune Ethercrash",
+  "location": "Spearhead Peak",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "campaign": "Prophecies",
+  "boss": "Ayassah Hess",
+  "location": "Dunes of Despair",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "campaign": "Prophecies",
+  "boss": "Tiss Danssir",
+  "location": "Elona Reach",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "campaign": "Prophecies",
+  "boss": "Goss Aleessh",
+  "location": "Thirsty River",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "campaign": "Factions",
+  "boss": "Mugra Swiftspell",
+  "location": "Ferndale",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "campaign": "Nightfall",
+  "boss": "Olunoss Windwalker",
+  "location": "Turai's Procession",
+  "note": "only after Battle of Turai's Procession"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Psychic Instability",
+  "campaign": "",
+  "boss": "Chazek Plague Herder",
+  "location": "Unwaking Waters (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "campaign": "",
+  "boss": "The Afflicted Meeka",
+  "location": "Dragon's Throat",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "campaign": "",
+  "boss": "The Afflicted Li Yun",
+  "location": "Vizunah Square and Shenzun Tunnels",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "campaign": "",
+  "boss": "The Afflicted Hsin Jun",
+  "location": "Unwaking Waters",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Symbols of Inspiration",
+  "campaign": "",
+  "boss": "Wieshur the Inspiring",
+  "location": "Domain of Secrets",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Air of Disenchantment",
+  "campaign": "",
+  "boss": "Hojanukun Mindstealer",
+  "location": "Garden of Seborhin",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Barl Stormsiege",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Erzek Runebreaker",
+  "location": "Lornar's Pass",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Fuury Stonewrath",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Garbok Handsmasher",
+  "location": "Sorrow's Furnace",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Gorrel Rockmolder",
+  "location": "Grenth's Footprint",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Hierophant Morlog",
+  "location": "Sorrow's Furnace",
+  "note": "only during the quest Unspeakable, Unknowable"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Jonar Stonebender",
+  "location": "Ice Caves of Sorrow",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Korvald Willcrusher",
+  "location": "Sorrow's Furnace",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Prophecies",
+  "boss": "Yxthoshth",
+  "location": "Salt Flats",
+  "note": "only during the quest The Ranger's Path"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Factions",
+  "boss": "Bezzr Wingstorm",
+  "location": "Drazach Thicket",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Nightfall",
+  "boss": "Eshim Mindclouder",
+  "location": "Sunward Marches",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Nightfall",
+  "boss": "Yamesh Mindclouder",
+  "location": "Vehtendi Valley",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Eye of the North",
+  "boss": "Veturni Mindsquall",
+  "location": "Magus Stones",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "campaign": "Eye of the North",
+  "boss": "Alitta Guilebloom",
+  "location": "Arbor Bay",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Fevered Dreams",
+  "campaign": "",
+  "boss": "Plexus Shadowhook",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Illusionary Weaponry",
+  "campaign": "",
+  "boss": "Didn Hopestealer",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Illusionary Weaponry",
+  "campaign": "",
+  "boss": "Seear Windlash",
+  "location": "Talus Chute",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Illusionary Weaponry",
+  "campaign": "",
+  "boss": "Digo Murkstalker",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Ineptitude",
+  "campaign": "Prophecies",
+  "boss": "Wyt Sharpfeather",
+  "location": "Mineral Springs",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Ineptitude",
+  "campaign": "Eye of the North",
+  "boss": "Kemil the Inept",
+  "location": "Alcazia Tangle",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Migraine",
+  "campaign": "Prophecies",
+  "boss": "Pytt Spitespew",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Migraine",
+  "campaign": "Eye of the North",
+  "boss": "Wilderm Wrathspew",
+  "location": "Verdant Cascades",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Migraine",
+  "campaign": "Eye of the North",
+  "boss": "Waray Skullflayer",
+  "location": "Sparkfly Swamp",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Recurring Insecurity",
+  "campaign": "",
+  "boss": "Xisni Dream Haunt",
+  "location": "Mourning Veil Falls",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Recurring Insecurity",
+  "campaign": "",
+  "boss": "Talous the Mad",
+  "location": "Rhea's Crater",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Shared Burden",
+  "campaign": "",
+  "boss": "Deeproot Sorrow",
+  "location": "Mourning Veil Falls",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Shared Burden",
+  "campaign": "",
+  "boss": "Kenrii Sea Sorrow",
+  "location": "Silent Surf",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Signet of Illusions",
+  "campaign": "",
+  "boss": "Shepherd of Dementia",
+  "location": "Nightfallen Jahai",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "campaign": "Prophecies",
+  "boss": "Gambol Headrainer",
+  "location": "Ice Floe",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "campaign": "Prophecies",
+  "boss": "Sniik Hungrymind",
+  "location": "Spearhead Peak and Witman's Folly",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "campaign": "Prophecies",
+  "boss": "Druul the Untamed",
+  "location": "Dragon's Gullet",
+  "note": "only during quest The Titan Source"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "campaign": "Factions",
+  "boss": "Siska Scalewand",
+  "location": "Archipelagos",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "campaign": "Nightfall",
+  "boss": "Rual, Stealer of Hope",
+  "location": "The Ruptured Heart",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Extend Conditions",
+  "campaign": "",
+  "boss": "Neoli the Contagious",
+  "location": "Marga Coast",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Lyssa's Aura",
+  "campaign": "Factions",
+  "boss": "Hai Jii",
+  "location": "Nahpui Quarter",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Lyssa's Aura",
+  "campaign": "Eye of the North",
+  "boss": "Nulfastu Earthbound",
+  "location": "Drakkar Lake",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "campaign": "Prophecies",
+  "boss": "Facet of Chaos",
+  "location": "The Dragon's Lair",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "campaign": "Prophecies",
+  "boss": "Featherclaw",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "campaign": "Eye of the North",
+  "boss": "Facet of Illusions",
+  "location": "Magus Stones",
+  "note": "during The Cipher of Lyssa"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "campaign": "Eye of the North",
+  "boss": "Facet of Illusions",
+  "location": "Varajar Fells",
+  "note": "during The Path to Revelations"
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Power Leech",
+  "campaign": "",
+  "boss": "Seaguard Hala",
+  "location": "Boreas Seabed",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Tease",
+  "campaign": "",
+  "boss": "Makdeh the Aggravating",
+  "location": "Yatendi Canyons",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "campaign": "Prophecies",
+  "boss": "Rwek Khawl Mawl",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "campaign": "Factions",
+  "boss": "Mohby Windbeak",
+  "location": "Gyala Hatchery (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "campaign": "Factions",
+  "boss": "The Time Eater",
+  "location": "The Eternal Grove (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "campaign": "Nightfall",
+  "boss": "Eshwe the Insane",
+  "location": "Joko's Domain",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Expel Hexes",
+  "campaign": "",
+  "boss": "Jin, the Purifier",
+  "location": "Bukdek Byway",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Shatter Storm",
+  "campaign": "",
+  "boss": "Mina Shatter Storm",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Mesmer",
+  "skill": "Signet of Midnight",
+  "campaign": "",
+  "boss": "Malus Phasmatis",
+  "location": "Perdition Rock",
+  "note": ""
+ }
+]

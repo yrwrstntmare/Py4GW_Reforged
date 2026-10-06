@@ -1,0 +1,2126 @@
+[
+ {
+  "region": "Istan",
+  "location": "Cliffs of Dohjok",
+  "boss": "Commander Bahreht",
+  "profession": "Warrior",
+  "skill": "\"You're All Alone!\"",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Istan",
+  "location": "Cliffs of Dohjok",
+  "boss": "Captain Shehnahr",
+  "profession": "Monk",
+  "skill": "Balthazar's Pendulum",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Istan",
+  "location": "Cliffs of Dohjok",
+  "boss": "Midshipman Beraidun",
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Istan",
+  "location": "Cliffs of Dohjok",
+  "boss": "Lieutenant Mahrik",
+  "profession": "Paragon",
+  "skill": "Crippling Anthem",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Istan",
+  "location": "Cliffs of Dohjok",
+  "boss": "Ensign Jahan",
+  "profession": "Dervish",
+  "skill": "Vow of Strength",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Istan",
+  "location": "Issnur Isles",
+  "boss": "Moa'vu'Kaal",
+  "profession": "Necromancer",
+  "skill": "Ravenous Gaze",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Istan",
+  "location": "Issnur Isles",
+  "boss": "Lonolun Waterwalker",
+  "profession": "Elementalist",
+  "skill": "Icy Shackles",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Enadiz the Hardheaded",
+  "profession": "Warrior",
+  "skill": "Headbutt",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Onwan, Lord of the Ntouka",
+  "profession": "Warrior",
+  "skill": "Rage of the Ntouka",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Commander Kubeh",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Modti Darkflower",
+  "profession": "Necromancer",
+  "skill": "Depravity",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Captain Chichor",
+  "profession": "Mesmer",
+  "skill": "Enchanter's Conundrum",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Zephyr Hedger",
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Lieutenant Kayin",
+  "profession": "Ritualist",
+  "skill": "Destructive Was Glaive",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Eshau Longspear",
+  "profession": "Paragon",
+  "skill": "Cruel Spear",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Arkjok Ward",
+  "boss": "Acolyte of Grenth",
+  "profession": "Dervish",
+  "skill": "Avatar of Grenth",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Bahdok Caverns",
+  "boss": "Riseh the Harmless",
+  "profession": "Monk",
+  "skill": "Balthazar's Pendulum",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Bahdok Caverns",
+  "boss": "Armind the Balancer",
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Bahdok Caverns",
+  "boss": "Commander Sehden",
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Bahdok Caverns",
+  "boss": "Joknang Earthturner",
+  "profession": "Elementalist",
+  "skill": "Stone Sheath",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Bahdok Caverns",
+  "boss": "Wandalz the Angry",
+  "profession": "Paragon",
+  "skill": "Focused Anger",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Bahdok Caverns",
+  "boss": "Sehlon, Beautiful Water",
+  "profession": "Dervish",
+  "skill": "Zealous Vow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Barbarous Shore",
+  "boss": "Commander Wahli",
+  "profession": "Warrior",
+  "skill": "\"You're All Alone!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Barbarous Shore",
+  "boss": "Midshipman Morolah",
+  "profession": "Mesmer",
+  "skill": "Simple Thievery",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Barbarous Shore",
+  "boss": "Captain Alsin",
+  "profession": "Ritualist",
+  "skill": "Wielder's Zeal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Barbarous Shore",
+  "boss": "Lieutenant Shagu",
+  "profession": "Paragon",
+  "skill": "Crippling Anthem",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Barbarous Shore",
+  "boss": "Captain Mhedi",
+  "profession": "Dervish",
+  "skill": "Vow of Strength",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Consulate Docks",
+  "boss": "Captain Kavaka",
+  "profession": "Warrior",
+  "skill": "Magehunter Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Consulate Docks",
+  "boss": "Captain Mwende",
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Consulate Docks",
+  "boss": "Captain Lumanda",
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Consulate Docks",
+  "boss": "Captain Denduru",
+  "profession": "Dervish",
+  "skill": "Pious Renewal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dajkah Inlet",
+  "boss": "Corsair Commander (warrior)",
+  "profession": "Warrior",
+  "skill": "\"You're All Alone!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dajkah Inlet",
+  "boss": "Corsair Commander (monk)",
+  "profession": "Monk",
+  "skill": "Zealous Benediction",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dajkah Inlet",
+  "boss": "Corsair Commander (elementalist)",
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dajkah Inlet",
+  "boss": "Corsair Commander (dervish)",
+  "profession": "Dervish",
+  "skill": "Vow of Strength",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dejarin Estate",
+  "boss": "Colonel Chaklin",
+  "profession": "Warrior",
+  "skill": "Magehunter Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dejarin Estate",
+  "boss": "Colonel Custo",
+  "profession": "Ranger",
+  "skill": "Infuriating Heat",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dejarin Estate",
+  "boss": "Major Jeahr",
+  "profession": "Assassin",
+  "skill": "Way of the Assassin",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dejarin Estate",
+  "boss": "Podaltur the Angry",
+  "profession": "Ritualist",
+  "skill": "Weapon of Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dejarin Estate",
+  "boss": "Corporal Luluh",
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Dejarin Estate",
+  "boss": "Acolyte of Dwayna",
+  "profession": "Dervish",
+  "skill": "Avatar of Dwayna",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Robah Hardback",
+  "profession": "Warrior",
+  "skill": "Decapitate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Dzabel Land Guardian",
+  "profession": "Ranger",
+  "skill": "Ferocious Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Zelnehlun Fastfoot",
+  "profession": "Ranger",
+  "skill": "Quick Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Commander Noss",
+  "profession": "Monk",
+  "skill": "Signet of Removal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Terob Roundback",
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Jerneh Nightbringer",
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Buhon Icelord",
+  "profession": "Elementalist",
+  "skill": "Icy Shackles",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Admiral Kaya",
+  "profession": "Assassin",
+  "skill": "Hidden Caltrops",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "The Floodplain of Mahnkelon",
+  "boss": "Lord Yama the Vengeful",
+  "profession": "Dervish",
+  "skill": "Grenth's Grasp",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Kourna",
+  "location": "Jahai Bluffs",
+  "boss": "Churrta the Rock",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Jahai Bluffs",
+  "boss": "Tundoss the Destroyer",
+  "profession": "Ranger",
+  "skill": "Rampage as One",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Jahai Bluffs",
+  "boss": "Shelboh the Ravenous",
+  "profession": "Necromancer",
+  "skill": "Ravenous Gaze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Jahai Bluffs",
+  "boss": "Admiral Kantoh",
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Jahai Bluffs",
+  "boss": "Corporal Argon",
+  "profession": "Paragon",
+  "skill": "Defensive Anthem",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Jahai Bluffs",
+  "boss": "Acolyte of Balthazar",
+  "profession": "Dervish",
+  "skill": "Avatar of Balthazar",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Kodonur Crossroads",
+  "boss": "Veldrunner Centaur (boss)",
+  "profession": "Ranger",
+  "skill": "Smoke Trap",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Kodonur Crossroads",
+  "boss": "Taskmaster Sadi-Belai",
+  "profession": "Monk",
+  "skill": "Zealous Benediction",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Kodonur Crossroads",
+  "boss": "Overseer Haubeh",
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "guaranteed": true,
+  "note": "page lists together: \"Overseer Haubeh and Taskmaster Vanahk\""
+ },
+ {
+  "region": "Kourna",
+  "location": "Kodonur Crossroads",
+  "boss": "Taskmaster Vanahk",
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "guaranteed": true,
+  "note": "page lists together: \"Overseer Haubeh and Taskmaster Vanahk\""
+ },
+ {
+  "region": "Kourna",
+  "location": "Kodonur Crossroads",
+  "boss": "Overseer Boktek",
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Kodonur Crossroads",
+  "boss": "Taskmaster Suli",
+  "profession": "Dervish",
+  "skill": "Pious Renewal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Chor the Bladed",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Admiral Chiggen",
+  "profession": "Ranger",
+  "skill": "Burning Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Chidehkir, Light of the Blind",
+  "profession": "Monk",
+  "skill": "Light of Deliverance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Neoli the Contagious",
+  "profession": "Mesmer",
+  "skill": "Extend Conditions",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Bosun Mohrti",
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Lunto Sharpfoot",
+  "profession": "Assassin",
+  "skill": "Shadow Meld",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Acolyte of Melandru",
+  "profession": "Dervish",
+  "skill": "Avatar of Melandru",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Marga Coast",
+  "boss": "Bubahl Icehands",
+  "profession": "Dervish",
+  "skill": "Grenth's Grasp",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Moddok Crevice",
+  "boss": "Ranshek, Carrion Eater",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Moddok Crevice",
+  "boss": "Kehmak the Tranquil",
+  "profession": "Monk",
+  "skill": "Light of Deliverance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Moddok Crevice",
+  "boss": "Yakun Trueshot",
+  "profession": "Paragon",
+  "skill": "Cruel Spear",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Nundu Bay",
+  "boss": "Priest Zein Zuu",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Nundu Bay",
+  "boss": "Scribe Wensal",
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Nundu Bay",
+  "boss": "Commander Chutal",
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Nundu Bay",
+  "boss": "Zealot Sheoli",
+  "profession": "Dervish",
+  "skill": "Arcane Zeal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Pogahn Passage",
+  "boss": "Executioner Vekil",
+  "profession": "Warrior",
+  "skill": "Magehunter Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Pogahn Passage",
+  "boss": "Lieutenant Nali",
+  "profession": "Mesmer",
+  "skill": "Enchanter's Conundrum",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Pogahn Passage",
+  "boss": "Captain Nebo",
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Pogahn Passage",
+  "boss": "Colonel Kajo",
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Rilohn Refuge",
+  "boss": "The Drought",
+  "profession": "Elementalist",
+  "skill": "Sandstorm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Sunward Marches",
+  "boss": "Mahto Sharptooth",
+  "profession": "Warrior",
+  "skill": "Crippling Slash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Sunward Marches",
+  "boss": "Eshim Mindclouder",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Sunward Marches",
+  "boss": "Birneh Skybringer",
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Sunward Marches",
+  "boss": "Acolyte of Lyssa",
+  "profession": "Dervish",
+  "skill": "Avatar of Lyssa",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Sunward Marches",
+  "boss": "Dabineh Deathbringer",
+  "profession": "Dervish",
+  "skill": "Reaper's Sweep",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Turai's Procession",
+  "boss": "Sergeant Behnwa",
+  "profession": "Ranger",
+  "skill": "Strike as One",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Turai's Procession",
+  "boss": "Chiossen, Soothing Breeze",
+  "profession": "Monk",
+  "skill": "Glimmer of Light",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Turai's Procession",
+  "boss": "Torment Weaver",
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Kourna",
+  "location": "Turai's Procession",
+  "boss": "Olunoss Windwalker",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kourna",
+  "location": "Turai's Procession",
+  "boss": "Korr, Living Flame",
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dasha Vestibule",
+  "boss": "Kormab, Burning Heart",
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dasha Vestibule",
+  "boss": "Shakor Firespear",
+  "profession": "Paragon",
+  "skill": "Angelic Bond",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dasha Vestibule",
+  "boss": "Hajok Earthguardian (Djinn)",
+  "profession": "Dervish",
+  "skill": "Zealous Vow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dzagonur Bastion",
+  "boss": "General Doriah",
+  "profession": "Warrior",
+  "skill": "Magehunter's Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dzagonur Bastion",
+  "boss": "General Nimtak",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dzagonur Bastion",
+  "boss": "General Tirraj",
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Dzagonur Bastion",
+  "boss": "General Kumtash",
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Grabthar the Overbearing",
+  "profession": "Warrior",
+  "skill": "Magehunter's Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Bolten Largebelly",
+  "profession": "Ranger",
+  "skill": "Ferocious Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Commander Sadi-Belai",
+  "profession": "Monk",
+  "skill": "Zealous Benediction",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Harrk Facestab",
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Korshek the Immolated",
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Churahm, Spirit Warrior",
+  "profession": "Ritualist",
+  "skill": "Spirit's Strength",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Forum Highlands",
+  "boss": "Render",
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "Garden of Seborhin",
+  "boss": "Hahan, Faithful Protector",
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Garden of Seborhin",
+  "boss": "Mabah Heardheart",
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Garden of Seborhin",
+  "boss": "Hojanukun Mindstealer",
+  "profession": "Mesmer",
+  "skill": "Air of Disenchantment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Garden of Seborhin",
+  "boss": "Ripened Mirage Iboga",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "Garden of Seborhin",
+  "boss": "Toshau Sharpspear",
+  "profession": "Paragon",
+  "skill": "Song of Restoration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Hidden City of Ahdashim",
+  "boss": "Tenshek Roundbody",
+  "profession": "Ranger",
+  "skill": "Escape",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Hidden City of Ahdashim",
+  "boss": "Yammirvu, Ether Guardian",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Hidden City of Ahdashim",
+  "boss": "Fire Lord",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Hidden City of Ahdashim",
+  "boss": "Shakor Firespear",
+  "profession": "Paragon",
+  "skill": "Angelic Bond",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Hidden City of Ahdashim",
+  "boss": "Water Lord",
+  "profession": "Dervish",
+  "skill": "Vow of Silence",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Hidden City of Ahdashim",
+  "boss": "Leilon, Tranquil Water",
+  "profession": "Dervish",
+  "skill": "Zealous Vow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Holdings of Chokhin",
+  "boss": "Tenezel the Quick",
+  "profession": "Ranger",
+  "skill": "Escape",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Holdings of Chokhin",
+  "boss": "Banor Greenbranch",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Holdings of Chokhin",
+  "boss": "Setikor Fireflower",
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Holdings of Chokhin",
+  "boss": "Hanchor Trueblade",
+  "profession": "Assassin",
+  "skill": "Fox's Promise",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Mirror of Lyss",
+  "boss": "Riktund the Vicious",
+  "profession": "Warrior",
+  "skill": "Charging Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Mirror of Lyss",
+  "boss": "Yammiron, Ether Lord",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Mirror of Lyss",
+  "boss": "Briahn the Chosen",
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "guaranteed": true,
+  "note": "page lists together: \"Briahn the Chosen and Overseer Juntahk\""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Mirror of Lyss",
+  "boss": "Overseer Juntahk",
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "guaranteed": true,
+  "note": "page lists together: \"Briahn the Chosen and Overseer Juntahk\""
+ },
+ {
+  "region": "Vabbi",
+  "location": "The Mirror of Lyss",
+  "boss": "Shezel Slowreaper",
+  "profession": "Dervish",
+  "skill": "Ebon Dust Aura",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Resplendent Makuun",
+  "boss": "Bansheh, Gatherer of Branches",
+  "profession": "Ranger",
+  "skill": "Expert's Dexterity",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Resplendent Makuun",
+  "boss": "Josinq the Whisperer",
+  "profession": "Monk",
+  "skill": "Healer's Boon",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Resplendent Makuun",
+  "boss": "Kormab, Burning Heart",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Resplendent Makuun",
+  "boss": "Jishol Darksong",
+  "profession": "Paragon",
+  "skill": "Song of Purification",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehjin Mines",
+  "boss": "Shak-Jarin the Justicebringer",
+  "profession": "Warrior",
+  "skill": "\"Charge!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehjin Mines",
+  "boss": "Preceptor Zunark",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehjin Mines",
+  "boss": "Nehpek the Remorseless",
+  "profession": "Necromancer",
+  "skill": "Pain of Disenchantment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehjin Mines",
+  "boss": "Pehnsed the Loudmouth",
+  "profession": "Paragon",
+  "skill": "Song of Purification",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehjin Mines",
+  "boss": "Marobeh Sharptail",
+  "profession": "Dervish",
+  "skill": "Wounding Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehtendi Valley",
+  "boss": "Chumab the Prideful",
+  "profession": "Warrior",
+  "skill": "Steady Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehtendi Valley",
+  "boss": "Yamesh Mindclouder",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehtendi Valley",
+  "boss": "Qwytzylkak",
+  "profession": "Mesmer",
+  "skill": "Keystone Signet",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehtendi Valley",
+  "boss": "Jarimiya the Unmerciful",
+  "profession": "Assassin",
+  "skill": "Wastrel's Collapse",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Vehtendi Valley",
+  "boss": "Bohdalz the Furious",
+  "profession": "Ritualist",
+  "skill": "Weapon of Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Brokk Ripsnort",
+  "profession": "Necromancer",
+  "skill": "Contagion",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Eshekibeh Longneck",
+  "profession": "Necromancer",
+  "skill": "Toxic Chill",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Korrub, Flame of Dreams",
+  "profession": "Mesmer",
+  "skill": "Visions of Regret",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Moteh Thundershooter",
+  "profession": "Elementalist",
+  "skill": "Blinding Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Kunan the Loudmouth",
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "guaranteed": true,
+  "note": "page lists together: \"Kunan the Loudmouth, Scratcher, and Screecher\""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Scratcher",
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "guaranteed": true,
+  "note": "page lists together: \"Kunan the Loudmouth, Scratcher, and Screecher\""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Wilderness of Bahdza",
+  "boss": "Screecher",
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "guaranteed": true,
+  "note": "page lists together: \"Kunan the Loudmouth, Scratcher, and Screecher\""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Yatendi Canyons",
+  "boss": "Lieutenant Vanahk",
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Yatendi Canyons",
+  "boss": "Tain the Corrupter",
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Yatendi Canyons",
+  "boss": "Makdeh the Aggravating",
+  "profession": "Mesmer",
+  "skill": "Tease",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Yatendi Canyons",
+  "boss": "Lushivahr the Invoker",
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Yatendi Canyons",
+  "boss": "Hajok Earthguardian (Insect)",
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Vabbi",
+  "location": "Yatendi Canyons",
+  "boss": "Corporal Suli",
+  "profession": "Dervish",
+  "skill": "Pious Renewal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Alkali Pan",
+  "boss": "Vah the Crafty",
+  "profession": "Ranger",
+  "skill": "Spike Trap",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Alkali Pan",
+  "boss": "Amiresh the Pious",
+  "profession": "Monk",
+  "skill": "Divert Hexes",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Alkali Pan",
+  "boss": "Shelkeh the Hungry",
+  "profession": "Mesmer",
+  "skill": "Hex Eater Vortex",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Alkali Pan",
+  "boss": "Churkeh the Defiant",
+  "profession": "Paragon",
+  "skill": "\"It's Just a Flesh Wound.\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Crystal Overlook",
+  "boss": "Ajamahn, Servant of the Sands",
+  "profession": "Monk",
+  "skill": "Scribe's Insight",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Crystal Overlook",
+  "boss": "Wioli the Infectious",
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Crystal Overlook",
+  "boss": "Achor the Bladed",
+  "profession": "Assassin",
+  "skill": "Shattering Assault",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Crystal Overlook",
+  "boss": "Jedeh the Mighty",
+  "profession": "Ritualist",
+  "skill": "Signet of Ghostly Might",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Gate of Desolation",
+  "boss": "Avah the Crafty",
+  "profession": "Warrior",
+  "skill": "Soldier's Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Gate of Desolation",
+  "boss": "Nehmak the Unpleasant",
+  "profession": "Necromancer",
+  "skill": "Signet of Suffering",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Gate of Desolation",
+  "boss": "Amind the Bitter",
+  "profession": "Mesmer",
+  "skill": "Hex Eater Vortex",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Gate of Desolation",
+  "boss": "Chakeh the Lonely",
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Gate of Desolation",
+  "boss": "Chundu the Meek",
+  "profession": "Dervish",
+  "skill": "Vow of Silence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Joko's Domain",
+  "boss": "Keht the Fierce",
+  "profession": "Warrior",
+  "skill": "Soldier's Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Joko's Domain",
+  "boss": "Zadukar the Blessed",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "The Desolation",
+  "location": "Joko's Domain",
+  "boss": "Eshwe the Insane",
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Joko's Domain",
+  "boss": "Shekoss the Stony",
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Joko's Domain",
+  "boss": "Ardeh the Quick",
+  "profession": "Assassin",
+  "skill": "Shadow Prison",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Joko's Domain",
+  "boss": "Arneh the Vigorous",
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Poisoned Outcrops",
+  "boss": "Fondalz the Spiteful",
+  "profession": "Necromancer",
+  "skill": "Signet of Suffering",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Poisoned Outcrops",
+  "boss": "Mekir the Prismatic",
+  "profession": "Elementalist",
+  "skill": "Ether Prism",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Poisoned Outcrops",
+  "boss": "Droajam, Mage of the Sands",
+  "profession": "Elementalist",
+  "skill": "Sandstorm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Poisoned Outcrops",
+  "boss": "Nehjab the Parched",
+  "profession": "Ritualist",
+  "skill": "Reclaim Essence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "Poisoned Outcrops",
+  "boss": "Battlelord Turgar",
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Rendabi Deatheater",
+  "profession": "Ranger",
+  "skill": "Scavenger's Focus",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Yoannh the Rebuilder",
+  "profession": "Monk",
+  "skill": "Judgment Strike",
+  "guaranteed": true,
+  "note": "requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Hamlen the Fallen",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Rebirther Jirath",
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Rual, Stealer of Hope",
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Tureksin the Delegator",
+  "profession": "Paragon",
+  "skill": "\"The Power Is Yours!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Yoannh the Rebuilder",
+  "profession": "Paragon",
+  "skill": "Heroic Refrain",
+  "guaranteed": true,
+  "note": "requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Ruptured Heart",
+  "boss": "Yoannh the Rebuilder",
+  "profession": "Dervish",
+  "skill": "Vow of Revolution",
+  "guaranteed": true,
+  "note": "requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Shattered Ravines",
+  "boss": "Saushali the Frustrating",
+  "profession": "Ranger",
+  "skill": "Magebane Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Shattered Ravines",
+  "boss": "Koahm the Weary",
+  "profession": "Ranger",
+  "skill": "Quicksand",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Shattered Ravines",
+  "boss": "Uhiwi the Smoky",
+  "profession": "Ranger",
+  "skill": "Smoke Trap",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Shattered Ravines",
+  "boss": "Dunshek the Purifier",
+  "profession": "Monk",
+  "skill": "Martyr",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Dupek the Mighty",
+  "profession": "Warrior",
+  "skill": "Magehunter's Smash",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Hauseh the Defiler",
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Bohdabi the Destructive",
+  "profession": "Necromancer",
+  "skill": "Order of Undeath",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Tanmahk the Arcane",
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Hajkor, Mystic Flame",
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Alem the Unclean",
+  "profession": "Ritualist",
+  "skill": "Weapon of Remedy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Desolation",
+  "location": "The Sulfurous Wastes",
+  "boss": "Vahlen the Silent",
+  "profession": "Dervish",
+  "skill": "Vow of Silence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Depths of Madness",
+  "boss": "Reaper of Agony",
+  "profession": "Warrior",
+  "skill": "Hundred Blades",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Depths of Madness",
+  "boss": "Topo the Protector",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Depths of Madness",
+  "boss": "Master of Misery",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Depths of Madness",
+  "boss": "Ravager of Dreams",
+  "profession": "Assassin",
+  "skill": "Golden Skull Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Depths of Madness",
+  "boss": "Consort of Ruin",
+  "profession": "Ritualist",
+  "skill": "Xinrae's Weapon",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Bound Tiendi",
+  "profession": "Warrior",
+  "skill": "Auspicious Parry",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Seed of Suffering",
+  "profession": "Ranger",
+  "skill": "Prepared Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Flame of Fervor",
+  "profession": "Monk",
+  "skill": "Defender's Zeal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Demonic Fortune Teller",
+  "profession": "Mesmer",
+  "skill": "Power Flux",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Storm of Anguish",
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Bound Kaichen",
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Bound Hao Li",
+  "profession": "Assassin",
+  "skill": "Shroud of Silence",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Fear",
+  "boss": "Shrieker of Dread",
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Pain",
+  "boss": "Saevio Proelium",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Pain",
+  "boss": "Bearer of Misfortune",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Pain",
+  "boss": "Bringer of Deceit",
+  "profession": "Monk",
+  "skill": "Healer's Covenant",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Pain",
+  "boss": "Vision of Despair",
+  "profession": "Mesmer",
+  "skill": "Power Flux",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Pain",
+  "boss": "Fahralon the Zealous",
+  "profession": "Dervish",
+  "skill": "Arcane Zeal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Razakel",
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Creo Vulnero",
+  "profession": "Necromancer",
+  "skill": "Lingering Curse",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Wieshur the Inspiring",
+  "profession": "Mesmer",
+  "skill": "Symbols of Inspiration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Exuro Flatus",
+  "profession": "Elementalist",
+  "skill": "Mind Blast",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Ignis Cruor",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "The Hunter",
+  "profession": "Assassin",
+  "skill": "Shattering Assault",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Hautoh the Pilferer",
+  "profession": "Ritualist",
+  "skill": "Caretaker's Charge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Domain of Secrets",
+  "boss": "Shakahm the Summoner",
+  "profession": "Ritualist",
+  "skill": "Offering of Spirit",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Gate of Madness",
+  "boss": "Champion Puran",
+  "profession": "Warrior",
+  "skill": "Magehunter's Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Gate of Madness",
+  "boss": "Curator Kali",
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Blade of Corruption (boss)",
+  "profession": "Warrior",
+  "skill": "Hundred Blades",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Abaddon's Adjutant",
+  "profession": "Ranger",
+  "skill": "Magebane Shot",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Rukkassa",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Emissary of Dhuum (necromancer)",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Shadow of Fear (boss)",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Shepherd of Dementia",
+  "profession": "Mesmer",
+  "skill": "Signet of Illusions",
+  "guaranteed": true,
+  "note": "listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Faveo Aggredior",
+  "profession": "Assassin",
+  "skill": "Assault Enchantments",
+  "guaranteed": true,
+  "note": "listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Chimor the Lightblooded",
+  "profession": "Assassin",
+  "skill": "Mark of Insecurity",
+  "guaranteed": true,
+  "note": "listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Oath of Profanity",
+  "profession": "Paragon",
+  "skill": "Anthem of Fury",
+  "guaranteed": true,
+  "note": "listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Zealous Amarantha",
+  "profession": "Dervish",
+  "skill": "Arcane Zeal",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Onslaught of Terror",
+  "profession": "Dervish",
+  "skill": "Onslaught",
+  "guaranteed": true,
+  "note": "listed on page under heading \"Gate of Pain\""
+ },
+ {
+  "region": "Realm of Torment",
+  "location": "Nightfallen Jahai",
+  "boss": "Emissary of Dhuum (dervish)",
+  "profession": "Dervish",
+  "skill": "Onslaught",
+  "guaranteed": true,
+  "note": "during quest; listed on page under heading \"Gate of Pain\""
+ }
+]

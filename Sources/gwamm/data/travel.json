@@ -1,0 +1,3989 @@
+{
+"238": {
+"file": "SunquaVale",
+"region": "Factions_ShingJeaIsland",
+"outpost": 242,
+"outpost_path": [
+[
+-11086.0,
+10149.0
+],
+[
+-13860.0,
+10410.0
+],
+[
+-15200.0,
+11510.0
+]
+],
+"transit": [],
+"plain": true
+},
+"236": {
+"file": "KinyaProvince",
+"region": "Factions_ShingJeaIsland",
+"outpost": 251,
+"outpost_path": [
+[
+14956.0,
+15878.0
+],
+[
+14800.0,
+15000.0
+]
+],
+"transit": [],
+"plain": true
+},
+"245": {
+"file": "MinisterChosEstate",
+"region": "Factions_ShingJeaIsland",
+"outpost": 251,
+"outpost_path": [
+[
+16642.0,
+19493.0
+],
+[
+16995.0,
+19739.0
+]
+],
+"transit": [],
+"plain": true
+},
+"313": {
+"file": "SaoshangTrail",
+"region": "Factions_ShingJeaIsland",
+"outpost": 250,
+"outpost_path": [
+[
+16589.0,
+13096.0
+],
+[
+16200.0,
+13500.0
+]
+],
+"transit": [],
+"plain": true
+},
+"237": {
+"file": "HaijuLagoon",
+"region": "Factions_ShingJeaIsland",
+"outpost": 213,
+"outpost_path": [
+[
+18839.0,
+13668.0
+],
+[
+19100.0,
+14100.0
+]
+],
+"transit": [],
+"plain": true
+},
+"235": {
+"file": "PanjiangPeninsula",
+"region": "Factions_ShingJeaIsland",
+"outpost": 249,
+"outpost_path": [
+[
+-11001.0,
+-16229.0
+],
+[
+-11501.0,
+-17229.0
+]
+],
+"transit": [],
+"plain": true
+},
+"196": {
+"file": "JayaBluffs",
+"region": "Factions_ShingJeaIsland",
+"outpost": 250,
+"outpost_path": [
+[
+18334.0,
+11324.0
+],
+[
+19140.0,
+13382.0
+],
+[
+18304.0,
+14969.0
+],
+[
+17377.0,
+17188.0
+],
+[
+16800.0,
+17550.0
+]
+],
+"transit": [],
+"plain": true
+},
+"201": {
+"file": "MelandrusHope",
+"region": "Factions_EchovaldForest",
+"outpost": 129,
+"outpost_path": [
+[
+-9490.0,
+338.0
+],
+[
+-9114.0,
+331.0
+],
+[
+-8478.0,
+844.0
+],
+[
+-7520.0,
+1931.0
+]
+],
+"transit": [],
+"plain": true
+},
+"209": {
+"file": "MourningVeilFalls",
+"region": "Factions_EchovaldForest",
+"outpost": 230,
+"outpost_path": [
+[
+-182.0,
+223.0
+],
+[
+-39.0,
+2572.0
+],
+[
+-4144.0,
+4036.0
+],
+[
+-4637.0,
+4991.0
+]
+],
+"transit": [],
+"plain": true
+},
+"128": {
+"file": "TheEternalGrove",
+"region": "Factions_EchovaldForest",
+"outpost": 130,
+"outpost_path": [
+[
+19629.66,
+5725.48
+],
+[
+18761.0,
+2360.0
+],
+[
+18400.0,
+2000.0
+]
+],
+"transit": [],
+"plain": true
+},
+"195": {
+"file": "DrazachThicket",
+"region": "Factions_EchovaldForest",
+"outpost": 222,
+"outpost_path": [
+[
+-4557.0,
+13723.0
+],
+[
+-6300.0,
+14400.0
+]
+],
+"transit": [],
+"plain": true
+},
+"244": {
+"file": "Arborstone",
+"region": "Factions_EchovaldForest",
+"outpost": 272,
+"outpost_path": [
+[
+5521.22,
+6597.16
+],
+[
+6026.74,
+7250.39
+]
+],
+"transit": [],
+"plain": true
+},
+"210": {
+"file": "Ferndale",
+"region": "Factions_EchovaldForest",
+"outpost": 77,
+"outpost_path": [
+[
+7810.0,
+-726.0
+],
+[
+10042.0,
+-1173.0
+],
+[
+10446.0,
+-1147.0
+]
+],
+"transit": [],
+"plain": true
+},
+"205": {
+"file": "MorostavTrail",
+"region": "Factions_EchovaldForest",
+"outpost": 298,
+"outpost_path": [
+[
+-9715.0,
+-3376.0
+],
+[
+-11645.0,
+-5155.0
+],
+[
+-12065.0,
+-7488.0
+],
+[
+-13751.78,
+-7651.7
+],
+[
+-14045.97,
+-7854.88
+]
+],
+"transit": [],
+"plain": true
+},
+"17": {
+"file": "TalmarkWilderness",
+"region": "Proph_Kryta",
+"outpost": 138,
+"outpost_path": [
+[
+-5252.0,
+15997.0
+]
+],
+"transit": [
+{
+"map": 18,
+"path": [
+[
+-6302.0,
+14890.0
+],
+[
+-12310.0,
+14349.0
+],
+[
+-15074.0,
+13794.0
+],
+[
+-16069.0,
+13242.0
+],
+[
+-17215.0,
+12961.0
+],
+[
+-17978.0,
+10435.0
+],
+[
+-18374.0,
+7235.0
+],
+[
+-20108.0,
+2457.0
+],
+[
+-20274.0,
+1812.0
+]
+]
+}
+],
+"plain": true
+},
+"58": {
+"file": "NorthKrytaProvince",
+"region": "Proph_Kryta",
+"outpost": 55,
+"outpost_path": [
+[
+810.0,
+7749.0
+],
+[
+1458.0,
+9940.0
+],
+[
+361.0,
+12256.0
+],
+[
+169.0,
+12479.0
+]
+],
+"transit": [],
+"plain": true
+},
+"54": {
+"file": "ScoundrelsRise",
+"region": "Proph_Kryta",
+"outpost": 14,
+"outpost_path": [
+[
+-1453.6,
+24938.46
+],
+[
+-4334.29,
+26859.33
+]
+],
+"transit": [],
+"plain": true
+},
+"59": {
+"file": "NeboTerrace",
+"region": "Proph_Kryta",
+"outpost": 138,
+"outpost_path": [
+[
+-5199.0,
+16327.0
+],
+[
+-5252.0,
+15997.0
+]
+],
+"transit": [
+{
+"map": 18,
+"path": [
+[
+-5219.0,
+15079.0
+],
+[
+-1627.0,
+14112.0
+],
+[
+3680.0,
+18302.0
+],
+[
+9937.0,
+19075.0
+],
+[
+12292.0,
+16368.0
+],
+[
+12011.0,
+14189.0
+],
+[
+13769.0,
+12256.0
+],
+[
+14331.0,
+9162.0
+],
+[
+14050.0,
+8073.0
+],
+[
+15491.0,
+6526.0
+],
+[
+17389.0,
+7018.0
+],
+[
+18966.0,
+4149.0
+],
+[
+19900.0,
+4564.0
+],
+[
+20398.0,
+5311.0
+]
+]
+},
+{
+"map": 56,
+"path": [
+[
+-18325.0,
+-2148.0
+],
+[
+-14836.0,
+-4068.0
+],
+[
+-12293.0,
+-4014.0
+],
+[
+-9886.0,
+-1931.0
+],
+[
+-8777.0,
+-2662.0
+],
+[
+-8966.0,
+-4257.0
+],
+[
+-6153.0,
+-3500.0
+],
+[
+-4612.0,
+-7341.0
+],
+[
+-4560.0,
+-10437.0
+],
+[
+-4436.0,
+-11552.0
+],
+[
+-3911.0,
+-11679.0
+]
+]
+}
+],
+"plain": true
+},
+"61": {
+"file": "TwinSerpentLakes",
+"region": "Proph_Kryta",
+"outpost": 73,
+"outpost_path": [
+[
+-20183.0,
+10506.0
+],
+[
+-18896.0,
+12390.0
+],
+[
+-16812.0,
+13585.0
+],
+[
+-16612.0,
+13585.0
+]
+],
+"transit": [],
+"plain": true
+},
+"64": {
+"file": "KessexPeak",
+"region": "Proph_Kryta",
+"outpost": 138,
+"outpost_path": [
+[
+-5199.0,
+16327.0
+],
+[
+-5252.0,
+15997.0
+]
+],
+"transit": [
+{
+"map": 18,
+"path": [
+[
+-5241.0,
+15182.0
+],
+[
+-6837.0,
+11715.0
+],
+[
+-7152.0,
+7351.0
+],
+[
+156.0,
+2791.0
+],
+[
+1680.0,
+496.0
+],
+[
+-3802.0,
+-4905.0
+],
+[
+-5955.0,
+-9211.0
+],
+[
+-753.0,
+-10986.0
+],
+[
+7797.0,
+-13034.0
+],
+[
+8548.0,
+-17166.0
+],
+[
+7834.0,
+-18238.0
+],
+[
+6093.0,
+-18015.0
+]
+]
+}
+],
+"plain": true
+},
+"62": {
+"file": "WatchtowerCoast",
+"region": "Proph_Kryta",
+"outpost": 136,
+"outpost_path": [
+[
+18349.0,
+-10465.0
+],
+[
+17407.0,
+-10077.0
+],
+[
+17324.0,
+-9489.0
+]
+],
+"transit": [],
+"plain": true
+},
+"18": {
+"file": "TheBlackCurtain",
+"region": "Proph_Kryta",
+"outpost": 138,
+"outpost_path": [
+[
+-5057.52,
+17188.52
+],
+[
+-5205.0,
+15562.0
+]
+],
+"transit": [],
+"plain": true
+},
+"56": {
+"file": "CursedLands",
+"region": "Proph_Kryta",
+"outpost": 138,
+"outpost_path": [
+[
+-5234.0,
+16000.0
+]
+],
+"transit": [
+{
+"map": 18,
+"path": [
+[
+-5205.0,
+15562.0
+],
+[
+-2349.0,
+13986.0
+],
+[
+59.0,
+15027.0
+],
+[
+352.0,
+16720.0
+],
+[
+9269.0,
+19160.0
+],
+[
+15029.0,
+16947.0
+],
+[
+16343.0,
+15691.0
+],
+[
+17767.0,
+15777.0
+],
+[
+19161.0,
+18064.0
+],
+[
+20018.0,
+18317.0
+]
+]
+}
+],
+"plain": true
+},
+"63": {
+"file": "StingrayStrand",
+"region": "Proph_Kryta",
+"outpost": 19,
+"outpost_path": [
+[
+-21997.0,
+6159.0
+],
+[
+-23033.0,
+7201.0
+]
+],
+"transit": [],
+"plain": true
+},
+"53": {
+"file": "TearsOfTheFallen",
+"region": "Proph_Kryta",
+"outpost": 137,
+"outpost_path": [
+[
+2043.0,
+11028.0
+],
+[
+1795.0,
+11698.0
+]
+],
+"transit": [
+{
+"map": 63,
+"path": [
+[
+1606.0,
+13394.0
+],
+[
+-4298.0,
+17149.0
+],
+[
+-5176.0,
+20570.0
+],
+[
+-9688.0,
+20389.0
+],
+[
+-11232.0,
+18965.0
+],
+[
+-12577.0,
+21055.0
+],
+[
+-13618.0,
+20788.0
+]
+]
+}
+],
+"plain": true
+},
+"406": {
+"file": "VehtendiValley",
+"region": "NF_Vabbi",
+"outpost": 414,
+"outpost_path": [
+[
+-1564.0,
+-2064.0
+],
+[
+2447.0,
+-2438.0
+],
+[
+2520.0,
+-4458.0
+],
+[
+4337.0,
+-4834.0
+],
+[
+4550.0,
+-4834.0
+]
+],
+"transit": [],
+"plain": true
+},
+"395": {
+"file": "HoldingsOfChokhin",
+"region": "NF_Vabbi",
+"outpost": 396,
+"outpost_path": [
+[
+4.0,
+2715.0
+],
+[
+-386.0,
+4527.0
+],
+[
+-450.0,
+4530.0
+]
+],
+"transit": [],
+"plain": true
+},
+"397": {
+"file": "VehjinMines",
+"region": "NF_Vabbi",
+"outpost": 476,
+"outpost_path": [
+[
+-2259.0,
+-78.0
+],
+[
+-4384.0,
+-2575.0
+],
+[
+-4544.0,
+-2571.0
+],
+[
+-4684.0,
+-2571.0
+]
+],
+"transit": [],
+"plain": true
+},
+"399": {
+"file": "ForumHighlands",
+"region": "NF_Vabbi",
+"outpost": 476,
+"outpost_path": [
+[
+4572.0,
+-4533.0
+],
+[
+4772.0,
+-4533.0
+]
+],
+"transit": [],
+"plain": true
+},
+"404": {
+"file": "WildernessOfBahdza",
+"region": "NF_Vabbi",
+"outpost": 433,
+"outpost_path": [
+[
+4537.0,
+1365.0
+],
+[
+4783.0,
+1220.0
+],
+[
+4983.0,
+1220.0
+]
+],
+"transit": [],
+"plain": true
+},
+"419": {
+"file": "TheMirrorOfLyss",
+"region": "NF_Vabbi",
+"outpost": 414,
+"outpost_path": [
+[
+-3336.0,
+1102.0
+],
+[
+-891.0,
+4438.0
+],
+[
+-884.0,
+4509.0
+],
+[
+-883.08,
+4698.31
+]
+],
+"transit": [],
+"plain": true
+},
+"413": {
+"file": "TheHiddenCityOfAhdashim",
+"region": "NF_Vabbi",
+"outpost": 434,
+"outpost_path": [
+[
+1387.0,
+-20884.0
+],
+[
+1339.0,
+-20418.0
+]
+],
+"transit": [],
+"plain": true
+},
+"394": {
+"file": "GardenOfSeborhin",
+"region": "NF_Vabbi",
+"outpost": 428,
+"outpost_path": [
+[
+-1398.0,
+14343.0
+],
+[
+-2100.0,
+14479.0
+]
+],
+"transit": [
+{
+"map": 399,
+"path": []
+}
+],
+"plain": false
+},
+"402": {
+"file": "ResplendentMakuun",
+"region": "NF_Vabbi",
+"outpost": 403,
+"outpost_path": [
+[
+-18803.0,
+14777.0
+],
+[
+-18737.0,
+13502.0
+]
+],
+"transit": [],
+"plain": true
+},
+"392": {
+"file": "YatendiCanyons",
+"region": "NF_Vabbi",
+"outpost": 378,
+"outpost_path": [
+[
+-1846.0,
+920.0
+],
+[
+-4616.0,
+-1382.0
+],
+[
+-4850.0,
+-1388.0
+]
+],
+"transit": [],
+"plain": true
+},
+"100": {
+"file": "DeldrimorBowl",
+"region": "Proph_NorthernShiverpeaks",
+"outpost": 133,
+"outpost_path": [
+[
+-10757.0,
+35382.0
+]
+],
+"transit": [],
+"plain": true
+},
+"97": {
+"file": "DreadnoughtsDrift",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 155,
+"outpost_path": [
+[
+6647.0,
+-41652.0
+],
+[
+5831.0,
+-41296.0
+]
+],
+"transit": [
+{
+"map": 91,
+"path": [
+[
+4361.0,
+-40986.0
+],
+[
+2911.0,
+-39264.0
+],
+[
+2133.0,
+-33852.0
+],
+[
+-1060.0,
+-33346.0
+],
+[
+-4758.0,
+-28947.0
+],
+[
+-6471.0,
+-25171.0
+],
+[
+-6082.0,
+-22640.0
+],
+[
+-904.0,
+-21784.0
+],
+[
+1054.0,
+-19774.0
+],
+[
+1709.0,
+-15734.0
+],
+[
+777.0,
+-12391.0
+],
+[
+-1244.0,
+-9061.0
+],
+[
+3023.0,
+-995.0
+],
+[
+3610.0,
+211.0
+],
+[
+1680.0,
+291.0
+],
+[
+2015.0,
+1742.0
+],
+[
+-305.0,
+3030.0
+],
+[
+3103.0,
+7774.0
+],
+[
+1909.0,
+14297.0
+],
+[
+-816.0,
+17801.0
+],
+[
+-3619.0,
+17256.0
+],
+[
+-5371.0,
+19670.0
+],
+[
+-1984.0,
+23796.0
+],
+[
+-1945.0,
+26833.0
+],
+[
+508.0,
+25354.0
+],
+[
+1870.0,
+22590.0
+],
+[
+4868.0,
+23524.0
+],
+[
+3856.0,
+27378.0
+],
+[
+2065.0,
+30960.0
+],
+[
+2026.0,
+32945.0
+],
+[
+4634.0,
+33957.0
+],
+[
+6230.0,
+35670.0
+],
+[
+3038.0,
+39018.0
+],
+[
+-310.0,
+37850.0
+],
+[
+-2023.0,
+40926.0
+],
+[
+-5916.0,
+41977.0
+],
+[
+-7311.0,
+44525.0
+],
+[
+-7091.0,
+45561.0
+]
+]
+}
+],
+"plain": true
+},
+"93": {
+"file": "SpearheadPeak",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 159,
+"outpost_path": [
+[
+-21052.03,
+13106.16
+],
+[
+-22899.0,
+13360.0
+]
+],
+"transit": [],
+"plain": true
+},
+"26": {
+"file": "TalusChute",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 22,
+"outpost_path": [
+[
+-22877.0,
+-5419.0
+],
+[
+-23133.0,
+-5519.0
+]
+],
+"transit": [],
+"plain": true
+},
+"96": {
+"file": "MineralSprings",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 156,
+"outpost_path": [
+[
+-10030.0,
+18833.0
+],
+[
+-9797.0,
+19027.0
+]
+],
+"transit": [
+{
+"map": 92,
+"path": [
+[
+-7118.0,
+20976.0
+],
+[
+-3362.0,
+18610.0
+],
+[
+-105.0,
+17184.0
+],
+[
+724.0,
+18845.0
+],
+[
+2189.0,
+21211.0
+],
+[
+5084.0,
+21288.0
+],
+[
+5798.0,
+22956.0
+],
+[
+4675.0,
+25495.0
+],
+[
+5365.0,
+28339.0
+],
+[
+7667.0,
+29462.0
+],
+[
+8091.0,
+29696.0
+]
+]
+}
+],
+"plain": true
+},
+"92": {
+"file": "TascasDemise",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 156,
+"outpost_path": [
+[
+-10030.0,
+18833.0
+],
+[
+-9797.0,
+19027.0
+]
+],
+"transit": [],
+"plain": true
+},
+"91": {
+"file": "SnakeDance",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 155,
+"outpost_path": [
+[
+6114.44,
+-41364.03
+]
+],
+"transit": [],
+"plain": true
+},
+"95": {
+"file": "WitmansFolly",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 20,
+"outpost_path": [
+[
+4869.0,
+3423.0
+],
+[
+5800.0,
+1400.0
+]
+],
+"transit": [],
+"plain": true
+},
+"191": {
+"file": "GrenthsFootprint",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 206,
+"outpost_path": [
+[
+-2911.2,
+-4543.41
+]
+],
+"transit": [],
+"plain": true
+},
+"90": {
+"file": "LornarsPass",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 155,
+"outpost_path": [
+[
+6647.0,
+-41652.0
+],
+[
+5831.0,
+-41296.0
+]
+],
+"transit": [
+{
+"map": 91,
+"path": [
+[
+4361.0,
+-40986.0
+],
+[
+2911.0,
+-39264.0
+],
+[
+2133.0,
+-33852.0
+],
+[
+-1060.0,
+-33346.0
+],
+[
+-4758.0,
+-28947.0
+],
+[
+-6471.0,
+-25171.0
+],
+[
+-6082.0,
+-22640.0
+],
+[
+-904.0,
+-21784.0
+],
+[
+1054.0,
+-19774.0
+],
+[
+1709.0,
+-15734.0
+],
+[
+777.0,
+-12391.0
+],
+[
+-1244.0,
+-9061.0
+],
+[
+3023.0,
+-995.0
+],
+[
+3610.0,
+211.0
+],
+[
+1680.0,
+291.0
+],
+[
+2015.0,
+1742.0
+],
+[
+-305.0,
+3030.0
+],
+[
+3103.0,
+7774.0
+],
+[
+1909.0,
+14297.0
+],
+[
+-816.0,
+17801.0
+],
+[
+-3619.0,
+17256.0
+],
+[
+-5371.0,
+19670.0
+],
+[
+-1984.0,
+23796.0
+],
+[
+-1945.0,
+26833.0
+],
+[
+508.0,
+25354.0
+],
+[
+1870.0,
+22590.0
+],
+[
+4868.0,
+23524.0
+],
+[
+3856.0,
+27378.0
+],
+[
+2065.0,
+30960.0
+],
+[
+2026.0,
+32945.0
+],
+[
+4634.0,
+33957.0
+],
+[
+6230.0,
+35670.0
+],
+[
+3038.0,
+39018.0
+],
+[
+-310.0,
+37850.0
+],
+[
+-2023.0,
+40926.0
+],
+[
+-5916.0,
+41977.0
+],
+[
+-7311.0,
+44525.0
+],
+[
+-7091.0,
+45561.0
+]
+]
+},
+{
+"map": 97,
+"path": [
+[
+-6657.0,
+-6239.0
+],
+[
+-5031.0,
+-5928.0
+],
+[
+-3275.0,
+-7065.0
+],
+[
+-1100.0,
+-6274.0
+],
+[
+-1891.0,
+-1676.0
+],
+[
+-606.0,
+2946.0
+],
+[
+-754.0,
+5666.0
+],
+[
+-2386.0,
+7708.0
+],
+[
+-4783.0,
+7055.0
+],
+[
+-5363.0,
+7789.0
+],
+[
+-5705.0,
+8493.0
+]
+]
+}
+],
+"plain": true
+},
+"98": {
+"file": "FrozenForest",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 24,
+"outpost_path": [
+[
+-7081.0,
+-31932.0
+],
+[
+-7584.0,
+-31736.0
+]
+],
+"transit": [],
+"plain": true
+},
+"87": {
+"file": "IceDome",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 22,
+"outpost_path": [
+[
+-22815.0,
+-5378.0
+],
+[
+-23091.0,
+-5492.0
+]
+],
+"transit": [
+{
+"map": 26,
+"path": [
+[
+20104.0,
+-13167.0
+],
+[
+19138.0,
+-10938.0
+],
+[
+18469.0,
+-8424.0
+],
+[
+13995.0,
+-8343.0
+],
+[
+15599.0,
+-6604.0
+],
+[
+18342.0,
+-837.0
+],
+[
+20857.0,
+-494.0
+],
+[
+21224.0,
+2843.0
+],
+[
+21705.0,
+4661.0
+],
+[
+22376.0,
+7119.0
+],
+[
+23184.0,
+9199.0
+],
+[
+23218.0,
+11371.0
+],
+[
+22197.0,
+16324.0
+],
+[
+23438.0,
+16609.0
+],
+[
+24083.0,
+16716.0
+]
+]
+}
+],
+"plain": true
+},
+"94": {
+"file": "IceFloe",
+"region": "Proph_SouthernShiverpeaks",
+"outpost": 23,
+"outpost_path": [
+[
+-12092.02,
+-23274.7
+]
+],
+"transit": [],
+"plain": true
+},
+"384": {
+"file": "TheFloodplainOfMahnkelon",
+"region": "NF_Kourna",
+"outpost": 424,
+"outpost_path": [
+[
+2369.0,
+3332.0
+],
+[
+4406.0,
+4058.0
+],
+[
+4800.0,
+4600.0
+]
+],
+"transit": [],
+"plain": true
+},
+"379": {
+"file": "DejarinEstate",
+"region": "NF_Kourna",
+"outpost": 426,
+"outpost_path": [
+[
+3715.0,
+2181.0
+],
+[
+4451.0,
+3557.0
+],
+[
+4550.0,
+3710.0
+]
+],
+"transit": [],
+"plain": true
+},
+"382": {
+"file": "GandaraTheMoonFortress",
+"region": "NF_Kourna",
+"outpost": 426,
+"outpost_path": [
+[
+3860.0,
+-1719.0
+],
+[
+2706.0,
+-4708.0
+],
+[
+2580.0,
+-4950.0
+]
+],
+"transit": [],
+"plain": true
+},
+"373": {
+"file": "SunwardMarches",
+"region": "NF_Kourna",
+"outpost": 421,
+"outpost_path": [
+[
+23271.0,
+14344.0
+],
+[
+23000.0,
+14100.0
+]
+],
+"transit": [],
+"plain": true
+},
+"371": {
+"file": "MargaCoast",
+"region": "NF_Kourna",
+"outpost": 381,
+"outpost_path": [
+[
+-3144.0,
+4512.0
+],
+[
+-4829.0,
+4923.0
+],
+[
+-4911.0,
+4913.0
+],
+[
+-4950.0,
+4913.0
+]
+],
+"transit": [],
+"plain": true
+},
+"375": {
+"file": "BarbarousShore",
+"region": "NF_Kourna",
+"outpost": 376,
+"outpost_path": [
+[
+-14174.0,
+18358.0
+],
+[
+-13900.0,
+18250.0
+]
+],
+"transit": [],
+"plain": true
+},
+"380": {
+"file": "ArkjokWard",
+"region": "NF_Kourna",
+"outpost": 381,
+"outpost_path": [
+[
+-470.0,
+-3677.0
+],
+[
+2061.0,
+-3136.0
+],
+[
+2522.0,
+440.0
+],
+[
+4316.0,
+811.0
+],
+[
+4400.0,
+837.0
+]
+],
+"transit": [],
+"plain": true
+},
+"369": {
+"file": "JahaiBluffs",
+"region": "NF_Kourna",
+"outpost": 424,
+"outpost_path": [
+[
+-2596.0,
+2279.0
+],
+[
+-4807.0,
+4228.0
+],
+[
+-4950.0,
+4400.0
+]
+],
+"transit": [],
+"plain": true
+},
+"386": {
+"file": "TuraisProcession",
+"region": "NF_Kourna",
+"outpost": 421,
+"outpost_path": [
+[
+26313.0,
+16414.0
+],
+[
+26250.0,
+16700.0
+]
+],
+"transit": [],
+"plain": true
+},
+"121": {
+"file": "PerditionRock",
+"region": "Proph_RingOfFireIsland",
+"outpost": 35,
+"outpost_path": [
+[
+3603.0,
+-10090.0
+],
+[
+3800.0,
+-8600.0
+]
+],
+"transit": [],
+"plain": true
+},
+"114": {
+"file": "SaltFlats",
+"region": "Proph_CrystalDesert",
+"outpost": 153,
+"outpost_path": [
+[
+-17139.62,
+8813.3
+],
+[
+-16591.81,
+8238.59
+]
+],
+"transit": [],
+"plain": true
+},
+"115": {
+"file": "SkywardReach",
+"region": "Proph_CrystalDesert",
+"outpost": 38,
+"outpost_path": [
+[
+-15225.14,
+1966.78
+],
+[
+-15233.08,
+2352.49
+]
+],
+"transit": [],
+"plain": true
+},
+"108": {
+"file": "TheScar",
+"region": "Proph_CrystalDesert",
+"outpost": 117,
+"outpost_path": [
+[
+12727.0,
+12865.0
+],
+[
+12985.0,
+13488.0
+]
+],
+"transit": [],
+"plain": true
+},
+"110": {
+"file": "DivinersAscent",
+"region": "Proph_CrystalDesert",
+"outpost": 118,
+"outpost_path": [
+[
+16763.0,
+6828.0
+],
+[
+17024.0,
+6837.0
+]
+],
+"transit": [],
+"plain": true
+},
+"111": {
+"file": "VultureDrifts",
+"region": "Proph_CrystalDesert",
+"outpost": 116,
+"outpost_path": [
+[
+10723.0,
+5352.0
+]
+],
+"transit": [],
+"plain": true
+},
+"113": {
+"file": "ProphetsPath",
+"region": "Proph_CrystalDesert",
+"outpost": 38,
+"outpost_path": [
+[
+-17562.0,
+-1143.0
+],
+[
+-18791.0,
+-310.0
+],
+[
+-20099.0,
+-320.0
+]
+],
+"transit": [],
+"plain": true
+},
+"112": {
+"file": "TheAridSea",
+"region": "Proph_CrystalDesert",
+"outpost": 116,
+"outpost_path": [
+[
+10795.0,
+6556.0
+],
+[
+10556.0,
+5908.0
+]
+],
+"transit": [
+{
+"map": 111,
+"path": [
+[
+-4667.0,
+-13772.0
+],
+[
+-2247.0,
+-14229.0
+],
+[
+1025.0,
+-8357.0
+],
+[
+-3110.0,
+-4890.0
+],
+[
+2382.0,
+-2425.0
+],
+[
+3462.0,
+-6718.0
+],
+[
+4443.0,
+-9835.0
+],
+[
+13232.0,
+-5778.0
+],
+[
+16850.0,
+4402.0
+],
+[
+18984.0,
+3739.0
+],
+[
+20707.0,
+6478.0
+]
+]
+}
+],
+"plain": true
+},
+"48": {
+"file": "TangleRoot",
+"region": "Proph_Maguuma",
+"outpost": 49,
+"outpost_path": [
+[
+6418.01,
+-10500.9
+],
+[
+6212.98,
+-10712.02
+]
+],
+"transit": [],
+"plain": true
+},
+"45": {
+"file": "ReedBog",
+"region": "Proph_Maguuma",
+"outpost": 139,
+"outpost_path": [
+[
+-14913.0,
+578.0
+],
+[
+-15169.0,
+426.0
+]
+],
+"transit": [
+{
+"map": 44,
+"path": [
+[
+-17065.0,
+-942.0
+],
+[
+-15179.0,
+-3115.0
+],
+[
+-13716.0,
+-7339.0
+],
+[
+-12855.0,
+-9881.0
+],
+[
+-15821.0,
+-10140.0
+],
+[
+-19351.0,
+-8594.0
+],
+[
+-20909.0,
+-11218.0
+],
+[
+-22657.0,
+-11462.0
+],
+[
+-23270.0,
+-11426.0
+]
+]
+}
+],
+"plain": true
+},
+"46": {
+"file": "TheFalls",
+"region": "Proph_Maguuma",
+"outpost": 139,
+"outpost_path": [
+[
+-14913.0,
+578.0
+],
+[
+-15169.0,
+426.0
+]
+],
+"transit": [
+{
+"map": 44,
+"path": [
+[
+-17065.0,
+-942.0
+],
+[
+-15179.0,
+-3115.0
+],
+[
+-13716.0,
+-7339.0
+],
+[
+-12855.0,
+-9881.0
+],
+[
+-15821.0,
+-10140.0
+],
+[
+-19351.0,
+-8594.0
+],
+[
+-20909.0,
+-11218.0
+],
+[
+-22657.0,
+-11462.0
+],
+[
+-23270.0,
+-11426.0
+]
+]
+},
+{
+"map": 45,
+"path": [
+[
+6861.0,
+6446.0
+],
+[
+6353.0,
+5885.0
+],
+[
+6414.0,
+4896.0
+],
+[
+5527.0,
+398.0
+],
+[
+5954.0,
+-3643.0
+],
+[
+2470.0,
+-4498.0
+],
+[
+-1229.0,
+-8667.0
+],
+[
+-2550.0,
+-6849.0
+],
+[
+-5626.0,
+-6814.0
+],
+[
+-6340.0,
+-7661.0
+],
+[
+-6489.0,
+-8107.0
+]
+]
+}
+],
+"plain": true
+},
+"42": {
+"file": "MamnoonLagoon",
+"region": "Proph_Maguuma",
+"outpost": 142,
+"outpost_path": [
+[
+1691.0,
+-2667.0
+],
+[
+1950.0,
+-2315.0
+]
+],
+"transit": [
+{
+"map": 43,
+"path": [
+[
+2757.0,
+-1170.0
+],
+[
+4836.0,
+2597.0
+],
+[
+7570.0,
+4470.0
+],
+[
+7950.0,
+7804.0
+],
+[
+6520.0,
+9733.0
+],
+[
+6331.0,
+15284.0
+],
+[
+11355.0,
+15759.0
+],
+[
+14292.0,
+16691.0
+],
+[
+15887.0,
+13608.0
+],
+[
+17008.0,
+13261.0
+],
+[
+18066.0,
+13453.0
+]
+]
+}
+],
+"plain": true
+},
+"47": {
+"file": "DryTop",
+"region": "Proph_Maguuma",
+"outpost": 141,
+"outpost_path": [
+[
+852.0,
+-10457.0
+],
+[
+409.0,
+-9585.0
+]
+],
+"transit": [
+{
+"map": 48,
+"path": [
+[
+370.0,
+-8607.0
+],
+[
+-504.0,
+-7172.0
+],
+[
+-5166.0,
+-8089.0
+],
+[
+-14358.0,
+-7670.0
+],
+[
+-21665.0,
+-6642.0
+],
+[
+-25990.0,
+-6089.0
+],
+[
+-24347.0,
+-3944.0
+],
+[
+-23878.0,
+-3055.0
+],
+[
+-22788.0,
+-1094.0
+],
+[
+-21448.0,
+-1480.0
+],
+[
+-21582.0,
+2107.0
+],
+[
+-18948.0,
+3362.0
+],
+[
+-19327.0,
+4362.0
+],
+[
+-19513.0,
+4863.0
+]
+]
+}
+],
+"plain": true
+},
+"43": {
+"file": "Silverwood",
+"region": "Proph_Maguuma",
+"outpost": 142,
+"outpost_path": [
+[
+1550.63,
+-2982.15
+],
+[
+2013.0,
+-2216.0
+]
+],
+"transit": [],
+"plain": true
+},
+"60": {
+"file": "MajestysRest",
+"region": "Proph_Maguuma",
+"outpost": 138,
+"outpost_path": [
+[
+-5199.0,
+16327.0
+],
+[
+-5252.0,
+15997.0
+]
+],
+"transit": [
+{
+"map": 18,
+"path": [
+[
+-6302.0,
+14890.0
+],
+[
+-13411.0,
+14710.0
+],
+[
+-16718.0,
+13517.0
+],
+[
+-17978.0,
+10435.0
+],
+[
+-18374.0,
+7235.0
+],
+[
+-20108.0,
+2457.0
+],
+[
+-20274.0,
+1812.0
+]
+]
+},
+{
+"map": 17,
+"path": [
+[
+16716.0,
+2887.0
+],
+[
+11180.0,
+7961.0
+],
+[
+3437.0,
+8483.0
+],
+[
+-2499.0,
+8992.0
+],
+[
+-7004.0,
+10342.0
+],
+[
+-12458.0,
+9257.0
+],
+[
+-14167.0,
+10912.0
+],
+[
+-17071.0,
+7303.0
+],
+[
+-18812.0,
+5631.0
+],
+[
+-19523.0,
+3658.0
+],
+[
+-20190.0,
+3714.0
+]
+]
+}
+],
+"plain": true
+},
+"44": {
+"file": "EttinsBack",
+"region": "Proph_Maguuma",
+"outpost": 139,
+"outpost_path": [
+[
+-14497.57,
+835.94
+],
+[
+-15074.91,
+437.85
+]
+],
+"transit": [],
+"plain": true
+},
+"233": {
+"file": "RaisuPalace",
+"region": "Factions_KainengCity",
+"outpost": 226,
+"outpost_path": [
+[
+-10609.0,
+-1451.0
+],
+[
+-10472.0,
+1289.0
+],
+[
+-9653.0,
+2457.0
+],
+[
+-9653.0,
+2757.0
+]
+],
+"transit": [],
+"plain": true
+},
+"31": {
+"file": "XaquangSkyway",
+"region": "Factions_KainengCity",
+"outpost": 51,
+"outpost_path": [
+[
+6759.0,
+-13421.0
+],
+[
+6425.0,
+-13162.0
+],
+[
+6250.0,
+-12900.0
+]
+],
+"transit": [],
+"plain": true
+},
+"239": {
+"file": "WajjunBazaar",
+"region": "Factions_KainengCity",
+"outpost": 303,
+"outpost_path": [
+[
+12772.0,
+16449.0
+],
+[
+11677.0,
+15441.0
+],
+[
+11626.0,
+15390.0
+],
+[
+11526.0,
+15290.0
+]
+],
+"transit": [],
+"plain": true
+},
+"269": {
+"file": "TahnnakiTemple",
+"region": "Factions_KainengCity",
+"outpost": 284,
+"outpost_path": [
+[
+2742.42,
+-16465.2
+],
+[
+2741.71,
+-16025.93
+]
+],
+"transit": [],
+"plain": true
+},
+"256": {
+"file": "SunjiangDistrict",
+"region": "Factions_KainengCity",
+"outpost": 284,
+"outpost_path": [
+[
+11102.0,
+-18577.0
+],
+[
+11737.0,
+-19551.0
+],
+[
+11737.0,
+-20100.0
+]
+],
+"transit": [],
+"plain": true
+},
+"211": {
+"file": "PongmeiValley",
+"region": "Factions_KainengCity",
+"outpost": 283,
+"outpost_path": [
+[
+-12095.0,
+12430.0
+],
+[
+-13340.0,
+11692.0
+],
+[
+-13351.0,
+11081.0
+]
+],
+"transit": [],
+"plain": true
+},
+"197": {
+"file": "ShenzunTunnels",
+"region": "Factions_KainengCity",
+"outpost": 283,
+"outpost_path": [
+[
+-17054.0,
+16615.0
+],
+[
+-17843.0,
+16604.0
+]
+],
+"transit": [],
+"plain": true
+},
+"240": {
+"file": "BukdekByway",
+"region": "Factions_KainengCity",
+"outpost": 303,
+"outpost_path": [
+[
+16567.48,
+19462.11
+],
+[
+16579.6,
+19735.57
+]
+],
+"transit": [],
+"plain": true
+},
+"232": {
+"file": "ShadowsPassage",
+"region": "Factions_KainengCity",
+"outpost": 274,
+"outpost_path": [
+[
+-12290.0,
+7648.0
+],
+[
+-12193.0,
+8409.0
+],
+[
+-12182.0,
+8800.0
+]
+],
+"transit": [],
+"plain": true
+},
+"265": {
+"file": "NahpuiQuarter",
+"region": "Factions_KainengCity",
+"outpost": 51,
+"outpost_path": [
+[
+7574.0,
+-16106.0
+],
+[
+7400.0,
+-17000.0
+]
+],
+"transit": [],
+"plain": true
+},
+"481": {
+"file": "FahranurTheFirstCity",
+"region": "NF_Istan",
+"outpost": 492,
+"outpost_path": [
+[
+-3232.0,
+3400.0
+],
+[
+-4316.0,
+4419.0
+],
+[
+-4380.0,
+4557.0
+],
+[
+-4405.0,
+4603.0
+],
+[
+-4505.0,
+4803.0
+]
+],
+"transit": [],
+"plain": true
+},
+"483": {
+"file": "ZehlonReach",
+"region": "NF_Istan",
+"outpost": 491,
+"outpost_path": [
+[
+3511.0,
+1930.0
+],
+[
+4225.0,
+4510.0
+],
+[
+4455.0,
+4479.0
+],
+[
+4550.0,
+4479.0
+]
+],
+"transit": [],
+"plain": true
+},
+"432": {
+"file": "CliffsOfDohjok",
+"region": "NF_Istan",
+"outpost": 492,
+"outpost_path": [
+[
+2572.0,
+1621.0
+],
+[
+4300.0,
+4564.0
+],
+[
+4400.0,
+4590.0
+]
+],
+"transit": [],
+"plain": true
+},
+"488": {
+"file": "MehtaniKeys",
+"region": "NF_Istan",
+"outpost": 489,
+"outpost_path": [
+[
+303.0,
+-1560.0
+],
+[
+3926.0,
+-3966.0
+],
+[
+4286.0,
+-3765.0
+],
+[
+4500.0,
+-3765.0
+]
+],
+"transit": [],
+"plain": true
+},
+"484": {
+"file": "LahtendaBog",
+"region": "NF_Istan",
+"outpost": 492,
+"outpost_path": [
+[
+1873.0,
+-460.0
+],
+[
+227.0,
+-3402.0
+],
+[
+298.0,
+-4114.0
+],
+[
+298.0,
+-4500.0
+]
+],
+"transit": [],
+"plain": true
+},
+"486": {
+"file": "IssnurIsles",
+"region": "NF_Istan",
+"outpost": 487,
+"outpost_path": [
+[
+-20136.0,
+12599.0
+],
+[
+-16011.0,
+11304.0
+],
+[
+-15700.0,
+11304.0
+]
+],
+"transit": [],
+"plain": true
+},
+"430": {
+"file": "PlainsofJarin",
+"region": "NF_Istan",
+"outpost": 449,
+"outpost_path": [
+[
+-9259.0,
+16725.0
+],
+[
+-9300.0,
+17000.0
+]
+],
+"transit": [],
+"plain": true
+},
+"548": {
+"file": "Norrhart_Domains",
+"region": "EOTN_Far_Silverpeaks",
+"outpost": 644,
+"outpost_path": [
+[
+18208.0,
+-6816.0
+],
+[
+15300.0,
+-6500.0
+]
+],
+"transit": [],
+"plain": true
+},
+"553": {
+"file": "Varajar_Fells",
+"region": "EOTN_Far_Silverpeaks",
+"outpost": 645,
+"outpost_path": [
+[
+-328.0,
+1240.0
+],
+[
+-1500.0,
+1250.0
+]
+],
+"transit": [],
+"plain": true
+},
+"513": {
+"file": "Drakkar_Lake",
+"region": "EOTN_Far_Silverpeaks",
+"outpost": 643,
+"outpost_path": [
+[
+9618.0,
+23822.0
+]
+],
+"transit": [],
+"plain": true
+},
+"499": {
+"file": "Ice_Cliff_Chasms",
+"region": "EOTN_Far_Silverpeaks",
+"outpost": 675,
+"outpost_path": [
+[
+5500.0,
+-27812.0
+],
+[
+4500.0,
+-27850.0
+]
+],
+"transit": [],
+"plain": true
+},
+"446": {
+"file": "TheAlkaliPan",
+"region": "NF_Desolation",
+"outpost": 480,
+"outpost_path": [
+[
+-3935.0,
+12288.0
+],
+[
+-3447.0,
+11751.0
+]
+],
+"transit": [],
+"plain": true
+},
+"443": {
+"file": "PoisonedOutcrops",
+"region": "NF_Desolation",
+"outpost": 442,
+"outpost_path": [
+[
+1180.0,
+2836.0
+],
+[
+1180.0,
+2836.0
+],
+[
+1020.0,
+4093.0
+],
+[
+2751.0,
+5004.0
+]
+],
+"transit": [],
+"plain": true
+},
+"439": {
+"file": "TheRupturedHeart",
+"region": "NF_Desolation",
+"outpost": 440,
+"outpost_path": [
+[
+-99.0,
+-3548.0
+],
+[
+1681.0,
+-1854.0
+],
+[
+2284.0,
+-1554.0
+]
+],
+"transit": [],
+"plain": true
+},
+"444": {
+"file": "TheSulfurousWastes",
+"region": "NF_Desolation",
+"outpost": 478,
+"outpost_path": [
+[
+-4820.0,
+5252.0
+]
+],
+"transit": [],
+"plain": true
+},
+"448": {
+"file": "CrystalOverlook",
+"region": "NF_Desolation",
+"outpost": 440,
+"outpost_path": [
+[
+-4454.0,
+-6313.0
+]
+],
+"transit": [
+{
+"map": 439,
+"path": [
+[
+-5217.0,
+-6706.0
+],
+[
+-7347.0,
+-5330.0
+],
+[
+-8751.0,
+-3218.0
+],
+[
+-11362.0,
+-3312.0
+],
+[
+-13161.0,
+-1485.0
+],
+[
+-15359.0,
+-224.0
+],
+[
+-17327.0,
+1473.0
+],
+[
+-18421.0,
+1661.0
+]
+]
+}
+],
+"plain": true
+},
+"441": {
+"file": "TheShatteredRavines",
+"region": "NF_Desolation",
+"outpost": 442,
+"outpost_path": [
+[
+787.0,
+56.0
+],
+[
+857.0,
+-1974.0
+],
+[
+-1058.0,
+-3540.0
+],
+[
+-1928.0,
+-4385.0
+]
+],
+"transit": [],
+"plain": true
+},
+"437": {
+"file": "JokosDomain",
+"region": "NF_Desolation",
+"outpost": 438,
+"outpost_path": [
+[
+-14662.0,
+3440.0
+]
+],
+"transit": [],
+"plain": true
+},
+"200": {
+"file": "MountQinkai",
+"region": "Factions_TheJadeSea",
+"outpost": 389,
+"outpost_path": [
+[
+-4268.0,
+11628.0
+],
+[
+-5490.0,
+13672.0
+]
+],
+"transit": [],
+"plain": true
+},
+"202": {
+"file": "RheasCrater",
+"region": "Factions_TheJadeSea",
+"outpost": 234,
+"outpost_path": [
+[
+-2623.0,
+6965.0
+],
+[
+-5921.0,
+6290.0
+],
+[
+-6600.0,
+7700.0
+]
+],
+"transit": [],
+"plain": true
+},
+"247": {
+"file": "BoreasSeabed",
+"region": "Factions_TheJadeSea",
+"outpost": 273,
+"outpost_path": [
+[
+3476.0,
+6599.0
+],
+[
+3510.0,
+7400.0
+]
+],
+"transit": [],
+"plain": true
+},
+"198": {
+"file": "Archipelagos",
+"region": "Factions_TheJadeSea",
+"outpost": 193,
+"outpost_path": [
+[
+5419.0,
+-4307.0
+],
+[
+5916.0,
+-6569.0
+],
+[
+6650.0,
+-7500.0
+]
+],
+"transit": [],
+"plain": true
+},
+"203": {
+"file": "SilentSurf",
+"region": "Factions_TheJadeSea",
+"outpost": 279,
+"outpost_path": [
+[
+8483.0,
+-25600.0
+],
+[
+9100.0,
+-26300.0
+]
+],
+"transit": [],
+"plain": true
+},
+"227": {
+"file": "UnwakingWaters",
+"region": "Factions_TheJadeSea",
+"outpost": 277,
+"outpost_path": [
+[
+3355.47,
+3054.54
+],
+[
+3355.47,
+2300.54
+]
+],
+"transit": [],
+"plain": true
+},
+"199": {
+"file": "MaishangHills",
+"region": "Factions_TheJadeSea",
+"outpost": 224,
+"outpost_path": [
+[
+1059.0,
+23549.0
+],
+[
+2750.0,
+24727.0
+],
+[
+4300.0,
+25800.0
+]
+],
+"transit": [],
+"plain": true
+},
+"144": {
+"file": "GyalaHatchery",
+"region": "Factions_TheJadeSea",
+"outpost": 279,
+"outpost_path": [
+[
+9177.0,
+-20845.0
+],
+[
+8500.0,
+-19800.0
+]
+],
+"transit": [],
+"plain": true
+},
+"27": {
+"file": "GriffonsMouth",
+"region": "Proph_NorthernShiverpeaks",
+"outpost": 14,
+"outpost_path": [
+[
+-1453.6,
+24938.46
+],
+[
+-4334.29,
+26859.33
+]
+],
+"transit": [
+{
+"map": 54,
+"path": [
+[
+-2324.0,
+-5061.0
+],
+[
+98.0,
+-2686.0
+],
+[
+4808.0,
+-1046.0
+],
+[
+6085.0,
+3327.0
+],
+[
+7698.0,
+5400.0
+],
+[
+7355.0,
+6838.0
+],
+[
+7504.0,
+7406.0
+],
+[
+7660.0,
+8001.0
+]
+]
+}
+],
+"plain": true
+},
+"99": {
+"file": "TravelersVale",
+"region": "Proph_NorthernShiverpeaks",
+"outpost": 134,
+"outpost_path": [
+[
+9303.0,
+4208.0
+],
+[
+9275.0,
+4000.0
+]
+],
+"transit": [],
+"plain": true
+},
+"89": {
+"file": "AnvilRock",
+"region": "Proph_NorthernShiverpeaks",
+"outpost": 132,
+"outpost_path": [
+[
+-11688.0,
+11666.0
+],
+[
+-12281.0,
+11654.0
+]
+],
+"transit": [],
+"plain": true
+},
+"88": {
+"file": "IronHorseMine",
+"region": "Proph_NorthernShiverpeaks",
+"outpost": 132,
+"outpost_path": [
+[
+-11688.0,
+11666.0
+],
+[
+-12281.0,
+11654.0
+]
+],
+"transit": [
+{
+"map": 89,
+"path": [
+[
+-14364.0,
+12884.0
+],
+[
+-7306.0,
+17104.0
+],
+[
+-1519.0,
+15606.0
+],
+[
+4887.0,
+17101.0
+],
+[
+10751.0,
+16175.0
+],
+[
+12604.0,
+19236.0
+],
+[
+16305.0,
+19985.0
+],
+[
+18238.0,
+17604.0
+],
+[
+20070.0,
+20046.0
+],
+[
+20520.0,
+20584.0
+]
+]
+}
+],
+"plain": true
+},
+"106": {
+"file": "FlameTempleCorridor",
+"region": "Proph_Ascalon",
+"outpost": 36,
+"outpost_path": [
+[
+945.0,
+14173.0
+],
+[
+2341.0,
+13416.0
+]
+],
+"transit": [
+{
+"map": 13,
+"path": [
+[
+3071.0,
+13038.0
+],
+[
+4060.0,
+14711.0
+],
+[
+5827.0,
+15815.0
+],
+[
+7552.0,
+15350.0
+],
+[
+11026.0,
+16534.0
+],
+[
+13413.0,
+16545.0
+],
+[
+14862.0,
+14674.0
+],
+[
+14696.0,
+13229.0
+],
+[
+17052.0,
+14409.0
+],
+[
+19976.0,
+15169.0
+],
+[
+21502.0,
+16356.0
+],
+[
+21419.0,
+17256.0
+],
+[
+21411.0,
+17437.0
+]
+]
+}
+],
+"plain": true
+},
+"107": {
+"file": "EasternFrontier",
+"region": "Proph_Ascalon",
+"outpost": 30,
+"outpost_path": [
+[
+-2300.0,
+-13836.0
+],
+[
+-1593.0,
+-13669.0
+]
+],
+"transit": [],
+"plain": true
+},
+"103": {
+"file": "AscalonFoothills",
+"region": "Proph_Ascalon",
+"outpost": 134,
+"outpost_path": [
+[
+9342.0,
+4942.0
+],
+[
+9240.0,
+3985.0
+]
+],
+"transit": [
+{
+"map": 99,
+"path": [
+[
+8304.0,
+-458.0
+],
+[
+10540.0,
+-4383.0
+],
+[
+10274.0,
+-11684.0
+],
+[
+9741.0,
+-16900.0
+],
+[
+10668.0,
+-17113.0
+],
+[
+11056.0,
+-17139.0
+]
+]
+}
+],
+"plain": true
+},
+"13": {
+"file": "DiessaLowlands",
+"region": "Proph_Ascalon",
+"outpost": 134,
+"outpost_path": [
+[
+9342.0,
+4942.0
+],
+[
+9240.0,
+3985.0
+]
+],
+"transit": [
+{
+"map": 99,
+"path": [
+[
+8304.0,
+-458.0
+],
+[
+10540.0,
+-4383.0
+],
+[
+10274.0,
+-11684.0
+],
+[
+9741.0,
+-16900.0
+],
+[
+10615.0,
+-17054.0
+],
+[
+11056.0,
+-17139.0
+]
+]
+},
+{
+"map": 103,
+"path": [
+[
+-5680.0,
+1631.0
+],
+[
+-2243.0,
+2158.0
+],
+[
+-942.0,
+3489.0
+],
+[
+-942.0,
+5161.0
+],
+[
+1658.0,
+5873.0
+],
+[
+2432.0,
+7266.0
+],
+[
+6086.0,
+5099.0
+],
+[
+5900.0,
+1043.0
+],
+[
+3114.0,
+-3013.0
+],
+[
+7324.0,
+-4933.0
+],
+[
+7382.0,
+-6759.0
+],
+[
+7399.0,
+-7005.0
+]
+]
+}
+],
+"plain": true
+},
+"104": {
+"file": "PockmarkFlats",
+"region": "Proph_Ascalon",
+"outpost": 131,
+"outpost_path": [
+[
+-6218.0,
+22736.0
+],
+[
+-6197.0,
+22280.0
+]
+],
+"transit": [],
+"plain": true
+},
+"33": {
+"file": "OldAscalon",
+"region": "Proph_Ascalon",
+"outpost": 81,
+"outpost_path": [
+[
+625.0,
+1883.0
+],
+[
+-426.0,
+1874.0
+]
+],
+"transit": [],
+"plain": true
+},
+"102": {
+"file": "TheBreach",
+"region": "Proph_Ascalon",
+"outpost": 40,
+"outpost_path": [
+[
+20252.0,
+8439.0
+],
+[
+20242.0,
+7929.0
+],
+[
+20246.0,
+7491.0
+]
+],
+"transit": [],
+"plain": true
+},
+"101": {
+"file": "RegentValley",
+"region": "Proph_Ascalon",
+"outpost": 29,
+"outpost_path": [
+[
+7936.0,
+-28412.0
+],
+[
+7194.0,
+-31058.0
+],
+[
+7208.0,
+-32163.0
+],
+[
+7208.0,
+-32863.0
+]
+],
+"transit": [],
+"plain": true
+},
+"105": {
+"file": "DragonsGullet",
+"region": "Proph_Ascalon",
+"outpost": 36,
+"outpost_path": [
+[
+945.0,
+14173.0
+],
+[
+2341.0,
+13416.0
+]
+],
+"transit": [
+{
+"map": 13,
+"path": [
+[
+3071.0,
+13038.0
+],
+[
+4060.0,
+14711.0
+],
+[
+5827.0,
+15815.0
+],
+[
+7552.0,
+15350.0
+],
+[
+11026.0,
+16534.0
+],
+[
+13413.0,
+16545.0
+],
+[
+14862.0,
+14674.0
+],
+[
+14696.0,
+13229.0
+],
+[
+17052.0,
+14409.0
+],
+[
+19976.0,
+15169.0
+],
+[
+21502.0,
+16356.0
+],
+[
+21436.0,
+17268.0
+],
+[
+21431.0,
+17396.0
+]
+]
+},
+{
+"map": 106,
+"path": [
+[
+-18448.0,
+-11278.0
+],
+[
+-19523.0,
+-8452.0
+],
+[
+-17298.0,
+-5976.0
+],
+[
+-16454.0,
+-6435.0
+],
+[
+-15811.0,
+-6814.0
+],
+[
+-15235.0,
+-7517.0
+],
+[
+-14899.0,
+-8035.0
+],
+[
+-14241.0,
+-8715.0
+],
+[
+-13971.0,
+-9342.0
+],
+[
+-13495.0,
+-9042.0
+],
+[
+-12983.0,
+-8753.0
+],
+[
+-12597.0,
+-6271.0
+],
+[
+-11975.0,
+-4276.0
+],
+[
+-10411.0,
+-4387.0
+],
+[
+-8600.0,
+-3114.0
+],
+[
+-8221.0,
+-2061.0
+],
+[
+-7238.0,
+-1008.0
+],
+[
+-4682.0,
+-1082.0
+],
+[
+-4577.0,
+-978.0
+]
+]
+}
+],
+"plain": true
+},
+"572": {
+"file": "AlcaziaTangle",
+"region": "EOTN_Tarnished_Coast",
+"outpost": 641,
+"outpost_path": [
+[
+20665.88,
+-11510.13
+],
+[
+19218.17,
+-10843.86
+]
+],
+"transit": [],
+"plain": true
+},
+"569": {
+"file": "MagusStones",
+"region": "EOTN_Tarnished_Coast",
+"outpost": 640,
+"outpost_path": [
+[
+16448.44,
+14224.86
+],
+[
+16183.18,
+13655.5
+]
+],
+"transit": [],
+"plain": true
+},
+"566": {
+"file": "VerdantCascades",
+"region": "EOTN_Tarnished_Coast",
+"outpost": 639,
+"outpost_path": [
+[
+-22340.0,
+10813.0
+],
+[
+-22785.0,
+6107.0
+]
+],
+"transit": [],
+"plain": true
+},
+"485": {
+"file": "ArborBay",
+"region": "EOTN_Tarnished_Coast",
+"outpost": 624,
+"outpost_path": [
+[
+16129.67,
+14160.49
+],
+[
+15545.26,
+12675.66
+]
+],
+"transit": [],
+"plain": true
+},
+"501": {
+"file": "RivenEarth",
+"region": "EOTN_Tarnished_Coast",
+"outpost": 640,
+"outpost_path": [
+[
+19623.0,
+16850.0
+],
+[
+20300.0,
+16850.0
+]
+],
+"transit": [],
+"plain": true
+},
+"647": {
+"file": "Dalada_Uplands",
+"region": "EOTN_Charr_Homelands",
+"outpost": 648,
+"outpost_path": [
+[
+-16016.0,
+17340.0
+],
+[
+-15400.0,
+13500.0
+]
+],
+"transit": [],
+"plain": true
+}
+}

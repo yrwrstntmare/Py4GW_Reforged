@@ -1,0 +1,2369 @@
+[
+ {
+  "region": "Kaineng City",
+  "location": "Bukdek Byway",
+  "boss": "Afflicted Guardsman Chun",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": "during quest: The Afflicted Guard"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Bukdek Byway",
+  "boss": "Wing, Three Blade",
+  "profession": "Warrior",
+  "skill": "Triple Chop",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Bukdek Byway",
+  "boss": "Jin, the Purifier",
+  "profession": "Mesmer",
+  "skill": "Expel Hexes",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Bukdek Byway",
+  "boss": "Chung, the Attuned",
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "guaranteed": true,
+  "note": "during quest: Eliminate the Am Fah"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Bukdek Byway",
+  "boss": "Kenshi Steelhand",
+  "profession": "Assassin",
+  "skill": "Palm Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Tamaya",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Susei",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Cho",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Xi",
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Meeka",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Rasa",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Huu",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Dragon's Throat",
+  "boss": "The Afflicted Mei",
+  "profession": "Ritualist",
+  "skill": "Weapon of Quickening",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Nahpui Quarter",
+  "boss": "Kaijun Don",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Nahpui Quarter",
+  "boss": "Kuonghsang",
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Nahpui Quarter",
+  "boss": "Hai Jii",
+  "profession": "Mesmer",
+  "skill": "Lyssa's Aura",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Nahpui Quarter",
+  "boss": "Tahmu",
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Nahpui Quarter (explorable area)",
+  "boss": "Royen Beastkeeper",
+  "profession": "Ranger",
+  "skill": "Enraged Lunge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Pongmei Valley",
+  "boss": "Arrahhsh Mountainclub",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Pongmei Valley",
+  "boss": "Meynsang the Sadistic",
+  "profession": "Ranger",
+  "skill": "Spike Trap",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Pongmei Valley",
+  "boss": "Xuekao, the Deceptive",
+  "profession": "Assassin",
+  "skill": "Assassin's Promise",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Pongmei Valley",
+  "boss": "The Afflicted Hakaru",
+  "profession": "Ritualist",
+  "skill": "Weapon of Quickening",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Sword Ancient Kai",
+  "profession": "Warrior",
+  "skill": "Auspicious Parry",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Famished Ancient Brrne",
+  "profession": "Ranger",
+  "skill": "Famine",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Untouched Ancient Ky",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Doomed Ancient Kkraz",
+  "profession": "Necromancer",
+  "skill": "Wail of Doom",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Arcane Ancient Phi",
+  "profession": "Mesmer",
+  "skill": "Arcane Languor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Star Ancient Koosun",
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Silent Ancient Onata",
+  "profession": "Assassin",
+  "skill": "Shroud of Silence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace",
+  "boss": "Defiant Ancient Sseer",
+  "profession": "Ritualist",
+  "skill": "Defiant Was Xinrae",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Sword Ancient Kai",
+  "profession": "Warrior",
+  "skill": "Auspicious Parry",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Blade Ancient Syu-Shai",
+  "profession": "Warrior",
+  "skill": "Seven Weapons Stance",
+  "guaranteed": true,
+  "note": "requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Famished Ancient Brrne",
+  "profession": "Ranger",
+  "skill": "Famine",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Untouched Ancient Ky",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Doomed Ancient Kkraz",
+  "profession": "Necromancer",
+  "skill": "Wail of Doom",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Arcane Ancient Phi",
+  "profession": "Mesmer",
+  "skill": "Arcane Languor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Star Ancient Koosun",
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Blade Ancient Syu-Shai",
+  "profession": "Assassin",
+  "skill": "Shadow Theft",
+  "guaranteed": true,
+  "note": "requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Silent Ancient Onata",
+  "profession": "Assassin",
+  "skill": "Shroud of Silence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Defiant Ancient Sseer",
+  "profession": "Ritualist",
+  "skill": "Soul Twisting",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Raisu Palace (explorable area)",
+  "boss": "Blade Ancient Syu-Shai",
+  "profession": "Ritualist",
+  "skill": "Weapons of Three Forges",
+  "guaranteed": true,
+  "note": "requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Shadow's Passage",
+  "boss": "The Afflicted Ako",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Shenzun Tunnels",
+  "boss": "Rien, the Martyr",
+  "profession": "Monk",
+  "skill": "Martyr",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Shenzun Tunnels",
+  "boss": "The Afflicted Li Yun",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Shenzun Tunnels",
+  "boss": "The Afflicted Kam",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Shenzun Tunnels",
+  "boss": "Lou, of the Knives",
+  "profession": "Assassin",
+  "skill": "Flashing Blades",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Shenzun Tunnels",
+  "boss": "Cho, Spirit Empath",
+  "profession": "Ritualist",
+  "skill": "Spirit Channeling",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "Warrior's Construct",
+  "profession": "Warrior",
+  "skill": "Hundred Blades",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "The Afflicted Huan (ranger)",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "Ranger's Construct",
+  "profession": "Ranger",
+  "skill": "Equinox",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "Monk's Construct",
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "Necromancer's Construct",
+  "profession": "Necromancer",
+  "skill": "Soul Bind",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "Mesmer's Construct",
+  "profession": "Mesmer",
+  "skill": "Psychic Distraction",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "Elemental's Construct",
+  "profession": "Elementalist",
+  "skill": "Mirror of Ice",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District (explorable area)",
+  "boss": "The Afflicted Soon Kim",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Warrior's Construct",
+  "profession": "Warrior",
+  "skill": "Hundred Blades",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Ranger's Construct",
+  "profession": "Ranger",
+  "skill": "Equinox",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Monk's Construct",
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Necromancer's Construct",
+  "profession": "Necromancer",
+  "skill": "Soul Bind",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Mesmer's Construct",
+  "profession": "Mesmer",
+  "skill": "Psychic Distraction",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Elemental's Construct",
+  "profession": "Elementalist",
+  "skill": "Mirror of Ice",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Assassin's Construct",
+  "profession": "Assassin",
+  "skill": "Temple Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Sunjiang District",
+  "boss": "Ritualist's Construct",
+  "profession": "Ritualist",
+  "skill": "Soul Twisting",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Jaizhanju",
+  "profession": "Warrior",
+  "skill": "Auspicious Parry",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Zojun",
+  "profession": "Ranger",
+  "skill": "Famine",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Karei",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Naku",
+  "profession": "Necromancer",
+  "skill": "Wail of Doom",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Kitah",
+  "profession": "Mesmer",
+  "skill": "Arcane Languor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Teinei",
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Vizu",
+  "profession": "Assassin",
+  "skill": "Shroud of Silence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple",
+  "boss": "Bound Kaolai",
+  "profession": "Ritualist",
+  "skill": "Defiant Was Xinrae",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Tahnnakai Temple (explorable area)",
+  "boss": "Quansong Spiritspeak",
+  "profession": "Ritualist",
+  "skill": "Wanderlust",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "Am Fah Leader",
+  "profession": "Monk",
+  "skill": "Martyr",
+  "guaranteed": true,
+  "note": "during quest: Capturing the Orrian Tome"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "The Afflicted Miju",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "Chan the Dragon's Blood",
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "The Afflicted Huan (necromancer)",
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "Mina Shatter Storm",
+  "profession": "Mesmer",
+  "skill": "Shatter Storm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "Chung, the Attuned",
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "Baubao Wavewrath",
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "The Undercity",
+  "boss": "Waeng",
+  "profession": "Assassin",
+  "skill": "Flashing Blades",
+  "guaranteed": true,
+  "note": "during quest: Assist the Guards"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Ako",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Huan (ranger)",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Miju",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Thu",
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Li Yun",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Kam",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Soon Kim",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Vizunah Square",
+  "boss": "The Afflicted Hakaru",
+  "profession": "Ritualist",
+  "skill": "Weapon of Quickening",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Wajjun Bazaar",
+  "boss": "Sun, the Quivering",
+  "profession": "Warrior",
+  "skill": "Quivering Blade",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Wajjun Bazaar",
+  "boss": "Quufu",
+  "profession": "Monk",
+  "skill": "Word of Censure",
+  "guaranteed": true,
+  "note": "during quest: Straight to the Top"
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Wajjun Bazaar",
+  "boss": "Shen, the Magistrate",
+  "profession": "Monk",
+  "skill": "Word of Censure",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Wajjun Bazaar",
+  "boss": "Lian, Dragon's Petal",
+  "profession": "Elementalist",
+  "skill": "Double Dragon",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Xaquang Skyway",
+  "boss": "Ziinfaun Lifeforce",
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Xaquang Skyway",
+  "boss": "Ghial the Bone Dancer",
+  "profession": "Necromancer",
+  "skill": "Animate Flesh Golem",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Xaquang Skyway",
+  "boss": "Shreader Sharptongue",
+  "profession": "Assassin",
+  "skill": "Seeping Wound",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Kaineng City",
+  "location": "Xaquang Skyway",
+  "boss": "Orosen, Tranquil Acolyte",
+  "profession": "Ritualist",
+  "skill": "Tranquil Was Tanasen",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Altrumm Ruins",
+  "boss": "Dorn Stonebreaker",
+  "profession": "Warrior",
+  "skill": "Forceful Blow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Altrumm Ruins",
+  "boss": "Ennsa Stoneweaver",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Altrumm Ruins",
+  "boss": "Froth Stonereap",
+  "profession": "Necromancer",
+  "skill": "Weaken Knees",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Altrumm Ruins",
+  "boss": "Azukhan Stonewrath",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone",
+  "boss": "Stone Judge",
+  "profession": "Warrior",
+  "skill": "Forceful Blow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone",
+  "boss": "Ryver Mossplanter",
+  "profession": "Ranger",
+  "skill": "Lacerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone",
+  "boss": "Dark Fang",
+  "profession": "Necromancer",
+  "skill": "Vampiric Spirit",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone",
+  "boss": "Milefaun Mindflayer",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone",
+  "boss": "The Ancient",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone (explorable area)",
+  "boss": "Mahr Stonebreaker",
+  "profession": "Warrior",
+  "skill": "Forceful Blow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone (explorable area)",
+  "boss": "Ryver Mossplanter",
+  "profession": "Ranger",
+  "skill": "Lacerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone (explorable area)",
+  "boss": "Meril Stoneweaver",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone (explorable area)",
+  "boss": "Craw Stonereap",
+  "profession": "Necromancer",
+  "skill": "Lingering Curse",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone (explorable area)",
+  "boss": "Kaswa Webstrider",
+  "profession": "Necromancer",
+  "skill": "Vampiric Spirit",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Arborstone (explorable area)",
+  "boss": "Zarnas Stonewrath",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Drazach Thicket",
+  "boss": "Chkkr Thousand Tail",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Drazach Thicket",
+  "boss": "Bazzr Icewing",
+  "profession": "Necromancer",
+  "skill": "Icy Veins",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Drazach Thicket",
+  "boss": "Bezzr Wingstorm",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Drazach Thicket",
+  "boss": "The Skill Eater (boss)",
+  "profession": "Ritualist",
+  "skill": "Attuned Was Songkai",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Drazach Thicket",
+  "boss": "The Pain Eater (boss)",
+  "profession": "Ritualist",
+  "skill": "Clamor of Souls",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove",
+  "boss": "The Afflicted Maaka",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove",
+  "boss": "The Afflicted Senku",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove",
+  "boss": "The Afflicted Xenxo",
+  "profession": "Ritualist",
+  "skill": "Weapon of Quickening",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "Tembarr Treefall",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "Jayne Forestlight",
+  "profession": "Monk",
+  "skill": "Air of Enchantment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "The Scar Eater (boss)",
+  "profession": "Monk",
+  "skill": "Healing Burst",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "The Time Eater (boss)",
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "Wiseroot Shatterstone",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "Bramble Everthorn",
+  "profession": "Assassin",
+  "skill": "Moebius Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "Flower Spiritgarden",
+  "profession": "Ritualist",
+  "skill": "Preservation",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "The Eternal Grove (explorable area)",
+  "boss": "Spiritroot Mossbeard",
+  "profession": "Ritualist",
+  "skill": "Ritual Lord",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Tarnen the Bully",
+  "profession": "Warrior",
+  "skill": "Shove",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Mungri Magicbox",
+  "profession": "Monk",
+  "skill": "Boon Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Hargg Plaguebinder",
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Mugra Swiftspell",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Tarlok Evermind",
+  "profession": "Elementalist",
+  "skill": "Energy Boon",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Warden of Saprophytes",
+  "profession": "Assassin",
+  "skill": "Beguiling Haze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Maximole",
+  "profession": "Assassin",
+  "skill": "Aura of Displacement",
+  "guaranteed": true,
+  "note": "during quest: Revolt of the Dredge"
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Urkal the Ambusher",
+  "profession": "Assassin",
+  "skill": "Aura of Displacement",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Ferndale",
+  "boss": "Wagg Spiritspeak",
+  "profession": "Ritualist",
+  "skill": "Signet of Spirits",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Melandru's Hope",
+  "boss": "Nundak The Archer",
+  "profession": "Ranger",
+  "skill": "Archer's Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Melandru's Hope",
+  "boss": "Salke Fur Friend",
+  "profession": "Ranger",
+  "skill": "Heal as One",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Melandru's Hope",
+  "boss": "Byzzr Wingmender",
+  "profession": "Monk",
+  "skill": "Empathic Removal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Melandru's Hope",
+  "boss": "Rot Foulbelly",
+  "profession": "Necromancer",
+  "skill": "Weaken Knees",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Melandru's Hope",
+  "boss": "Chkkr Locust Lord",
+  "profession": "Assassin",
+  "skill": "Locust's Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Melandru's Hope",
+  "boss": "Chkkr Brightclaw",
+  "profession": "Ritualist",
+  "skill": "Spirit Light Weapon",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Sunreach Warmaker",
+  "profession": "Warrior",
+  "skill": "\"Charge!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Strongroot Tanglebranch",
+  "profession": "Warrior",
+  "skill": "Primal Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Nandet, Glass Weaver",
+  "profession": "Ranger",
+  "skill": "Glass Arrows",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Inallay Splintercall",
+  "profession": "Ranger",
+  "skill": "Quick Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Kyril Oathwarden",
+  "profession": "Necromancer",
+  "skill": "Cultist's Fervor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Konrru, Tainted Stone",
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Arbor Earthcall",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Falaharn Mistwarden",
+  "profession": "Assassin",
+  "skill": "Beguiling Haze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Morostav Trail",
+  "boss": "Ritualist's Construct",
+  "profession": "Ritualist",
+  "skill": "Soul Twisting",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Chkkr Ironclaw",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Foalcrest Darkwish",
+  "profession": "Necromancer",
+  "skill": "Spoil Victor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Milefaun Mindflayer",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Xisni Dream Haunt",
+  "profession": "Mesmer",
+  "skill": "Recurring Insecurity",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Deeproot Sorrow",
+  "profession": "Mesmer",
+  "skill": "Shared Burden",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Rahse Windcatcher",
+  "profession": "Elementalist",
+  "skill": "Gust",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Bizzr Ironshell",
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Darkroot Entrop",
+  "profession": "Assassin",
+  "skill": "Dark Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Echovald Forest",
+  "location": "Mourning Veil Falls",
+  "boss": "Bazzr Dustwing",
+  "profession": "Ritualist",
+  "skill": "Vengeful Was Khanhei",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "Razortongue Frothspit",
+  "profession": "Ranger",
+  "skill": "Melandru's Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "Ssuns, Blessed of Dwayna",
+  "profession": "Monk",
+  "skill": "Blessed Light",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "KaySey Stormray",
+  "profession": "Monk",
+  "skill": "Healing Light",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "Xiriss Stickleback",
+  "profession": "Necromancer",
+  "skill": "Discord",
+  "guaranteed": true,
+  "note": "during quest: Night Raiders"
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "Siska Scalewand",
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "Snapjaw Windshell",
+  "profession": "Elementalist",
+  "skill": "Second Wind",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Archipelagos",
+  "boss": "Ssyn Coiled Grasp",
+  "profession": "Ritualist",
+  "skill": "Grasping Was Kuurong",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed",
+  "boss": "Seaguard Eli",
+  "profession": "Warrior",
+  "skill": "Dragon Slash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed",
+  "boss": "Aurora",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed",
+  "boss": "Daeman",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed",
+  "boss": "Seaguard Gita",
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed",
+  "boss": "Seaguard Hala",
+  "profession": "Mesmer",
+  "skill": "Power Leech",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed",
+  "boss": "Argo",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed (explorable area)",
+  "boss": "Sskai, Dragon's Birth",
+  "profession": "Warrior",
+  "skill": "Dragon Slash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed (explorable area)",
+  "boss": "Geoffer Pain Bringer",
+  "profession": "Warrior",
+  "skill": "Whirling Axe",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed (explorable area)",
+  "boss": "Milodestus the Wrangler",
+  "profession": "Ranger",
+  "skill": "Ferocious Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed (explorable area)",
+  "boss": "Senkai, Lord of the 1,000 Daggers Guild",
+  "profession": "Assassin",
+  "skill": "Way of the Empty Palm",
+  "guaranteed": true,
+  "note": "during quest: The Halcyon Job"
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Boreas Seabed (explorable area)",
+  "boss": "Ilidus of the Empty Palm",
+  "profession": "Assassin",
+  "skill": "Way of the Empty Palm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Jacqui The Reaver",
+  "profession": "Warrior",
+  "skill": "\"Charge!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Reefclaw Ragebound",
+  "profession": "Warrior",
+  "skill": "Primal Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Lukrker Foulfist",
+  "profession": "Necromancer",
+  "skill": "Tainted Flesh",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Mohby Windbeak",
+  "profession": "Mesmer",
+  "skill": "Echo",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Whyk Steelshell",
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Bahnba Shockfoot",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Razorfang Hazeclaw",
+  "profession": "Assassin",
+  "skill": "Beguiling Haze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Gyala Hatchery (explorable area)",
+  "boss": "Soulwhisper, Elder Guardian",
+  "profession": "Ritualist",
+  "skill": "Preservation",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Maishang Hills",
+  "boss": "Stsou Swiftscale",
+  "profession": "Ranger",
+  "skill": "Escape",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Maishang Hills",
+  "boss": "Sessk, Woe Spreader",
+  "profession": "Necromancer",
+  "skill": "Discord",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Maishang Hills",
+  "boss": "Sarss, Stormscale",
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Maishang Hills",
+  "boss": "Seacrash, Elder Guardian",
+  "profession": "Elementalist",
+  "skill": "Unsteady Ground",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Maishang Hills",
+  "boss": "Ssaresh Rattler",
+  "profession": "Assassin",
+  "skill": "Siphon Strength",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Mount Qinkai",
+  "boss": "Arrahhsh Mountainclub",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": "during quest: Return of the Yeti"
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Mount Qinkai",
+  "boss": "Kayali the Brave",
+  "profession": "Warrior",
+  "skill": "\"Coward!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Mount Qinkai",
+  "boss": "Chehbaba Roottripper",
+  "profession": "Ranger",
+  "skill": "Trapper's Focus",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Mount Qinkai",
+  "boss": "Hukhrah Earthslove",
+  "profession": "Monk",
+  "skill": "Withdraw Hexes",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Mount Qinkai",
+  "boss": "Tomton Spiriteater",
+  "profession": "Ritualist",
+  "skill": "Consume Soul",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Razorfin Fleshrend",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Lorelle Jade Cutter",
+  "profession": "Ranger",
+  "skill": "Glass Arrows",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Incetol, Devout of Depths",
+  "profession": "Monk",
+  "skill": "Healing Burst",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Cultist Milthuran",
+  "profession": "Necromancer",
+  "skill": "Cultist's Fervor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Talous the Mad",
+  "profession": "Mesmer",
+  "skill": "Recurring Insecurity",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Wavecrest Stonebreak",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Arius, Dark Apostle",
+  "profession": "Assassin",
+  "skill": "Dark Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Rhea's Crater",
+  "boss": "Delic the Vengeance Seeker",
+  "profession": "Ritualist",
+  "skill": "Vengeful Was Khanhei",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Sentasi, the Jade Maul",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Razorjaw Longspine",
+  "profession": "Ranger",
+  "skill": "Quick Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Miella Lightwing",
+  "profession": "Monk",
+  "skill": "Air of Enchantment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Scourgewind, Elder Guardian",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Sourbeak Rotshell",
+  "profession": "Necromancer",
+  "skill": "Spoil Victor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Kenrii Sea Sorrow",
+  "profession": "Mesmer",
+  "skill": "Shared Burden",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Amadis, Wind of the Sea",
+  "profession": "Elementalist",
+  "skill": "Gust",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Assassin's Construct",
+  "profession": "Assassin",
+  "skill": "Temple Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Silent Surf",
+  "boss": "Whispering Ritual Lord",
+  "profession": "Ritualist",
+  "skill": "Ritual Lord",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Maaka",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Pana",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Jingme",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Lau",
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Hsin Jun",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Shen",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Senku",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters",
+  "boss": "The Afflicted Xenxo",
+  "profession": "Ritualist",
+  "skill": "Weapon of Quickening",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters (explorable area)",
+  "boss": "Merki The Reaver",
+  "profession": "Warrior",
+  "skill": "\"Charge!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters (explorable area)",
+  "boss": "Cultist Rajazan",
+  "profession": "Necromancer",
+  "skill": "Cultist's Fervor",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters (explorable area)",
+  "boss": "Chazek Plague Herder",
+  "profession": "Mesmer",
+  "skill": "Psychic Instability",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters (explorable area)",
+  "boss": "Kunvie Firewing",
+  "profession": "Elementalist",
+  "skill": "Ride the Lightning",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "The Jade Sea",
+  "location": "Unwaking Waters (explorable area)",
+  "boss": "Shrouded Oni",
+  "profession": "Assassin",
+  "skill": "Shadow Shroud",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Hearts of the North",
+  "location": "Mourning Veil Falls (Hearts of the North)",
+  "boss": "Elusive Black Moa",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": "during quest: Norn Catering"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Kaineng City (Winds of Change)",
+  "boss": "Am Fah Courier",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": "during quest: Intercepting the Am Fah"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Warrior",
+  "profession": "Warrior",
+  "skill": "Earth Shaker",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Ranger",
+  "profession": "Ranger",
+  "skill": "Magebane Shot",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Monk",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Necromancer",
+  "profession": "Necromancer",
+  "skill": "Lingering Curse",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Mesmer",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Elementalist",
+  "profession": "Elementalist",
+  "skill": "Blinding Surge",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Assassin",
+  "profession": "Assassin",
+  "skill": "Way of the Assassin",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Morostav Trail (Winds of Change)",
+  "boss": "Monstrous Afflicted Ritualist",
+  "profession": "Ritualist",
+  "skill": "Soul Twisting",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Morostav Trail"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Nahpui Quarter (explorable area) (Winds of Change)",
+  "boss": "Jeijou, Shadow Whispered",
+  "profession": "Necromancer",
+  "skill": "Discord",
+  "guaranteed": true,
+  "note": "during quest: Architect of Corruption"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Pongmei Valley (Winds of Change)",
+  "boss": "Monstrous Afflicted Warrior",
+  "profession": "Warrior",
+  "skill": "Earth Shaker",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Pongmei Valley"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Pongmei Valley (Winds of Change)",
+  "boss": "Uris Tong of Ash",
+  "profession": "Ritualist",
+  "skill": "Weapon of Quickening",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Shadow's Passage (Winds of Change)",
+  "boss": "Tuila the Club",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Shenzun Tunnels (Winds of Change)",
+  "boss": "Rai Zhon the Manipulator",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Shenzun Tunnels (Winds of Change)",
+  "boss": "Xi Lin of the Flames",
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Sunjiang District (Winds of Change)",
+  "boss": "Zu Jin the Quick",
+  "profession": "Ranger",
+  "skill": "Broad Head Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Sunjiang District (Winds of Change)",
+  "boss": "Fah Yu the Shadow's Eye",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Marketplace (Winds of Change)",
+  "boss": "Fah Yu the Shadow's Eye",
+  "profession": "Assassin",
+  "skill": "Shadow Form",
+  "guaranteed": true,
+  "note": "during quest: Tracking the Corruption"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "Polack",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": "during quest: When Kappa Attack"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "Ming the Judgment",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "Copernicus",
+  "profession": "Monk",
+  "skill": "Healing Burst",
+  "guaranteed": true,
+  "note": "during quest: When Kappa Attack"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "En Fa the Awakened",
+  "profession": "Necromancer",
+  "skill": "Order of Apostasy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "Francis",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": "during quest: When Kappa Attack"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "Giovanni",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": "during quest: When Kappa Attack"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "The Undercity (Winds of Change)",
+  "boss": "Kai Shi Jo",
+  "profession": "Dervish",
+  "skill": "Vow of Strength",
+  "guaranteed": true,
+  "note": "during quest: When Kappa Attack"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Wajjun Bazaar (Winds of Change)",
+  "boss": "Ganshu the Scribe",
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "guaranteed": true,
+  "note": "during quest: The Gangs of Kaineng"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Xaquang Skyway (Winds of Change)",
+  "boss": "Sheng Pai",
+  "profession": "Warrior",
+  "skill": "Triple Chop",
+  "guaranteed": true,
+  "note": "during quest: What Waits in Shadow"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Xaquang Skyway (Winds of Change)",
+  "boss": "Jang Wen",
+  "profession": "Ranger",
+  "skill": "Glass Arrows",
+  "guaranteed": true,
+  "note": "during quest: What Waits in Shadow"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Xaquang Skyway (Winds of Change)",
+  "boss": "Rei Bi",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": "during quest: What Waits in Shadow"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Xaquang Skyway (Winds of Change)",
+  "boss": "Seiran of the Cards",
+  "profession": "Mesmer",
+  "skill": "Stolen Speed",
+  "guaranteed": true,
+  "note": "during quest: What Waits in Shadow"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Xaquang Skyway (Winds of Change)",
+  "boss": "Lai, Graceful Blade",
+  "profession": "Assassin",
+  "skill": "Temple Strike",
+  "guaranteed": true,
+  "note": "during quest: What Waits in Shadow"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Zen Daijun (Winds of Change)",
+  "boss": "Diseased Zunraa",
+  "profession": "Monk",
+  "skill": "Defender's Zeal",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Zen Daijun"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Zen Daijun (Winds of Change)",
+  "boss": "Infected Zunraa",
+  "profession": "Monk",
+  "skill": "Shield of Judgment",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Zen Daijun"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Zen Daijun (Winds of Change)",
+  "boss": "Plagued Zunraa",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Zen Daijun"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Zen Daijun (Winds of Change)",
+  "boss": "Rotten Zunraa",
+  "profession": "Monk",
+  "skill": "Word of Censure",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Zen Daijun"
+ },
+ {
+  "region": "Winds of Change",
+  "location": "Zen Daijun (Winds of Change)",
+  "boss": "Tainted Zunraa",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": "during quest: Cleansing Zen Daijun"
+ }
+]

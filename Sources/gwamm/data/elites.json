@@ -1,0 +1,3868 @@
+{
+"26": [
+{
+"id": 317,
+"name": "Battle Rage",
+"prof": 1,
+"boss": "Krogg Shmush (Shiverpeak Mountains)",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 448,
+"name": "Escape",
+"prof": 2,
+"boss": "Whuup Buumbuul",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 294,
+"name": "Signet of Judgment",
+"prof": 3,
+"boss": "Frostbite",
+"guaranteed": true,
+"source": "profession list",
+"areas": 5
+},
+{
+"id": 132,
+"name": "Plague Signet",
+"prof": 4,
+"boss": "Allobo Dimdim",
+"guaranteed": true,
+"source": "profession list",
+"areas": 6
+},
+{
+"id": 121,
+"name": "Spiteful Spirit",
+"prof": 4,
+"boss": "Nighh SpineChill",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 33,
+"name": "Illusionary Weaponry",
+"prof": 5,
+"boss": "Seear Windlash",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 227,
+"name": "Glimmering Mark",
+"prof": 6,
+"boss": "Edibbo Kepkep",
+"guaranteed": true,
+"source": "profession list",
+"areas": 3
+},
+{
+"id": 236,
+"name": "Mist Form",
+"prof": 6,
+"boss": "Brrrr Windburn",
+"guaranteed": true,
+"source": "profession list",
+"areas": 4
+}
+],
+"31": [
+{
+"id": 282,
+"name": "Word of Healing",
+"prof": 3,
+"boss": "Ziinfaun Lifeforce",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 832,
+"name": "Animate Flesh Golem",
+"prof": 4,
+"boss": "Ghial the Bone Dancer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1034,
+"name": "Seeping Wound",
+"prof": 7,
+"boss": "Shreader Sharptongue",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 913,
+"name": "Tranquil Was Tanasen",
+"prof": 8,
+"boss": "Orosen, Tranquil Acolyte",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"90": [
+{
+"id": 318,
+"name": "Defy Pain",
+"prof": 1,
+"boss": "Clobberhusk",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 270,
+"name": "Life Barrier",
+"prof": 3,
+"boss": "Quickroot",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 151,
+"name": "Feast of Corruption",
+"prof": 4,
+"boss": "Maw the Mountain Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 146,
+"name": "Offering of Blood",
+"prof": 4,
+"boss": "Tonfor Copperblood",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Erzek Runebreaker",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+},
+{
+"id": 237,
+"name": "Water Trident",
+"prof": 6,
+"boss": "Chunk Clumpfoot",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"91": [
+{
+"id": 317,
+"name": "Battle Rage",
+"prof": 1,
+"boss": "Smukk Foombool",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 354,
+"name": "Earth Shaker",
+"prof": 1,
+"boss": "Kor Stonewrath",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 448,
+"name": "Escape",
+"prof": 2,
+"boss": "Whuup Buumbuul",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 409,
+"name": "Punishing Shot",
+"prof": 2,
+"boss": "Thul Boulderrain",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 266,
+"name": "Peace and Harmony",
+"prof": 3,
+"boss": "Marnta Doomspeaker",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 294,
+"name": "Signet of Judgment",
+"prof": 3,
+"boss": "Fawl Driftstalker",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 273,
+"name": "Spell Breaker",
+"prof": 3,
+"boss": "Raptorhawk",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 119,
+"name": "Blood is Power",
+"prof": 4,
+"boss": "Cry Darkday",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 151,
+"name": "Feast of Corruption",
+"prof": 4,
+"boss": "Maw the Mountain Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 121,
+"name": "Spiteful Spirit",
+"prof": 4,
+"boss": "Sapph Blacktracker",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 33,
+"name": "Illusionary Weaponry",
+"prof": 5,
+"boss": "Didn Hopestealer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 82,
+"name": "Mantra of Recall",
+"prof": 5,
+"boss": "Featherclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 226,
+"name": "Mind Shock",
+"prof": 6,
+"boss": "Old Red Claw",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 236,
+"name": "Mist Form",
+"prof": 6,
+"boss": "Sala Chillbringer",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"93": [
+{
+"id": 365,
+"name": "\"Victory Is Mine!\"",
+"prof": 1,
+"boss": "Jono Yawpyawl",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 329,
+"name": "Skull Crack",
+"prof": 1,
+"boss": "Hail Blackice",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 442,
+"name": "Ferocious Strike",
+"prof": 2,
+"boss": "Thul The Bull",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 404,
+"name": "Poison Arrow",
+"prof": 2,
+"boss": "Kekona Pippip",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 268,
+"name": "Unyielding Aura",
+"prof": 3,
+"boss": "Kaia Wupwup",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 151,
+"name": "Feast of Corruption",
+"prof": 4,
+"boss": "Maw the Mountain Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 132,
+"name": "Plague Signet",
+"prof": 4,
+"boss": "Allobo Dimdim",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 79,
+"name": "Energy Drain",
+"prof": 5,
+"boss": "Sniik Hungrymind",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 63,
+"name": "Keystone Signet",
+"prof": 5,
+"boss": "Rune Ethercrash",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 227,
+"name": "Glimmering Mark",
+"prof": 6,
+"boss": "Edibbo Kepkep",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 209,
+"name": "Mind Freeze",
+"prof": 6,
+"boss": "Maak Frostfriend",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+}
+],
+"94": [
+{
+"id": 355,
+"name": "Devastating Hammer",
+"prof": 1,
+"boss": "Jade Armor",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 405,
+"name": "Oath Shot",
+"prof": 2,
+"boss": "Jade Bow",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 260,
+"name": "Aura of Faith",
+"prof": 3,
+"boss": "Mursaat Monk",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 294,
+"name": "Signet of Judgment",
+"prof": 3,
+"boss": "Frostbite",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 126,
+"name": "Life Transfer",
+"prof": 4,
+"boss": "Mursaat Necromancer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 79,
+"name": "Energy Drain",
+"prof": 5,
+"boss": "Gambol Headrainer",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 39,
+"name": "Energy Surge",
+"prof": 5,
+"boss": "Mursaat Mesmer",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 209,
+"name": "Mind Freeze",
+"prof": 6,
+"boss": "Skitt Skizzle",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 228,
+"name": "Thunderclap",
+"prof": 6,
+"boss": "Mursaat Elementalist",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"95": [
+{
+"id": 268,
+"name": "Unyielding Aura",
+"prof": 3,
+"boss": "Ipillo Wupwup",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 132,
+"name": "Plague Signet",
+"prof": 4,
+"boss": "Karobo Dimdim",
+"guaranteed": true,
+"source": "profession list",
+"areas": 6
+},
+{
+"id": 79,
+"name": "Energy Drain",
+"prof": 5,
+"boss": "Sniik Hungrymind",
+"guaranteed": true,
+"source": "profession list",
+"areas": 5
+},
+{
+"id": 227,
+"name": "Glimmering Mark",
+"prof": 6,
+"boss": "Alana Kepkep",
+"guaranteed": true,
+"source": "profession list",
+"areas": 3
+},
+{
+"id": 209,
+"name": "Mind Freeze",
+"prof": 6,
+"boss": "Maak Frostfriend",
+"guaranteed": true,
+"source": "profession list",
+"areas": 5
+}
+],
+"96": [
+{
+"id": 389,
+"name": "Flourish",
+"prof": 1,
+"boss": "Syr Honorcrest",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 449,
+"name": "Practiced Stance",
+"prof": 2,
+"boss": "Ryk Arrowwing",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 262,
+"name": "Shield of Judgment",
+"prof": 3,
+"boss": "Myd Springclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 151,
+"name": "Feast of Corruption",
+"prof": 4,
+"boss": "Maw the Mountain Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 91,
+"name": "Well of Power",
+"prof": 4,
+"boss": "Nhy Darkclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 47,
+"name": "Ineptitude",
+"prof": 5,
+"boss": "Wyt Sharpfeather",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 199,
+"name": "Glyph of Energy",
+"prof": 6,
+"boss": "Hyl Thunderwing",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 236,
+"name": "Mist Form",
+"prof": 6,
+"boss": "Ice Beast",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"97": [
+{
+"id": 151,
+"name": "Feast of Corruption",
+"prof": 4,
+"boss": "Maw the Mountain Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+}
+],
+"98": [
+{
+"id": 335,
+"name": "Cleave",
+"prof": 1,
+"boss": "Linka Goldensteel",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 318,
+"name": "Defy Pain",
+"prof": 1,
+"boss": "Obrhit Barkwood",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 429,
+"name": "Melandru's Arrows",
+"prof": 2,
+"boss": "Rensar Mountainsight",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 270,
+"name": "Life Barrier",
+"prof": 3,
+"boss": "Esnhal Hardwood",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 269,
+"name": "Mark of Protection",
+"prof": 3,
+"boss": "Mesqul Ironhealer",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 146,
+"name": "Offering of Blood",
+"prof": 4,
+"boss": "Jollen Steelblight",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 107,
+"name": "Virulence",
+"prof": 4,
+"boss": "Unthet Rotwood",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Barl Stormsiege",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+},
+{
+"id": 239,
+"name": "Ward Against Harm",
+"prof": 6,
+"boss": "Arkhel Havenwood",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 237,
+"name": "Water Trident",
+"prof": 6,
+"boss": "Boreal Kubeclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"113": [
+{
+"id": 269,
+"name": "Mark of Protection",
+"prof": 3,
+"boss": "Kepkhet Marrowfeast",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+}
+],
+"121": [
+{
+"id": 265,
+"name": "Amity",
+"prof": 3,
+"boss": "Pravus Obsideo",
+"guaranteed": true,
+"source": "profession list",
+"areas": 1
+},
+{
+"id": 285,
+"name": "Healing Hands",
+"prof": 3,
+"boss": "Rull Browbeater",
+"guaranteed": true,
+"source": "profession list",
+"areas": 1
+},
+{
+"id": 298,
+"name": "Martyr",
+"prof": 3,
+"boss": "Dwayna's Cursed",
+"guaranteed": true,
+"source": "profession list",
+"areas": 3
+},
+{
+"id": 142,
+"name": "Lingering Curse",
+"prof": 4,
+"boss": "Grenth's Cursed",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 113,
+"name": "Tainted Flesh",
+"prof": 4,
+"boss": "Dosakaru Fevertouch",
+"guaranteed": true,
+"source": "profession list",
+"areas": 4
+},
+{
+"id": 125,
+"name": "Wither",
+"prof": 4,
+"boss": "Ignis Effigia",
+"guaranteed": true,
+"source": "profession list",
+"areas": 1
+},
+{
+"id": 74,
+"name": "Echo",
+"prof": 5,
+"boss": "Rwek Khawl Mawl",
+"guaranteed": true,
+"source": "profession list",
+"areas": 4
+},
+{
+"id": 5,
+"name": "Power Block",
+"prof": 5,
+"boss": "Lyssa's Cursed",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 58,
+"name": "Signet of Midnight",
+"prof": 5,
+"boss": "Malus Phasmatis",
+"guaranteed": true,
+"source": "profession list",
+"areas": 1
+},
+{
+"id": 164,
+"name": "Elemental Attunement",
+"prof": 6,
+"boss": "Geckokaru Earthwind",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 203,
+"name": "Glyph of Renewal",
+"prof": 6,
+"boss": "Nayl Klaw Tuthan",
+"guaranteed": true,
+"source": "profession list",
+"areas": 1
+},
+{
+"id": 218,
+"name": "Obsidian Flesh",
+"prof": 6,
+"boss": "Harn Coldstone",
+"guaranteed": true,
+"source": "profession list",
+"areas": 4
+}
+],
+"128": [
+{
+"id": 355,
+"name": "Devastating Hammer",
+"prof": 1,
+"boss": "Tembarr Treefall",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1115,
+"name": "Air of Enchantment",
+"prof": 3,
+"boss": "Jayne Forestlight",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1118,
+"name": "Healing Burst",
+"prof": 3,
+"boss": "The Scar Eater",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 74,
+"name": "Echo",
+"prof": 5,
+"boss": "The Time Eater",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 809,
+"name": "Shatterstone",
+"prof": 6,
+"boss": "Wiseroot Shatterstone",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 781,
+"name": "Moebius Strike",
+"prof": 7,
+"boss": "Bramble Everthorn",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1250,
+"name": "Preservation",
+"prof": 8,
+"boss": "Flower Spiritgarden",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1217,
+"name": "Ritual Lord",
+"prof": 8,
+"boss": "Spiritroot Mossbeard",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"144": [
+{
+"id": 364,
+"name": "\"Charge!\"",
+"prof": 1,
+"boss": "Jacqui The Reaver",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 831,
+"name": "Primal Rage",
+"prof": 1,
+"boss": "Reefclaw Ragebound",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 113,
+"name": "Tainted Flesh",
+"prof": 4,
+"boss": "Lukrker Foulfist",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 74,
+"name": "Echo",
+"prof": 5,
+"boss": "Mohby Windbeak",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 218,
+"name": "Obsidian Flesh",
+"prof": 6,
+"boss": "Whyk Steelshell",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 937,
+"name": "Shockwave",
+"prof": 6,
+"boss": "Bahnba Shockfoot",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 799,
+"name": "Beguiling Haze",
+"prof": 7,
+"boss": "Razorfang Hazeclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1250,
+"name": "Preservation",
+"prof": 8,
+"boss": "Soulwhisper, Elder Guardian",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+}
+],
+"191": [
+{
+"id": 375,
+"name": "Dwarven Battle Stance",
+"prof": 1,
+"boss": "Thorgall Bludgeonhammer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 429,
+"name": "Melandru's Arrows",
+"prof": 2,
+"boss": "Gargash Thornbeard",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 269,
+"name": "Mark of Protection",
+"prof": 3,
+"boss": "Wroth Yakslapper",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 151,
+"name": "Feast of Corruption",
+"prof": 4,
+"boss": "Maw the Mountain Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 146,
+"name": "Offering of Blood",
+"prof": 4,
+"boss": "Morgriff Shadestone",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Gorrel Rockmolder",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+},
+{
+"id": 237,
+"name": "Water Trident",
+"prof": 6,
+"boss": "Flint Fleshcleaver",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"195": [
+{
+"id": 395,
+"name": "Barrage",
+"prof": 2,
+"boss": "Chkkr Thousand Tail",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 821,
+"name": "Icy Veins",
+"prof": 4,
+"boss": "Bazzr Icewing",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Bezzr Wingstorm",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+},
+{
+"id": 1220,
+"name": "Attuned Was Songkai",
+"prof": 8,
+"boss": "The Skill Eater",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1215,
+"name": "Clamor of Souls",
+"prof": 8,
+"boss": "The Pain Eater",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"197": [
+{
+"id": 298,
+"name": "Martyr",
+"prof": 3,
+"boss": "Rien, the Martyr",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 880,
+"name": "Stolen Speed",
+"prof": 5,
+"boss": "The Afflicted Li Yun",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 185,
+"name": "Mind Burn",
+"prof": 6,
+"boss": "The Afflicted Kam",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1042,
+"name": "Flashing Blades",
+"prof": 7,
+"boss": "Lou, of the Knives",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1231,
+"name": "Spirit Channeling",
+"prof": 8,
+"boss": "Cho, Spirit Empath",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"198": [
+{
+"id": 853,
+"name": "Melandru's Shot",
+"prof": 2,
+"boss": "Razortongue Frothspit",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 941,
+"name": "Blessed Light",
+"prof": 3,
+"boss": "Ssuns, Blessed of Dwayna",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 867,
+"name": "Healing Light",
+"prof": 3,
+"boss": "KaySey Stormray",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 79,
+"name": "Energy Drain",
+"prof": 5,
+"boss": "Siska Scalewand",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1088,
+"name": "Second Wind",
+"prof": 6,
+"boss": "Snapjaw Windshell",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 789,
+"name": "Grasping Was Kuurong",
+"prof": 8,
+"boss": "Ssyn Coiled Grasp",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"199": [
+{
+"id": 448,
+"name": "Escape",
+"prof": 2,
+"boss": "Stsou Swiftscale",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 817,
+"name": "Discord",
+"prof": 4,
+"boss": "Sessk, Woe Spreader",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 205,
+"name": "Lightning Surge",
+"prof": 6,
+"boss": "Sarss, Stormscale",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1083,
+"name": "Unsteady Ground",
+"prof": 6,
+"boss": "Seacrash, Elder Guardian",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 827,
+"name": "Siphon Strength",
+"prof": 7,
+"boss": "Ssaresh Rattler",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"200": [
+{
+"id": 869,
+"name": "\"Coward!\"",
+"prof": 1,
+"boss": "Kayali the Brave",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 946,
+"name": "Trapper's Focus",
+"prof": 2,
+"boss": "Chehbaba Roottripper",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 942,
+"name": "Withdraw Hexes",
+"prof": 3,
+"boss": "Hukhrah Earthslove",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 914,
+"name": "Consume Soul",
+"prof": 8,
+"boss": "Tomton Spiriteater",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"201": [
+{
+"id": 1200,
+"name": "Archer's Signet",
+"prof": 2,
+"boss": "Nundak The Archer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1195,
+"name": "Heal as One",
+"prof": 2,
+"boss": "Salke Fur Friend",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1126,
+"name": "Empathic Removal",
+"prof": 3,
+"boss": "Byzzr Wingmender",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 822,
+"name": "Weaken Knees",
+"prof": 4,
+"boss": "Rot Foulbelly",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1030,
+"name": "Locust's Fury",
+"prof": 7,
+"boss": "Chkkr Locust Lord",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1257,
+"name": "Spirit Light Weapon",
+"prof": 8,
+"boss": "Chkkr Brightclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"202": [
+{
+"id": 335,
+"name": "Cleave",
+"prof": 1,
+"boss": "Razorfin Fleshrend",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1199,
+"name": "Glass Arrows",
+"prof": 2,
+"boss": "Lorelle Jade Cutter",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1118,
+"name": "Healing Burst",
+"prof": 3,
+"boss": "Incetol, Devout of Depths",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 806,
+"name": "Cultist's Fervor",
+"prof": 4,
+"boss": "Cultist Milthuran",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1055,
+"name": "Recurring Insecurity",
+"prof": 5,
+"boss": "Talous the Mad",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 809,
+"name": "Shatterstone",
+"prof": 6,
+"boss": "Wavecrest Stonebreak",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1029,
+"name": "Dark Apostasy",
+"prof": 7,
+"boss": "Arius, Dark Apostle",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 790,
+"name": "Vengeful Was Khanhei",
+"prof": 8,
+"boss": "Delic the Vengeance Seeker",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"203": [
+{
+"id": 355,
+"name": "Devastating Hammer",
+"prof": 1,
+"boss": "Sentasi, the Jade Maul",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 397,
+"name": "Quick Shot",
+"prof": 2,
+"boss": "Razorjaw Longspine",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1115,
+"name": "Air of Enchantment",
+"prof": 3,
+"boss": "Miella Lightwing",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 294,
+"name": "Signet of Judgment",
+"prof": 3,
+"boss": "Scourgewind, Elder Guardian",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1066,
+"name": "Spoil Victor",
+"prof": 4,
+"boss": "Sourbeak Rotshell",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 900,
+"name": "Shared Burden",
+"prof": 5,
+"boss": "Kenrii Sea Sorrow",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 843,
+"name": "Gust",
+"prof": 6,
+"boss": "Amadis, Wind of the Sea",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 988,
+"name": "Temple Strike",
+"prof": 7,
+"boss": "Assassin's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1217,
+"name": "Ritual Lord",
+"prof": 8,
+"boss": "Whispering Ritual Lord",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"205": [
+{
+"id": 364,
+"name": "\"Charge!\"",
+"prof": 1,
+"boss": "Sunreach Warmaker",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 831,
+"name": "Primal Rage",
+"prof": 1,
+"boss": "Strongroot Tanglebranch",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1199,
+"name": "Glass Arrows",
+"prof": 2,
+"boss": "Nandet, Glass Weaver",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 397,
+"name": "Quick Shot",
+"prof": 2,
+"boss": "Inallay Splintercall",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 806,
+"name": "Cultist's Fervor",
+"prof": 4,
+"boss": "Kyril Oathwarden",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 113,
+"name": "Tainted Flesh",
+"prof": 4,
+"boss": "Konrru, Tainted Stone",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 937,
+"name": "Shockwave",
+"prof": 6,
+"boss": "Arbor Earthcall",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 799,
+"name": "Beguiling Haze",
+"prof": 7,
+"boss": "Falaharn Mistwarden",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1240,
+"name": "Soul Twisting",
+"prof": 8,
+"boss": "Ritualist's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"209": [
+{
+"id": 335,
+"name": "Cleave",
+"prof": 1,
+"boss": "Chkkr Ironclaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1066,
+"name": "Spoil Victor",
+"prof": 4,
+"boss": "Foalcrest Darkwish",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 39,
+"name": "Energy Surge",
+"prof": 5,
+"boss": "Milefaun Mindflayer",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1055,
+"name": "Recurring Insecurity",
+"prof": 5,
+"boss": "Xisni Dream Haunt",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 900,
+"name": "Shared Burden",
+"prof": 5,
+"boss": "Deeproot Sorrow",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 843,
+"name": "Gust",
+"prof": 6,
+"boss": "Rahse Windcatcher",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 218,
+"name": "Obsidian Flesh",
+"prof": 6,
+"boss": "Bizzr Ironshell",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1029,
+"name": "Dark Apostasy",
+"prof": 7,
+"boss": "Darkroot Entrop",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 790,
+"name": "Vengeful Was Khanhei",
+"prof": 8,
+"boss": "Bazzr Dustwing",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"210": [
+{
+"id": 1146,
+"name": "Shove",
+"prof": 1,
+"boss": "Tarnen the Bully",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 847,
+"name": "Boon Signet",
+"prof": 3,
+"boss": "Mungri Magicbox",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 132,
+"name": "Plague Signet",
+"prof": 4,
+"boss": "Hargg Plaguebinder",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 13,
+"name": "Mantra of Recovery",
+"prof": 5,
+"boss": "Mugra Swiftspell",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 837,
+"name": "Energy Boon",
+"prof": 6,
+"boss": "Tarlok Evermind",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 771,
+"name": "Aura of Displacement",
+"prof": 7,
+"boss": "Urkal the Ambusher",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 799,
+"name": "Beguiling Haze",
+"prof": 7,
+"boss": "Warden of Saprophytes",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1239,
+"name": "Signet of Spirits",
+"prof": 8,
+"boss": "Wagg Spiritspeak",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"211": [
+{
+"id": 317,
+"name": "Battle Rage",
+"prof": 1,
+"boss": "Arrahhsh Mountainclub",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 461,
+"name": "Spike Trap",
+"prof": 2,
+"boss": "Meynsang the Sadistic",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1035,
+"name": "Assassin's Promise",
+"prof": 7,
+"boss": "Xuekao, the Deceptive",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1268,
+"name": "Weapon of Quickening",
+"prof": 8,
+"boss": "The Afflicted Hakaru",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"227": [
+{
+"id": 364,
+"name": "\"Charge!\"",
+"prof": 1,
+"boss": "Merki The Reaver",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 806,
+"name": "Cultist's Fervor",
+"prof": 4,
+"boss": "Cultist Rajazan",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1057,
+"name": "Psychic Instability",
+"prof": 5,
+"boss": "Chazek Plague Herder",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 836,
+"name": "Ride the Lightning",
+"prof": 6,
+"boss": "Kunvie Firewing",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 928,
+"name": "Shadow Shroud",
+"prof": 7,
+"boss": "Shrouded Oni",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"232": [
+{
+"id": 993,
+"name": "Enraged Smash",
+"prof": 1,
+"boss": "The Afflicted Ako",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"233": [
+{
+"id": 1142,
+"name": "Auspicious Parry",
+"prof": 1,
+"boss": "Sword Ancient Kai",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 997,
+"name": "Famine",
+"prof": 2,
+"boss": "Famished Ancient Brrne",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 273,
+"name": "Spell Breaker",
+"prof": 3,
+"boss": "Untouched Ancient Ky",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 764,
+"name": "Wail of Doom",
+"prof": 4,
+"boss": "Doomed Ancient Kkraz",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 804,
+"name": "Arcane Languor",
+"prof": 5,
+"boss": "Arcane Ancient Phi",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1095,
+"name": "Star Burst",
+"prof": 6,
+"boss": "Star Ancient Koosun",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 801,
+"name": "Shroud of Silence",
+"prof": 7,
+"boss": "Silent Ancient Onata",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1240,
+"name": "Soul Twisting",
+"prof": 8,
+"boss": "Defiant Ancient Sseer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"239": [
+{
+"id": 892,
+"name": "Quivering Blade",
+"prof": 1,
+"boss": "Sun, the Quivering",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1129,
+"name": "Word of Censure",
+"prof": 3,
+"boss": "Shen, the Magistrate",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1091,
+"name": "Double Dragon",
+"prof": 6,
+"boss": "Lian, Dragon's Petal",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"240": [
+{
+"id": 992,
+"name": "Triple Chop",
+"prof": 1,
+"boss": "Wing, Three Blade",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 954,
+"name": "Expel Hexes",
+"prof": 5,
+"boss": "Jin, the Purifier",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1045,
+"name": "Palm Strike",
+"prof": 7,
+"boss": "Kenshi Steelhand",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"244": [
+{
+"id": 889,
+"name": "Forceful Blow",
+"prof": 1,
+"boss": "Mahr Stonebreaker",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 961,
+"name": "Lacerate",
+"prof": 2,
+"boss": "Ryver Mossplanter",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 261,
+"name": "Shield of Regeneration",
+"prof": 3,
+"boss": "Meril Stoneweaver",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 142,
+"name": "Lingering Curse",
+"prof": 4,
+"boss": "Craw Stonereap",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 819,
+"name": "Vampiric Spirit",
+"prof": 4,
+"boss": "Kaswa Webstrider",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 937,
+"name": "Shockwave",
+"prof": 6,
+"boss": "Zarnas Stonewrath",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"247": [
+{
+"id": 907,
+"name": "Dragon Slash",
+"prof": 1,
+"boss": "Sskai, Dragon's Birth",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 888,
+"name": "Whirling Axe",
+"prof": 1,
+"boss": "Geoffer Pain Bringer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 442,
+"name": "Ferocious Strike",
+"prof": 2,
+"boss": "Milodestus the Wrangler",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 987,
+"name": "Way of the Empty Palm",
+"prof": 7,
+"boss": "Ilidus of the Empty Palm",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"256": [
+{
+"id": 381,
+"name": "Hundred Blades",
+"prof": 1,
+"boss": "Warrior's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1198,
+"name": "Broad Head Arrow",
+"prof": 2,
+"boss": "The Afflicted Huan",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1212,
+"name": "Equinox",
+"prof": 2,
+"boss": "Ranger's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1123,
+"name": "Life Sheath",
+"prof": 3,
+"boss": "Monk's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 901,
+"name": "Soul Bind",
+"prof": 4,
+"boss": "Necromancer's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1053,
+"name": "Psychic Distraction",
+"prof": 5,
+"boss": "Mesmer's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1098,
+"name": "Mirror of Ice",
+"prof": 6,
+"boss": "Elemental's Construct",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 826,
+"name": "Shadow Form",
+"prof": 7,
+"boss": "The Afflicted Soon Kim",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"265": [
+{
+"id": 1202,
+"name": "Enraged Lunge",
+"prof": 2,
+"boss": "Royen Beastkeeper",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"269": [
+{
+"id": 1255,
+"name": "Wanderlust",
+"prof": 8,
+"boss": "Quansong Spiritspeak",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"369": [
+{
+"id": 355,
+"name": "Devastating Hammer",
+"prof": 1,
+"boss": "Churrta the Rock",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1721,
+"name": "Rampage as One",
+"prof": 2,
+"boss": "Tundoss the Destroyer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 862,
+"name": "Ravenous Gaze",
+"prof": 4,
+"boss": "Shelboh the Ravenous",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1378,
+"name": "Master of Magic",
+"prof": 6,
+"boss": "Admiral Kantoh",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1555,
+"name": "Defensive Anthem",
+"prof": 9,
+"boss": "Corporal Argon",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1518,
+"name": "Avatar of Balthazar",
+"prof": 10,
+"boss": "Acolyte of Balthazar",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"371": [
+{
+"id": 335,
+"name": "Cleave",
+"prof": 1,
+"boss": "Chor the Bladed",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1466,
+"name": "Burning Arrow",
+"prof": 2,
+"boss": "Admiral Chiggen",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1397,
+"name": "Light of Deliverance",
+"prof": 3,
+"boss": "Chidehkir, Light of the Blind",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1333,
+"name": "Extend Conditions",
+"prof": 5,
+"boss": "Neoli the Contagious",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 164,
+"name": "Elemental Attunement",
+"prof": 6,
+"boss": "Bosun Mohrti",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1654,
+"name": "Shadow Meld",
+"prof": 7,
+"boss": "Lunto Sharpfoot",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1522,
+"name": "Avatar of Melandru",
+"prof": 10,
+"boss": "Acolyte of Melandru",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1756,
+"name": "Grenth's Grasp",
+"prof": 10,
+"boss": "Bubahl Icehands",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"373": [
+{
+"id": 1415,
+"name": "Crippling Slash",
+"prof": 1,
+"boss": "Mahto Sharptooth",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Eshim Mindclouder",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+},
+{
+"id": 205,
+"name": "Lightning Surge",
+"prof": 6,
+"boss": "Birneh Skybringer",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1521,
+"name": "Avatar of Lyssa",
+"prof": 10,
+"boss": "Acolyte of Lyssa",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1767,
+"name": "Reaper's Sweep",
+"prof": 10,
+"boss": "Dabineh Deathbringer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"375": [
+{
+"id": 1412,
+"name": "\"You're All Alone!\"",
+"prof": 1,
+"boss": "Commander Wahli",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1350,
+"name": "Simple Thievery",
+"prof": 5,
+"boss": "Midshipman Morolah",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1737,
+"name": "Wielder's Zeal",
+"prof": 8,
+"boss": "Captain Alsin",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1554,
+"name": "Crippling Anthem",
+"prof": 9,
+"boss": "Lieutenant Shagu",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1759,
+"name": "Vow of Strength",
+"prof": 10,
+"boss": "Captain Mhedi",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"377": [
+{
+"id": 1395,
+"name": "Balthazar's Pendulum",
+"prof": 3,
+"boss": "Riseh the Harmless",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 86,
+"name": "Grenth's Balance",
+"prof": 4,
+"boss": "Armind the Balancer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 808,
+"name": "Reaper's Mark",
+"prof": 4,
+"boss": "Commander Sehden",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1373,
+"name": "Stone Sheath",
+"prof": 6,
+"boss": "Joknang Earthturner",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1769,
+"name": "Focused Anger",
+"prof": 9,
+"boss": "Wandalz the Angry",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1761,
+"name": "Zealous Vow",
+"prof": 10,
+"boss": "Sehlon, Beautiful Water",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"379": [
+{
+"id": 1694,
+"name": "Magehunter Strike",
+"prof": 1,
+"boss": "Colonel Chaklin",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1730,
+"name": "Infuriating Heat",
+"prof": 2,
+"boss": "Colonel Custo",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1649,
+"name": "Way of the Assassin",
+"prof": 7,
+"boss": "Major Jeahr",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1749,
+"name": "Weapon of Fury",
+"prof": 8,
+"boss": "Podaltur the Angry",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1588,
+"name": "Cautery Signet",
+"prof": 9,
+"boss": "Corporal Luluh",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1519,
+"name": "Avatar of Dwayna",
+"prof": 10,
+"boss": "Acolyte of Dwayna",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"380": [
+{
+"id": 1406,
+"name": "Headbutt",
+"prof": 1,
+"boss": "Enadiz the Hardheaded",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1408,
+"name": "Rage of the Ntouka",
+"prof": 1,
+"boss": "Onwan, Lord of the Ntouka",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 820,
+"name": "Depravity",
+"prof": 4,
+"boss": "Modti Darkflower",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1345,
+"name": "Enchanter's Conundrum",
+"prof": 5,
+"boss": "Captain Chichor",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1732,
+"name": "Destructive Was Glaive",
+"prof": 8,
+"boss": "Lieutenant Kayin",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1548,
+"name": "Cruel Spear",
+"prof": 9,
+"boss": "Eshau Longspear",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1520,
+"name": "Avatar of Grenth",
+"prof": 10,
+"boss": "Acolyte of Grenth",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"384": [
+{
+"id": 1696,
+"name": "Decapitate",
+"prof": 1,
+"boss": "Robah Hardback",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 442,
+"name": "Ferocious Strike",
+"prof": 2,
+"boss": "Dzabel Land Guardian",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 397,
+"name": "Quick Shot",
+"prof": 2,
+"boss": "Zelnehlun Fastfoot",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1690,
+"name": "Signet of Removal",
+"prof": 3,
+"boss": "Commander Noss",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1356,
+"name": "Contagion",
+"prof": 4,
+"boss": "Terob Roundback",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 113,
+"name": "Tainted Flesh",
+"prof": 4,
+"boss": "Jerneh Nightbringer",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 939,
+"name": "Icy Shackles",
+"prof": 6,
+"boss": "Buhon Icelord",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1642,
+"name": "Hidden Caltrops",
+"prof": 7,
+"boss": "Admiral Kaya",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"386": [
+{
+"id": 1468,
+"name": "Strike as One",
+"prof": 2,
+"boss": "Sergeant Behnwa",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1686,
+"name": "Glimmer of Light",
+"prof": 3,
+"boss": "Chiossen, Soothing Breeze",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 13,
+"name": "Mantra of Recovery",
+"prof": 5,
+"boss": "Olunoss Windwalker",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 884,
+"name": "Searing Flames",
+"prof": 6,
+"boss": "Korr, Living Flame",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+}
+],
+"392": [
+{
+"id": 119,
+"name": "Blood is Power",
+"prof": 4,
+"boss": "Lieutenant Vanahk",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1362,
+"name": "Corrupt Enchantment",
+"prof": 4,
+"boss": "Tain the Corrupter",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1342,
+"name": "Tease",
+"prof": 5,
+"boss": "Makdeh the Aggravating",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1664,
+"name": "Invoke Lightning",
+"prof": 6,
+"boss": "Lushivahr the Invoker",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1378,
+"name": "Master of Magic",
+"prof": 6,
+"boss": "Hajok Earthguardian",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1499,
+"name": "Pious Renewal",
+"prof": 10,
+"boss": "Corporal Suli",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"394": [
+{
+"id": 282,
+"name": "Word of Healing",
+"prof": 3,
+"boss": "Hahan, Faithful Protector",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1356,
+"name": "Contagion",
+"prof": 4,
+"boss": "Mabah Heardheart",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1656,
+"name": "Air of Disenchantment",
+"prof": 5,
+"boss": "Hojanukun Mindstealer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1771,
+"name": "Song of Restoration",
+"prof": 9,
+"boss": "Toshau Sharpspear",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"395": [
+{
+"id": 448,
+"name": "Escape",
+"prof": 2,
+"boss": "Tenezel the Quick",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 261,
+"name": "Shield of Regeneration",
+"prof": 3,
+"boss": "Banor Greenbranch",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 205,
+"name": "Lightning Surge",
+"prof": 6,
+"boss": "Setikor Fireflower",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1640,
+"name": "Fox's Promise",
+"prof": 7,
+"boss": "Hanchor Trueblade",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"397": [
+{
+"id": 364,
+"name": "\"Charge!\"",
+"prof": 1,
+"boss": "Shak-Jarin the Justicebringer",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1359,
+"name": "Pain of Disenchantment",
+"prof": 4,
+"boss": "Nehpek the Remorseless",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1570,
+"name": "Song of Purification",
+"prof": 9,
+"boss": "Pehnsed the Loudmouth",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1536,
+"name": "Wounding Strike",
+"prof": 10,
+"boss": "Marobeh Sharptail",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"399": [
+{
+"id": 1697,
+"name": "Magehunter's Smash",
+"prof": 1,
+"boss": "Grabthar the Overbearing",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 442,
+"name": "Ferocious Strike",
+"prof": 2,
+"boss": "Bolten Largebelly",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1687,
+"name": "Zealous Benediction",
+"prof": 3,
+"boss": "Commander Sadi-Belai",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 884,
+"name": "Searing Flames",
+"prof": 6,
+"boss": "Korshek the Immolated",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1736,
+"name": "Spirit's Strength",
+"prof": 8,
+"boss": "Churahm, Spirit Warrior",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"402": [
+{
+"id": 1724,
+"name": "Expert's Dexterity",
+"prof": 2,
+"boss": "Bansheh, Gatherer of Branches",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1393,
+"name": "Healer's Boon",
+"prof": 3,
+"boss": "Josinq the Whisperer",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 185,
+"name": "Mind Burn",
+"prof": 6,
+"boss": "Kormab, Burning Heart",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1570,
+"name": "Song of Purification",
+"prof": 9,
+"boss": "Jishol Darksong",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"404": [
+{
+"id": 1356,
+"name": "Contagion",
+"prof": 4,
+"boss": "Brokk Ripsnort",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 1659,
+"name": "Toxic Chill",
+"prof": 4,
+"boss": "Eshekibeh Longneck",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 878,
+"name": "Visions of Regret",
+"prof": 5,
+"boss": "Korrub, Flame of Dreams",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1367,
+"name": "Blinding Surge",
+"prof": 6,
+"boss": "Moteh Thundershooter",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1596,
+"name": "\"Incoming!\"",
+"prof": 9,
+"boss": "Kunan the Loudmouth",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1596,
+"name": "\"Incoming!\"",
+"prof": 9,
+"boss": "Scratcher",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1596,
+"name": "\"Incoming!\"",
+"prof": 9,
+"boss": "Screecher",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"406": [
+{
+"id": 1701,
+"name": "Steady Stance",
+"prof": 1,
+"boss": "Chumab the Prideful",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Yamesh Mindclouder",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+},
+{
+"id": 1644,
+"name": "Wastrel's Collapse",
+"prof": 7,
+"boss": "Jarimiya the Unmerciful",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1749,
+"name": "Weapon of Fury",
+"prof": 8,
+"boss": "Bohdalz the Furious",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"413": [
+{
+"id": 448,
+"name": "Escape",
+"prof": 2,
+"boss": "Tenshek Roundbody",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 39,
+"name": "Energy Surge",
+"prof": 5,
+"boss": "Yammirvu, Ether Guardian",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1587,
+"name": "Angelic Bond",
+"prof": 9,
+"boss": "Shakor Firespear",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1761,
+"name": "Zealous Vow",
+"prof": 10,
+"boss": "Leilon, Tranquil Water",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"419": [
+{
+"id": 1405,
+"name": "Charging Strike",
+"prof": 1,
+"boss": "Riktund the Vicious",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 39,
+"name": "Energy Surge",
+"prof": 5,
+"boss": "Yammiron, Ether Lord",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1568,
+"name": "Anthem of Guidance",
+"prof": 9,
+"boss": "Briahn the Chosen",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1568,
+"name": "Anthem of Guidance",
+"prof": 9,
+"boss": "Overseer Juntahk",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1760,
+"name": "Ebon Dust Aura",
+"prof": 10,
+"boss": "Shezel Slowreaper",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"437": [
+{
+"id": 1698,
+"name": "Soldier's Stance",
+"prof": 1,
+"boss": "Keht the Fierce",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 74,
+"name": "Echo",
+"prof": 5,
+"boss": "Eshwe the Insane",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 218,
+"name": "Obsidian Flesh",
+"prof": 6,
+"boss": "Shekoss the Stony",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1652,
+"name": "Shadow Prison",
+"prof": 7,
+"boss": "Ardeh the Quick",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1773,
+"name": "Soldier's Fury",
+"prof": 9,
+"boss": "Arneh the Vigorous",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"439": [
+{
+"id": 1471,
+"name": "Scavenger's Focus",
+"prof": 2,
+"boss": "Rendabi Deatheater",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 294,
+"name": "Signet of Judgment",
+"prof": 3,
+"boss": "Hamlen the Fallen",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 79,
+"name": "Energy Drain",
+"prof": 5,
+"boss": "Rual, Stealer of Hope",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1782,
+"name": "\"The Power Is Yours!\"",
+"prof": 9,
+"boss": "Tureksin the Delegator",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"441": [
+{
+"id": 1726,
+"name": "Magebane Shot",
+"prof": 2,
+"boss": "Saushali the Frustrating",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1473,
+"name": "Quicksand",
+"prof": 2,
+"boss": "Koahm the Weary",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1729,
+"name": "Smoke Trap",
+"prof": 2,
+"boss": "Uhiwi the Smoky",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 298,
+"name": "Martyr",
+"prof": 3,
+"boss": "Dunshek the Purifier",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+}
+],
+"443": [
+{
+"id": 1364,
+"name": "Signet of Suffering",
+"prof": 4,
+"boss": "Fondalz the Spiteful",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1377,
+"name": "Ether Prism",
+"prof": 6,
+"boss": "Mekir the Prismatic",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1372,
+"name": "Sandstorm",
+"prof": 6,
+"boss": "Droajam, Mage of the Sands",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1482,
+"name": "Reclaim Essence",
+"prof": 8,
+"boss": "Nehjab the Parched",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1568,
+"name": "Anthem of Guidance",
+"prof": 9,
+"boss": "Battlelord Turgar",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"444": [
+{
+"id": 1352,
+"name": "Order of Undeath",
+"prof": 4,
+"boss": "Bohdabi the Destructive",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1380,
+"name": "Savannah Heat",
+"prof": 6,
+"boss": "Hajkor, Mystic Flame",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1752,
+"name": "Weapon of Remedy",
+"prof": 8,
+"boss": "Alem the Unclean",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1517,
+"name": "Vow of Silence",
+"prof": 10,
+"boss": "Vahlen the Silent",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"446": [
+{
+"id": 461,
+"name": "Spike Trap",
+"prof": 2,
+"boss": "Vah the Crafty",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1692,
+"name": "Divert Hexes",
+"prof": 3,
+"boss": "Amiresh the Pious",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1348,
+"name": "Hex Eater Vortex",
+"prof": 5,
+"boss": "Shelkeh the Hungry",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1599,
+"name": "\"It's Just a Flesh Wound.\"",
+"prof": 9,
+"boss": "Churkeh the Defiant",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"448": [
+{
+"id": 1684,
+"name": "Scribe's Insight",
+"prof": 3,
+"boss": "Ajamahn, Servant of the Sands",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 132,
+"name": "Plague Signet",
+"prof": 4,
+"boss": "Wioli the Infectious",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 1634,
+"name": "Shattering Assault",
+"prof": 7,
+"boss": "Achor the Bladed",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1742,
+"name": "Signet of Ghostly Might",
+"prof": 8,
+"boss": "Jedeh the Mighty",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"482": [
+{
+"id": 338,
+"name": "Eviscerate",
+"prof": 1,
+"boss": "Lissah the Packleader",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 209,
+"name": "Mind Freeze",
+"prof": 6,
+"boss": "Lord Glacius the Eternal",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1536,
+"name": "Wounding Strike",
+"prof": 10,
+"boss": "Taameh the Frigid",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"485": [
+{
+"id": 282,
+"name": "Word of Healing",
+"prof": 3,
+"boss": "Flannuss Broadwing",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Alitta Guilebloom",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+}
+],
+"486": [
+{
+"id": 939,
+"name": "Icy Shackles",
+"prof": 6,
+"boss": "Lonolun Waterwalker",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"499": [
+{
+"id": 1465,
+"name": "Prepared Shot",
+"prof": 2,
+"boss": "Johon the Oxflinger",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 237,
+"name": "Water Trident",
+"prof": 6,
+"boss": "Elsnil Frigidheart",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"501": [
+{
+"id": 395,
+"name": "Barrage",
+"prof": 2,
+"boss": "Storm of Destruction",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 393,
+"name": "Crippling Shot",
+"prof": 2,
+"boss": "Gallow Nooseknitter",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 937,
+"name": "Shockwave",
+"prof": 6,
+"boss": "Joffs the Mitigator",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 1035,
+"name": "Assassin's Promise",
+"prof": 7,
+"boss": "Rekoff Broodmother",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"513": [
+{
+"id": 335,
+"name": "Cleave",
+"prof": 1,
+"boss": "Dvalinn Stonebreaker",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 354,
+"name": "Earth Shaker",
+"prof": 1,
+"boss": "Jormungand",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 393,
+"name": "Crippling Shot",
+"prof": 2,
+"boss": "Koren Wildrunner",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 813,
+"name": "Lyssa's Aura",
+"prof": 5,
+"boss": "Nulfastu, Earthbound",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1754,
+"name": "Onslaught",
+"prof": 10,
+"boss": "Myish, Lady of the Lake",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+}
+],
+"546": [
+{
+"id": 1355,
+"name": "Jagged Bones",
+"prof": 4,
+"boss": "Avarr The Fallen",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 226,
+"name": "Mind Shock",
+"prof": 6,
+"boss": "Edielh Shockhunter",
+"guaranteed": true,
+"source": "profession list",
+"areas": 2
+},
+{
+"id": 809,
+"name": "Shatterstone",
+"prof": 6,
+"boss": "Whiteout",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+}
+],
+"548": [
+{
+"id": 1415,
+"name": "Crippling Slash",
+"prof": 1,
+"boss": "Fenrir",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 329,
+"name": "Skull Crack",
+"prof": 1,
+"boss": "Baglorag Grumblesnort",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"553": [
+{
+"id": 209,
+"name": "Mind Freeze",
+"prof": 6,
+"boss": "Dazehl Brainfreezer",
+"guaranteed": true,
+"source": "location list",
+"areas": 5
+},
+{
+"id": 1767,
+"name": "Reaper's Sweep",
+"prof": 10,
+"boss": "Asterius the Mighty",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"558": [
+{
+"id": 1415,
+"name": "Crippling Slash",
+"prof": 1,
+"boss": "Mobrin, Lord of the Marsh",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 53,
+"name": "Migraine",
+"prof": 5,
+"boss": "Waray Skullflayer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1760,
+"name": "Ebon Dust Aura",
+"prof": 10,
+"boss": "Brynn Earthporter",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"566": [
+{
+"id": 1199,
+"name": "Glass Arrows",
+"prof": 2,
+"boss": "Petraj the Evasive",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 942,
+"name": "Withdraw Hexes",
+"prof": 3,
+"boss": "Kaykitt Hidemender",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 53,
+"name": "Migraine",
+"prof": 5,
+"boss": "Wilderm Wrathspew",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"569": [
+{
+"id": 907,
+"name": "Dragon Slash",
+"prof": 1,
+"boss": "Byndliss Flamecrown",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1701,
+"name": "Steady Stance",
+"prof": 1,
+"boss": "Skomay Bonehewer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1202,
+"name": "Enraged Lunge",
+"prof": 2,
+"boss": "Ashlyn Spiderfriend",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 132,
+"name": "Plague Signet",
+"prof": 4,
+"boss": "Bredyss Longstride",
+"guaranteed": true,
+"source": "location list",
+"areas": 6
+},
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Veturni Mindsquall",
+"guaranteed": true,
+"source": "location list",
+"areas": 8
+}
+],
+"572": [
+{
+"id": 47,
+"name": "Ineptitude",
+"prof": 5,
+"boss": "Kemil the Inept",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1635,
+"name": "Golden Skull Strike",
+"prof": 7,
+"boss": "Pywatt the Swift",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1257,
+"name": "Spirit Light Weapon",
+"prof": 8,
+"boss": "Reesou the Wanderer",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"647": [
+{
+"id": 358,
+"name": "Backbreaker",
+"prof": 1,
+"boss": "Hodat the Tumbler",
+"guaranteed": true,
+"source": "location list",
+"areas": 1
+},
+{
+"id": 1406,
+"name": "Headbutt",
+"prof": 1,
+"boss": "Molotov Rocktail",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 261,
+"name": "Shield of Regeneration",
+"prof": 3,
+"boss": "Horai Wingshielder",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 236,
+"name": "Mist Form",
+"prof": 6,
+"boss": "Drikard the Foggy",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+}
+],
+"649": [
+{
+"id": 836,
+"name": "Ride the Lightning",
+"prof": 6,
+"boss": "Thraexis Thundermaw",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+}
+],
+"651": [
+{
+"id": 317,
+"name": "Battle Rage",
+"prof": 1,
+"boss": "Cobleri Arronn",
+"guaranteed": true,
+"source": "location list",
+"areas": 4
+},
+{
+"id": 338,
+"name": "Eviscerate",
+"prof": 1,
+"boss": "Shons the Pretender",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 126,
+"name": "Life Transfer",
+"prof": 4,
+"boss": "Katye Bloodburner",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 5,
+"name": "Power Block",
+"prof": 5,
+"boss": "Anmat the Trickster",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 884,
+"name": "Searing Flames",
+"prof": 6,
+"boss": "Borrguus Blisterbark",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+},
+{
+"id": 239,
+"name": "Ward Against Harm",
+"prof": 6,
+"boss": "Spafrod Iceblood",
+"guaranteed": true,
+"source": "location list",
+"areas": 2
+},
+{
+"id": 1250,
+"name": "Preservation",
+"prof": 8,
+"boss": "Fozzy Yeoryios",
+"guaranteed": true,
+"source": "location list",
+"areas": 3
+}
+]
+}

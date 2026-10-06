@@ -1,0 +1,1426 @@
+[
+ {
+  "profession": "Elementalist",
+  "skill": "Blinding Surge",
+  "campaign": "Nightfall",
+  "boss": "Moteh Thundershooter",
+  "location": "Wilderness of Bahdza",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Blinding Surge",
+  "campaign": "Eye of the North",
+  "boss": "Cursed Brigand",
+  "location": "Shards of Orr",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Glimmering Mark",
+  "campaign": "",
+  "boss": "Edibbo Kepkep",
+  "location": "Talus Chute and Spearhead Peak",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Glimmering Mark",
+  "campaign": "",
+  "boss": "Alana Kepkep",
+  "location": "Witman's Folly",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Gust",
+  "campaign": "Factions",
+  "boss": "Rahse Windcatcher",
+  "location": "Mourning Veil Falls",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Gust",
+  "campaign": "Factions",
+  "boss": "Amadis, Wind of the Sea",
+  "location": "Silent Surf",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Nightfall",
+  "boss": "Lushivahr the Invoker",
+  "location": "Yatendi Canyons",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Nightfall",
+  "boss": "Scribe Wensal",
+  "location": "Nundu Bay",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Nightfall",
+  "boss": "General Tirraj",
+  "location": "Dzagonur Bastion",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Nightfall",
+  "boss": "Curator Kali",
+  "location": "Gate of Madness",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Nightfall",
+  "boss": "Tanmahk the Arcane",
+  "location": "The Sulfurous Wastes",
+  "note": "only during A Show of Force"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Nightfall",
+  "boss": "Margonite Portal Mage",
+  "location": "The Shadow Nexus",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "campaign": "Eye of the North",
+  "boss": "Shadow Spawn",
+  "location": "Raven's Point",
+  "note": "only during Shadows in the Night"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "campaign": "Prophecies",
+  "boss": "Facet of Elements",
+  "location": "The Dragon's Lair",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "campaign": "Factions",
+  "boss": "Tahmu",
+  "location": "Nahpui Quarter",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "campaign": "Factions",
+  "boss": "Sarss, Stormscale",
+  "location": "Maishang Hills",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "campaign": "Nightfall",
+  "boss": "Zephyr Hedger",
+  "location": "Arkjok Ward",
+  "note": "only during Koss's Elixir"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "campaign": "Nightfall",
+  "boss": "Birneh Skybringer",
+  "location": "Sunward Marches",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "campaign": "Nightfall",
+  "boss": "Setikor Fireflower",
+  "location": "Holdings of Chokhin",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Shock",
+  "campaign": "Prophecies",
+  "boss": "Old Red Claw",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Shock",
+  "campaign": "Eye of the North",
+  "boss": "Edielh Shockhunter",
+  "location": "Jaga Moraine",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ride the Lightning",
+  "campaign": "Factions",
+  "boss": "Kunvie Firewing",
+  "location": "Unwaking Waters (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ride the Lightning",
+  "campaign": "Eye of the North",
+  "boss": "Thraexis Thundermaw",
+  "location": "Grothmar Wardowns",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "campaign": "",
+  "boss": "Chrysos the Magnetic",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "campaign": "",
+  "boss": "Kratos the Foul",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "campaign": "",
+  "boss": "Mursaat Elementalist (boss)",
+  "location": "Ice Floe",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "campaign": "",
+  "boss": "The Inquisitor",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "campaign": "",
+  "boss": "Maida the Ill Tempered",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "campaign": "",
+  "boss": "Optimus Caliph",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "campaign": "Prophecies",
+  "boss": "Harn Coldstone",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "campaign": "Factions",
+  "boss": "Bizzr Ironshell",
+  "location": "Mourning Veil Falls",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "campaign": "Factions",
+  "boss": "Whyk Steelshell",
+  "location": "Gyala Hatchery (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Obsidian Flesh",
+  "campaign": "Nightfall",
+  "boss": "Shekoss the Stony",
+  "location": "Joko's Domain",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Sandstorm",
+  "campaign": "",
+  "boss": "The Drought",
+  "location": "Rilohn Refuge",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Sandstorm",
+  "campaign": "",
+  "boss": "Droajam, Mage of the Sands",
+  "location": "Poisoned Outcrops",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "campaign": "Factions",
+  "boss": "Arbor Earthcall",
+  "location": "Morostav Trail",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "campaign": "Factions",
+  "boss": "Bahnba Shockfoot",
+  "location": "Gyala Hatchery (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "campaign": "Factions",
+  "boss": "Azukhan Stonewrath",
+  "location": "Altrumm Ruins",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "campaign": "Factions",
+  "boss": "Zarnas Stonewrath",
+  "location": "Arborstone (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "campaign": "Eye of the North",
+  "boss": "Ssissth the Leviathan",
+  "location": "Jaga Moraine",
+  "note": "before completing Prenuptial Disagreement; must have Factions in order to capture the skill from GW:EN"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "campaign": "Eye of the North",
+  "boss": "Joffs the Mitigator",
+  "location": "Riven Earth",
+  "note": "must have Factions in order to capture the skill from GW:EN"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Stone Sheath",
+  "campaign": "",
+  "boss": "Joknang Earthturner",
+  "location": "Bahdok Caverns",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Unsteady Ground",
+  "campaign": "",
+  "boss": "Seacrash, Elder Guardian",
+  "location": "Maishang Hills",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "campaign": "Prophecies",
+  "boss": "Geckokaru Earthwind",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "campaign": "Factions",
+  "boss": "Chung, the Attuned",
+  "location": "Bukdek Byway",
+  "note": "only during Eliminate the Am Fah"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "campaign": "Factions",
+  "boss": "Chung, the Attuned",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "campaign": "Nightfall",
+  "boss": "Bosun Mohrti",
+  "location": "Marga Coast",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "campaign": "Eye of the North",
+  "boss": "Flame Guardian (golem)",
+  "location": "Oola's Lab",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Energy Boon",
+  "campaign": "",
+  "boss": "Tarlok Evermind",
+  "location": "Ferndale",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Prism",
+  "campaign": "",
+  "boss": "Mekir the Prismatic",
+  "location": "Poisoned Outcrops",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Prism",
+  "campaign": "",
+  "boss": "Tortureweb Dryder (boss)",
+  "location": "Gate of Pain",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "campaign": "Prophecies",
+  "boss": "Jyth Sprayburst",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "campaign": "Eye of the North",
+  "boss": "Hierophant Burntsoul",
+  "location": "Assault on the Stronghold",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "campaign": "Eye of the North",
+  "boss": "Tyndir Flamecaller",
+  "location": "Cathedral of Flames",
+  "note": "level 2"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "campaign": "Eye of the North",
+  "boss": "Straut Flamebourne",
+  "location": "Sacnoth Valley",
+  "note": "only during Fire and Pain"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Renewal",
+  "campaign": "",
+  "boss": "Cyss Gresshla",
+  "location": "Dunes of Despair",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Renewal",
+  "campaign": "",
+  "boss": "Issah Sshay",
+  "location": "Thirsty River",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ether Renewal",
+  "campaign": "",
+  "boss": "Vassa Ssiss",
+  "location": "Elona Reach",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Glyph of Energy",
+  "campaign": "",
+  "boss": "Hyl Thunderwing",
+  "location": "Mineral Springs",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "campaign": "",
+  "boss": "Captain Mwende",
+  "location": "Consulate Docks",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "campaign": "",
+  "boss": "Admiral Kantoh",
+  "location": "Jahai Bluffs",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "campaign": "",
+  "boss": "Captain Nebo",
+  "location": "Pogahn Passage",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Master of Magic",
+  "campaign": "",
+  "boss": "Hajok Earthguardian (Insect)",
+  "location": "Yatendi Canyons",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Double Dragon",
+  "campaign": "Factions",
+  "boss": "Lale the Vindictive",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Double Dragon",
+  "campaign": "Factions",
+  "boss": "Lian, Dragon's Petal",
+  "location": "Wajjun Bazaar",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Double Dragon",
+  "campaign": "Nightfall",
+  "boss": "The Fury",
+  "location": "The Foundry of Failed Creations",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Blast",
+  "campaign": "Nightfall",
+  "boss": "Exuro Flatus",
+  "location": "Domain of Secrets",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Blast",
+  "campaign": "Eye of the North",
+  "boss": "Kakei Stormcaller",
+  "location": "Blood Washes Blood",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Blast",
+  "campaign": "Eye of the North",
+  "boss": "Scorch Maulclaw",
+  "location": "Dalada Uplands",
+  "note": "only during The Dawn of Rebellion"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Prophecies",
+  "boss": "Scelus Prosum",
+  "location": "Hell's Precipice",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Factions",
+  "boss": "The Afflicted Kam",
+  "location": "Vizunah Square",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Factions",
+  "boss": "The Afflicted Rasa",
+  "location": "Dragon's Throat",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Factions",
+  "boss": "The Afflicted Kam",
+  "location": "Shenzun Tunnels",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Factions",
+  "boss": "Argo",
+  "location": "Boreas Seabed",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Factions",
+  "boss": "The Afflicted Shen",
+  "location": "Unwaking Waters",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Nightfall",
+  "boss": "Kormab, Burning Heart",
+  "location": "Resplendent Makuun",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Nightfall",
+  "boss": "Fire Lord",
+  "location": "",
+  "note": "only during Gift of the Djinn; location blank in fetched text"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Burn",
+  "campaign": "Nightfall",
+  "boss": "Ignis Cruor",
+  "location": "Domain of Secrets",
+  "note": "only during A Flickering Flame"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "campaign": "Nightfall",
+  "boss": "Hajkor, Mystic Flame",
+  "location": "The Sulfurous Wastes",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "campaign": "Eye of the North",
+  "boss": "Lok The Mischievous",
+  "location": "Arachni's Haunt",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "campaign": "Eye of the North",
+  "boss": "Regent of Flame",
+  "location": "Catacombs of Kathandrax",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "campaign": "Eye of the North",
+  "boss": "Magmus",
+  "location": "Heart of the Shiverpeaks",
+  "note": "Level 3"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "campaign": "Nightfall",
+  "boss": "Kormab, Burning Heart",
+  "location": "Dasha Vestibule",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "campaign": "Nightfall",
+  "boss": "Korr, Living Flame",
+  "location": "Turai's Procession",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "campaign": "Nightfall",
+  "boss": "Korshek the Immolated",
+  "location": "Forum Highlands",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "campaign": "Eye of the North",
+  "boss": "Borrguus Blisterbark",
+  "location": "Sacnoth Valley",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "campaign": "Factions",
+  "boss": "Bound Teinai",
+  "location": "Tahnnakai Temple",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "campaign": "Factions",
+  "boss": "Star Ancient Koosun",
+  "location": "Raisu Palace",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Star Burst",
+  "campaign": "Nightfall",
+  "boss": "Bound Kaichen",
+  "location": "Domain of Fear",
+  "note": "only during A History of Violence"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Icy Shackles",
+  "campaign": "",
+  "boss": "Lonolun Waterwalker",
+  "location": "Issnur Isles",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Icy Shackles",
+  "campaign": "",
+  "boss": "Buhon Icelord",
+  "location": "The Floodplain of Mahnkelon",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "campaign": "Prophecies",
+  "boss": "Skitt Skizzle",
+  "location": "Ice Floe",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "campaign": "Prophecies",
+  "boss": "Maak Frostfriend",
+  "location": "Spearhead Peak and Witman's Folly",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "campaign": "Factions",
+  "boss": "Baubao Wavewrath",
+  "location": "The Undercity",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "campaign": "Nightfall",
+  "boss": "Storm of Anguish",
+  "location": "Domain of Fear",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "campaign": "Eye of the North",
+  "boss": "Dazehl Brainfreezer",
+  "location": "Varajar Fells",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "campaign": "Eye of the North",
+  "boss": "Lord Glacius the Eternal",
+  "location": "Bjora Marches",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mirror of Ice",
+  "campaign": "",
+  "boss": "Elemental's Construct",
+  "location": "Sunjiang District",
+  "note": "page text reads \"Sunjiang District and (explorable area)\" i.e. mission and explorable area"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Prophecies",
+  "boss": "Eidolon",
+  "location": "Iron Mines of Moladune",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Prophecies",
+  "boss": "Eidolon",
+  "location": "Ring of Fire",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Prophecies",
+  "boss": "Eidolon",
+  "location": "Abaddon's Mouth",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Prophecies",
+  "boss": "Ice Beast",
+  "location": "Mineral Springs",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Prophecies",
+  "boss": "Sala Chillbringer",
+  "location": "Snake Dance",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Prophecies",
+  "boss": "Brrrr Windburn",
+  "location": "Talus Chute",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "campaign": "Eye of the North",
+  "boss": "Drikard the Foggy",
+  "location": "Dalada Uplands",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Factions",
+  "boss": "The Ancient",
+  "location": "Arborstone",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Factions",
+  "boss": "Wiseroot Shatterstone",
+  "location": "The Eternal Grove (explorable area)",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Factions",
+  "boss": "Wavecrest Stonebreak",
+  "location": "Rhea's Crater",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Eye of the North",
+  "boss": "Whiteout",
+  "location": "Jaga Moraine",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Eye of the North",
+  "boss": "Fragment of Antiquities",
+  "location": "Sepulchre of Dragrimmar",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Eye of the North",
+  "boss": "Regent of Ice",
+  "location": "Sepulchre of Dragrimmar",
+  "note": "level 1"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "campaign": "Eye of the North",
+  "boss": "Ancient Vaettir",
+  "location": "Raven's Point",
+  "note": "level 1 and level 2"
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "campaign": "Prophecies",
+  "boss": "Arkhel Havenwood",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "campaign": "Eye of the North",
+  "boss": "Frazar Frostfur",
+  "location": "Against the Charr",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "campaign": "Eye of the North",
+  "boss": "Spafrod Iceblood",
+  "location": "Sacnoth Valley",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "campaign": "Eye of the North",
+  "boss": "Torch Harrowkeeper",
+  "location": "Grothmar Wardowns",
+  "note": "only during Be Very, Very Quiet..."
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Prophecies",
+  "boss": "Berg Frozenfist",
+  "location": "Ice Caves of Sorrow",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Prophecies",
+  "boss": "Boreal Kubeclaw",
+  "location": "Frozen Forest",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Prophecies",
+  "boss": "Chunk Clumpfoot",
+  "location": "Lornar's Pass",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Prophecies",
+  "boss": "Flint Fleshcleaver",
+  "location": "Grenth's Footprint",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Prophecies",
+  "boss": "The Judge",
+  "location": "Thunderhead Keep",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Eye of the North",
+  "boss": "Elsnil Frigidheart",
+  "location": "Ice Cliff Chasms",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "campaign": "Eye of the North",
+  "boss": "Gloop",
+  "location": "Ooze Pit",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Glyph of Renewal",
+  "campaign": "",
+  "boss": "Nayl Klaw Tuthan",
+  "location": "Perdition Rock",
+  "note": ""
+ },
+ {
+  "profession": "Elementalist",
+  "skill": "Second Wind",
+  "campaign": "",
+  "boss": "Snapjaw Windshell",
+  "location": "Archipelagos",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "campaign": "",
+  "boss": "Render",
+  "location": "Forum Highlands",
+  "note": "only during the quest Desperate Measures"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "campaign": "",
+  "boss": "Scratcher",
+  "location": "Wilderness of Bahdza",
+  "note": "only before completion of the quest Destroy the Harpies"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "campaign": "",
+  "boss": "Screecher",
+  "location": "Wilderness of Bahdza",
+  "note": "only before completion of the quest Destroy the Harpies or Population Control"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "\"Incoming!\"",
+  "campaign": "",
+  "boss": "Kunan the Loudmouth",
+  "location": "Wilderness of Bahdza",
+  "note": "only after completion of the quest Extinction"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "campaign": "",
+  "boss": "Briahn the Chosen",
+  "location": "The Mirror of Lyss",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "campaign": "",
+  "boss": "Overseer Juntahk",
+  "location": "The Mirror of Lyss",
+  "note": "only during the quest Warning Kehanni"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "campaign": "",
+  "boss": "General Kumtash",
+  "location": "Dzagonur Bastion",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "campaign": "",
+  "boss": "Commander Chutal",
+  "location": "Nundu Bay",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Anthem of Guidance",
+  "campaign": "",
+  "boss": "Battlelord Turgar",
+  "location": "Poisoned Outcrops",
+  "note": "only during the quest The Cold Touch of the Past"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Crippling Anthem",
+  "campaign": "",
+  "boss": "Lieutenant Mahrik",
+  "location": "Cliffs of Dohjok",
+  "note": "only during A Land of Heroes"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Crippling Anthem",
+  "campaign": "",
+  "boss": "Lieutenant Shagu",
+  "location": "Barbarous Shore",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Angelic Bond",
+  "campaign": "",
+  "boss": "Shakor Firespear",
+  "location": "Dasha Vestibule",
+  "note": "page text reads \"(Dasha Vestibule and )\" - second location missing on page"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Anthem of Fury",
+  "campaign": "",
+  "boss": "Oath of Profanity",
+  "location": "Nightfallen Jahai",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Defensive Anthem",
+  "campaign": "",
+  "boss": "Corporal Argon",
+  "location": "Jahai Bluffs",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Focused Anger",
+  "campaign": "",
+  "boss": "Wandalz the Angry",
+  "location": "Bahdok Caverns",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "campaign": "Nightfall",
+  "boss": "Chakeh the Lonely",
+  "location": "Gate of Desolation",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "campaign": "Nightfall",
+  "boss": "Arneh the Vigorous",
+  "location": "Joko's Domain",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "campaign": "Eye of the North",
+  "boss": "Vraxx the Condemned",
+  "location": "Cathedral of Flames",
+  "note": "level 2"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "campaign": "Eye of the North",
+  "boss": "Sotanaht the Tomb Guardian",
+  "location": "Vloxen Excavations",
+  "note": "level 3"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "\"It's Just a Flesh Wound.\"",
+  "campaign": "",
+  "boss": "Churkeh the Defiant",
+  "location": "The Alkali Pan",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "\"The Power Is Yours!\"",
+  "campaign": "",
+  "boss": "Tureksin the Delegator",
+  "location": "The Ruptured Heart",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Song of Purification",
+  "campaign": "",
+  "boss": "Jishol Darksong",
+  "location": "Resplendent Makuun",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Song of Purification",
+  "campaign": "",
+  "boss": "Pehnsed the Loudmouth",
+  "location": "Vehjin Mines",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Song of Restoration",
+  "campaign": "Nightfall",
+  "boss": "Toshau Sharpspear",
+  "location": "Garden of Seborhin",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Song of Restoration",
+  "campaign": "Eye of the North",
+  "boss": "Erasklion the Prolific",
+  "location": "Heart of the Shiverpeaks",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cruel Spear",
+  "campaign": "Nightfall",
+  "boss": "Eshau Longspear",
+  "location": "Arkjok Ward",
+  "note": "page text: (Arkjok Ward, Secure the Refuge)"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cruel Spear",
+  "campaign": "Nightfall",
+  "boss": "Yakun Trueshot",
+  "location": "Moddok Crevice",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cruel Spear",
+  "campaign": "Eye of the North",
+  "boss": "Elder Nephilim",
+  "location": "Rragar's Menagerie",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "campaign": "Nightfall",
+  "boss": "Shrieker of Dread",
+  "location": "Domain of Fear",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "campaign": "Eye of the North",
+  "boss": "Jadam Spearspinner",
+  "location": "Warband of Brothers",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "campaign": "Eye of the North",
+  "boss": "Spider Matriarch",
+  "location": "Arachni's Haunt",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "campaign": "Eye of the North",
+  "boss": "Timberland Guardian",
+  "location": "Magus Stones",
+  "note": "only during Lab Space"
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "campaign": "",
+  "boss": "Captain Lumanda",
+  "location": "Consulate Docks",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "campaign": "",
+  "boss": "Corporal Luluh",
+  "location": "Dejarin Estate",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "campaign": "",
+  "boss": "Overseer Boktek",
+  "location": "Kodonur Crossroads",
+  "note": ""
+ },
+ {
+  "profession": "Paragon",
+  "skill": "Cautery Signet",
+  "campaign": "",
+  "boss": "Colonel Kajo",
+  "location": "Pogahn Passage",
+  "note": ""
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Captain Mhedi",
+  "location": "Barbarous Shore",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Earth Prayers"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Ensign Jahan",
+  "location": "Cliffs of Dohjok",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Earth Prayers; only during A Land of Heroes"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Zealot Sheoli",
+  "location": "Nundu Bay",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Zealous Amarantha",
+  "location": "Nightfallen Jahai",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism; Only during the quest Good Demon Hunting"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Fahralon the Zealous",
+  "location": "Domain of Pain",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Facet of Spirit",
+  "location": "Arbor Bay",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism; during The Cipher of Kormir"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Facet of Spirit",
+  "location": "Varajar Fells",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism; during The Path to Revelations"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Vahlen the Silent",
+  "location": "The Sulfurous Wastes",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Water Lord",
+  "location": "The Hidden City of Ahdashim",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism; only during the quest Gift of the Djinn"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Chundu the Meek",
+  "location": "Gate of Desolation",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Mysticism; mission"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Taameh the Frigid",
+  "location": "Bjora Marches",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Scythe Mastery"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Reaper of Destruction",
+  "location": "Raven's Point",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Scythe Mastery; one on level 1, one on level 2"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Bubahl Icehands",
+  "location": "Marga Coast",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Wind Prayers"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Lord Yama the Vengeful",
+  "location": "The Floodplain of Mahnkelon",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Wind Prayers; only during the quest Drakes on the Plain"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Sehlon, Beautiful Water",
+  "location": "Bahdok Caverns",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Wind Prayers"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Hajok Earthguardian (Djinn)",
+  "location": "Dasha Vestibule",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Wind Prayers"
+ },
+ {
+  "profession": "Dervish",
+  "skill": "",
+  "campaign": "",
+  "boss": "Leilon, Tranquil Water",
+  "location": "The Hidden City of Ahdashim",
+  "note": "SKILL NAME MISSING from fetched text; attribute section: Wind Prayers"
+ }
+]

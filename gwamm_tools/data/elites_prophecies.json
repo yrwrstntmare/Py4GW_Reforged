@@ -1,0 +1,1163 @@
+[
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Phlog the Indomitable",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Gigas Expii",
+  "profession": "Ranger",
+  "skill": "Melandru's Resilience",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Staggh the Fervid",
+  "profession": "Ranger",
+  "skill": "Greater Conflagration",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Ludo Ossidi",
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Lugg the Malignant",
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Mallus Funo",
+  "profession": "Mesmer",
+  "skill": "Panic",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Ascalon",
+  "location": "Dragon's Gullet",
+  "boss": "Druul the Untamed",
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Kryta",
+  "location": "Kessex Peak",
+  "boss": "Galrath",
+  "profession": "Warrior",
+  "skill": "Hundred Blades",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Kryta",
+  "location": "North Kryta Province",
+  "boss": "Mentanl Arobo",
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Maguuma Jungle",
+  "location": "Tangle Root",
+  "boss": "Desnas Hubor",
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Custodian Fidius",
+  "profession": "Warrior",
+  "skill": "Warrior's Endurance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Custodian Kora",
+  "profession": "Ranger",
+  "skill": "Marksman's Wager",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Dassk Arossyss",
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Byssha Hisst",
+  "profession": "Necromancer",
+  "skill": "Order of the Vampire",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Ayassah Hess",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "guaranteed": true,
+  "note": "listed in the same row as Goss Aleessh; page gives no spawn note"
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Goss Aleessh",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "guaranteed": true,
+  "note": "listed in the same row as Ayassah Hess; page gives no spawn note"
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Dunes of Despair",
+  "boss": "Cyss Gresshla",
+  "profession": "Elementalist",
+  "skill": "Ether Renewal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Elona Reach",
+  "boss": "Custodian Dellus",
+  "profession": "Warrior",
+  "skill": "Warrior's Endurance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Elona Reach",
+  "boss": "Custodian Jenus",
+  "profession": "Ranger",
+  "skill": "Marksman's Wager",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Elona Reach",
+  "boss": "Wissper Inssani",
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Elona Reach",
+  "boss": "Uussh Visshta",
+  "profession": "Necromancer",
+  "skill": "Order of the Vampire",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Elona Reach",
+  "boss": "Tiss Danssir",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Elona Reach",
+  "boss": "Vassa Ssiss",
+  "profession": "Elementalist",
+  "skill": "Ether Renewal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Prophet's Path",
+  "boss": "Kepkhet Marrowfeast",
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Salt Flats",
+  "boss": "Yxthoshth",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": "during quest The Ranger's Path"
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Thirsty River",
+  "boss": "Custodian Hulgar",
+  "profession": "Warrior",
+  "skill": "Warrior's Endurance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Thirsty River",
+  "boss": "Custodian Phebus",
+  "profession": "Ranger",
+  "skill": "Marksman's Wager",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Thirsty River",
+  "boss": "Josso Essher",
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Thirsty River",
+  "boss": "Hessper Sasso",
+  "profession": "Necromancer",
+  "skill": "Order of the Vampire",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Thirsty River",
+  "boss": "Goss Aleessh",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recovery",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Thirsty River",
+  "boss": "Issah Sshay",
+  "profession": "Elementalist",
+  "skill": "Ether Renewal",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Dragon's Lair",
+  "boss": "Facet of Strength",
+  "profession": "Warrior",
+  "skill": "Gladiator's Defense",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Dragon's Lair",
+  "boss": "Facet of Nature",
+  "profession": "Ranger",
+  "skill": "Melandru's Resilience",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Dragon's Lair",
+  "boss": "Facet of Light",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Dragon's Lair",
+  "boss": "Facet of Darkness",
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Dragon's Lair",
+  "boss": "Facet of Chaos",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Dragon's Lair",
+  "boss": "Facet of Elements",
+  "profession": "Elementalist",
+  "skill": "Lightning Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "The Hall of Heroes (explorable area)",
+  "boss": "The Darkness (boss)",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Dreadnought's Drift",
+  "boss": "Maw the Mountain Heart",
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Linka Goldensteel",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Obrhit Barkwood",
+  "profession": "Warrior",
+  "skill": "Defy Pain",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Rensar Mountainsight",
+  "profession": "Ranger",
+  "skill": "Melandru's Arrows",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Esnhal Hardwood",
+  "profession": "Monk",
+  "skill": "Life Barrier",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Mesqul Ironhealer",
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Mragga",
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "guaranteed": true,
+  "note": "during quest The Hero's Challenge"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Jollen Steelblight",
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Unthet Rotwood",
+  "profession": "Necromancer",
+  "skill": "Virulence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Barl Stormsiege",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Arkhel Havenwood",
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Frozen Forest",
+  "boss": "Boreal Kubeclaw",
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Thorgall Bludgeonhammer",
+  "profession": "Warrior",
+  "skill": "Dwarven Battle Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Gargash Thornbeard",
+  "profession": "Ranger",
+  "skill": "Melandru's Arrows",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Wroth Yakslapper",
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Maw the Mountain Heart",
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Morgriff Shadestone",
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Gorrel Rockmolder",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Grenth's Footprint",
+  "boss": "Flint Fleshcleaver",
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Caves of Sorrow",
+  "boss": "Arlak Stoneleaf",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": "listed in the same row as Virag Bladestone; page gives no spawn note"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Caves of Sorrow",
+  "boss": "Virag Bladestone",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": "listed in the same row as Arlak Stoneleaf; page gives no spawn note"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Caves of Sorrow",
+  "boss": "Darda Goldenchief",
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Caves of Sorrow",
+  "boss": "Hormak Ironcurse",
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Caves of Sorrow",
+  "boss": "Jonar Stonebender",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Caves of Sorrow",
+  "boss": "Berg Frozenfist",
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Jade Armor (boss)",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Jade Bow (boss)",
+  "profession": "Ranger",
+  "skill": "Oath Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Mursaat Monk (boss)",
+  "profession": "Monk",
+  "skill": "Aura of Faith",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Frostbite",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Mursaat Necromancer (boss)",
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Gambol Headrainer",
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Mursaat Mesmer (boss)",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Skitt Skizzle",
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Ice Floe",
+  "boss": "Mursaat Elementalist (boss)",
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Marika Granitehand",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Martigris the Stalwart",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Slonak Copperbark",
+  "profession": "Warrior",
+  "skill": "Dwarven Battle Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Markis",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Hilios the Dutiful",
+  "profession": "Ranger",
+  "skill": "Oath Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Lokar Icemender",
+  "profession": "Monk",
+  "skill": "Mark of Protection",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Balt Duskstrider",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Feodor the Baneful",
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Ceru Gloomrunner",
+  "profession": "Necromancer",
+  "skill": "Spiteful Spirit",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Balasi the Arcane",
+  "profession": "Mesmer",
+  "skill": "Energy Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Digo Murkstalker",
+  "profession": "Mesmer",
+  "skill": "Illusionary Weaponry",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Eidolon",
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "Kratos the Foul",
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "guaranteed": true,
+  "note": "listed in the same row as The Inquisitor; page gives no spawn note"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Iron Mines of Moladune",
+  "boss": "The Inquisitor",
+  "profession": "Elementalist",
+  "skill": "Thunderclap",
+  "guaranteed": true,
+  "note": "listed in the same row as Kratos the Foul; page gives no spawn note"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Lornar's Pass",
+  "boss": "Clobberhusk",
+  "profession": "Warrior",
+  "skill": "Defy Pain",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Lornar's Pass",
+  "boss": "Quickroot",
+  "profession": "Monk",
+  "skill": "Life Barrier",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Lornar's Pass",
+  "boss": "Maw the Mountain Heart",
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Lornar's Pass",
+  "boss": "Tonfor Copperblood",
+  "profession": "Necromancer",
+  "skill": "Offering of Blood",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Lornar's Pass",
+  "boss": "Erzek Runebreaker",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Lornar's Pass",
+  "boss": "Chunk Clumpfoot",
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Syr Honorcrest",
+  "profession": "Warrior",
+  "skill": "Flourish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Ryk Arrowwing",
+  "profession": "Ranger",
+  "skill": "Practiced Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Myd Springclaw",
+  "profession": "Monk",
+  "skill": "Shield of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Maw the Mountain Heart",
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Nhy Darkclaw",
+  "profession": "Necromancer",
+  "skill": "Well of Power",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Evirso Sectus",
+  "profession": "Necromancer",
+  "skill": "Wither",
+  "guaranteed": true,
+  "note": "during quest"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Wyt Sharpfeather",
+  "profession": "Mesmer",
+  "skill": "Ineptitude",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Hyl Thunderwing",
+  "profession": "Elementalist",
+  "skill": "Glyph of Energy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Mineral Springs",
+  "boss": "Ice Beast",
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Kor Stonewrath",
+  "profession": "Warrior",
+  "skill": "Earth Shaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Smukk Foombool",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Whuup Buumbuul",
+  "profession": "Ranger",
+  "skill": "Escape",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Thul Boulderrain",
+  "profession": "Ranger",
+  "skill": "Punishing Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Marnta Doomspeaker",
+  "profession": "Monk",
+  "skill": "Peace and Harmony",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Raptorhawk",
+  "profession": "Monk",
+  "skill": "Spell Breaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Fawl Driftstalker",
+  "profession": "Monk",
+  "skill": "Signet of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Cry Darkday",
+  "profession": "Necromancer",
+  "skill": "Blood is Power",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Maw the Mountain Heart",
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Sapph Blacktracker",
+  "profession": "Necromancer",
+  "skill": "Spiteful Spirit",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Didn Hopestealer",
+  "profession": "Mesmer",
+  "skill": "Illusionary Weaponry",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Featherclaw",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Old Red Claw",
+  "profession": "Elementalist",
+  "skill": "Mind Shock",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Snake Dance",
+  "boss": "Sala Chillbringer",
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Jono Yawpyawl",
+  "profession": "Warrior",
+  "skill": "\"Victory Is Mine!\"",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Hail Blackice",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Thul The Bull",
+  "profession": "Ranger",
+  "skill": "Ferocious Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Kekona Pippip",
+  "profession": "Ranger",
+  "skill": "Poison Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Kaia Wupwup",
+  "profession": "Monk",
+  "skill": "Unyielding Aura",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Maw the Mountain Heart",
+  "profession": "Necromancer",
+  "skill": "Feast of Corruption",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Allobo Dimdim",
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Rune Ethercrash",
+  "profession": "Mesmer",
+  "skill": "Keystone Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Sniik Hungrymind",
+  "profession": "Mesmer",
+  "skill": "Energy Drain",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Edibbo Kepkep",
+  "profession": "Elementalist",
+  "skill": "Glimmering Mark",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Spearhead Peak",
+  "boss": "Maak Frostfriend",
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Talus Chute",
+  "boss": "Jono Yawpyawl",
+  "profession": "Warrior",
+  "skill": "\"Victory Is Mine!\"",
+  "guaranteed": true,
+  "note": "location incomplete: page text truncated after this location's first rows"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Talus Chute",
+  "boss": "Krogg Shmush (Shiverpeak Mountains)",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": "location incomplete: page text truncated"
+ },
+ {
+  "region": "Shiverpeak Mountains",
+  "location": "Talus Chute",
+  "boss": "Whuup Buumbuul",
+  "profession": "Ranger",
+  "skill": "Escape",
+  "guaranteed": true,
+  "note": "location incomplete: page text truncated"
+ }
+]

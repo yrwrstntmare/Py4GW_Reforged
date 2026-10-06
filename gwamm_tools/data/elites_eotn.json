@@ -1,0 +1,1379 @@
+[
+ {
+  "region": "Charr Homelands",
+  "location": "Dalada Uplands",
+  "boss": "Hodat the Tumbler",
+  "profession": "Warrior",
+  "skill": "Backbreaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Dalada Uplands",
+  "boss": "Molotov Rocktail",
+  "profession": "Warrior",
+  "skill": "Headbutt",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Dalada Uplands",
+  "boss": "Horai Wingshielder",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Dalada Uplands",
+  "boss": "Drikard the Foggy",
+  "profession": "Elementalist",
+  "skill": "Mist Form",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Grothmar Wardowns",
+  "boss": "Docu Kindleshot",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": false,
+  "note": "Shares spawn points with Chaelse Flameshielder; the boss that spawns depends on story and quest progression (only one appears)"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Grothmar Wardowns",
+  "boss": "Chaelse Flameshielder",
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "guaranteed": false,
+  "note": "Shares spawn points with Docu Kindleshot; the boss that spawns depends on story and quest progression (only one appears)"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Grothmar Wardowns",
+  "boss": "Thraexis Thundermaw",
+  "profession": "Elementalist",
+  "skill": "Ride the Lightning",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Cobleri Arronn",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Gharaz the Glutton",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": "During quest: Forbidden Fruit"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Shons the Pretender",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Ignus the Eternal",
+  "profession": "Warrior",
+  "skill": "Forceful Blow",
+  "guaranteed": true,
+  "note": "During quest: The Smell of Titan in the Morning"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Fureyst Sharpsight",
+  "profession": "Ranger",
+  "skill": "\"Together as One!\"",
+  "guaranteed": true,
+  "note": "Requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Katye Bloodburner",
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Rend Ragemauler",
+  "profession": "Necromancer",
+  "skill": "Reaper's Mark",
+  "guaranteed": true,
+  "note": "During quest: The Assassin's Revenge"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Anmat the Trickster",
+  "profession": "Mesmer",
+  "skill": "Power Block",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Fureyst Sharpsight",
+  "profession": "Mesmer",
+  "skill": "Time Ward",
+  "guaranteed": true,
+  "note": "Requires a party member to be carrying a Proof of Triumph"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Borrguus Blisterbark",
+  "profession": "Elementalist",
+  "skill": "Searing Flames",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Spafrod Iceblood",
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Straut Flamebourne",
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "guaranteed": true,
+  "note": "During quest: Fire and Pain"
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Sacnoth Valley",
+  "boss": "Fozzy Yeoryios",
+  "profession": "Ritualist",
+  "skill": "Preservation",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Against the Charr",
+  "boss": "Gordam Griefgiver",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Against the Charr",
+  "boss": "Groknar Weazlewortz",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Against the Charr",
+  "boss": "Anmat the Trickster",
+  "profession": "Mesmer",
+  "skill": "Power Block",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Against the Charr",
+  "boss": "Frazar Frostfur",
+  "profession": "Elementalist",
+  "skill": "Ward Against Harm",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Warband of Brothers",
+  "boss": "Charr Prison Guard (boss)",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Warband of Brothers",
+  "boss": "Flamemaster Maultooth",
+  "profession": "Elementalist",
+  "skill": "Mind Blast",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Warband of Brothers",
+  "boss": "Jadam Spearspinner",
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Charr Homelands",
+  "location": "Assault on the Stronghold",
+  "boss": "Hierophant Burntsoul",
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Bjora Marches",
+  "boss": "Lissah the Packleader",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Bjora Marches",
+  "boss": "Lord Glacius the Eternal",
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Bjora Marches",
+  "boss": "Taameh the Frigid",
+  "profession": "Dervish",
+  "skill": "Wounding Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Dvalinn Stonebreaker",
+  "profession": "Warrior",
+  "skill": "Cleave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Jormungand",
+  "profession": "Warrior",
+  "skill": "Earth Shaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Chieftain Ulgrimar Gnash",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": "During quest: The Big Unfriendly Jotun"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Lann Browsmasher",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": "During quest: Nornhood"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Koren Wildrunner",
+  "profession": "Ranger",
+  "skill": "Crippling Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Nulfastu, Earthbound",
+  "profession": "Mesmer",
+  "skill": "Lyssa's Aura",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Silver Vaettir",
+  "profession": "Mesmer",
+  "skill": "Symbols of Inspiration",
+  "guaranteed": false,
+  "note": "Only spawns under specific circumstances"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Drakkar Lake",
+  "boss": "Myish, Lady of the Lake",
+  "profession": "Dervish",
+  "skill": "Onslaught",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Ice Cliff Chasms",
+  "boss": "Johon the Oxflinger",
+  "profession": "Ranger",
+  "skill": "Prepared Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Ice Cliff Chasms",
+  "boss": "Elsnil Frigidheart",
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Jaga Moraine",
+  "boss": "Krak Flamewhip",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": "During quest: Krak's Cavalry"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Jaga Moraine",
+  "boss": "Avarr The Fallen",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Jaga Moraine",
+  "boss": "Edielh Shockhunter",
+  "profession": "Elementalist",
+  "skill": "Mind Shock",
+  "guaranteed": true,
+  "note": "After quest: Prenuptial Disagreement"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Jaga Moraine",
+  "boss": "Whiteout",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Jaga Moraine",
+  "boss": "Ssissth the Leviathan",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": "Before completing quest: Prenuptial Disagreement"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Norrhart Domains",
+  "boss": "Fenrir",
+  "profession": "Warrior",
+  "skill": "Crippling Slash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Norrhart Domains",
+  "boss": "Baglorag Grumblesnort",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Sifhalla",
+  "boss": "Glacial Griffon",
+  "profession": "Ritualist",
+  "skill": "Ritual Lord",
+  "guaranteed": true,
+  "note": "During quest: Cold as Ice"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Facet of Destruction",
+  "profession": "Warrior",
+  "skill": "Gladiator's Defense",
+  "guaranteed": true,
+  "note": "During quest: The Path to Revelations"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Facet of Creation",
+  "profession": "Ranger",
+  "skill": "Melandru's Resilience",
+  "guaranteed": true,
+  "note": "During quest: The Path to Revelations"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Facet of Existence",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": "During quest: The Path to Revelations"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Tanto the Grim",
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "guaranteed": true,
+  "note": "During quest: Haunted"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Facet of Death",
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "guaranteed": true,
+  "note": "During quest: The Path to Revelations"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Facet of Illusions",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "guaranteed": true,
+  "note": "During quest: The Path to Revelations"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Dazehl Brainfreezer",
+  "profession": "Elementalist",
+  "skill": "Mind Freeze",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Asterius the Mighty",
+  "profession": "Dervish",
+  "skill": "Reaper's Sweep",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Varajar Fells",
+  "boss": "Facet of Spirit",
+  "profession": "Dervish",
+  "skill": "Pious Renewal",
+  "guaranteed": true,
+  "note": "During quest: The Path to Revelations"
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Blood Washes Blood",
+  "boss": "Tenagg Flametroller",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Blood Washes Blood",
+  "boss": "Docu Kindleshot",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Blood Washes Blood",
+  "boss": "Elmohr Snowmender",
+  "profession": "Monk",
+  "skill": "Healing Light",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Far Shiverpeaks",
+  "location": "Blood Washes Blood",
+  "boss": "Kakei Stormcaller",
+  "profession": "Elementalist",
+  "skill": "Mind Blast",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Alcazia Tangle",
+  "boss": "Alpha Tyrannus",
+  "profession": "Warrior",
+  "skill": "Earth Shaker",
+  "guaranteed": true,
+  "note": "During quest: Norn Catering"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Alcazia Tangle",
+  "boss": "Facet of Creation",
+  "profession": "Ranger",
+  "skill": "Melandru's Resilience",
+  "guaranteed": true,
+  "note": "During quest: The Cipher of Melandru"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Alcazia Tangle",
+  "boss": "Kemil the Inept",
+  "profession": "Mesmer",
+  "skill": "Ineptitude",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Alcazia Tangle",
+  "boss": "Pywatt the Swift",
+  "profession": "Assassin",
+  "skill": "Golden Skull Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Alcazia Tangle",
+  "boss": "Reesou the Wanderer",
+  "profession": "Ritualist",
+  "skill": "Spirit Light Weapon",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Arbor Bay",
+  "boss": "Flannuss Broadwing",
+  "profession": "Monk",
+  "skill": "Word of Healing",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Arbor Bay",
+  "boss": "Alitta Guilebloom",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Arbor Bay",
+  "boss": "Shock of Destruction",
+  "profession": "Ritualist",
+  "skill": "Weapon of Fury",
+  "guaranteed": true,
+  "note": "During quest: O Brave New World"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Arbor Bay",
+  "boss": "Facet of Spirit",
+  "profession": "Dervish",
+  "skill": "Pious Renewal",
+  "guaranteed": true,
+  "note": "During quest: The Cipher of Kormir"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Byndliss Flamecrown",
+  "profession": "Warrior",
+  "skill": "Dragon Slash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Skomay Bonehewer",
+  "profession": "Warrior",
+  "skill": "Steady Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Ashlyn Spiderfriend",
+  "profession": "Ranger",
+  "skill": "Enraged Lunge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Bredyss Longstride",
+  "profession": "Necromancer",
+  "skill": "Plague Signet",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Veturni Mindsquall",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Facet of Illusions",
+  "profession": "Mesmer",
+  "skill": "Mantra of Recall",
+  "guaranteed": true,
+  "note": "During quest: The Cipher of Lyssa"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Magus Stones",
+  "boss": "Timberland Guardian",
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "guaranteed": true,
+  "note": "During quest: Lab Space"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Riven Earth",
+  "boss": "Storm of Destruction",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Riven Earth",
+  "boss": "Gallow Nooseknitter",
+  "profession": "Ranger",
+  "skill": "Crippling Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Riven Earth",
+  "boss": "Facet of Existence",
+  "profession": "Monk",
+  "skill": "Shield of Regeneration",
+  "guaranteed": true,
+  "note": "During quest: The Cipher of Dwayna"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Riven Earth",
+  "boss": "Joffs the Mitigator",
+  "profession": "Elementalist",
+  "skill": "Shockwave",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Riven Earth",
+  "boss": "Rekoff Broodmother",
+  "profession": "Assassin",
+  "skill": "Assassin's Promise",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Sparkfly Swamp",
+  "boss": "Mobrin, Lord of the Marsh",
+  "profession": "Warrior",
+  "skill": "Crippling Slash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Sparkfly Swamp",
+  "boss": "Inscribed Ettin",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": "During quest: Finding Gadd"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Sparkfly Swamp",
+  "boss": "Facet of Death",
+  "profession": "Necromancer",
+  "skill": "Grenth's Balance",
+  "guaranteed": true,
+  "note": "During quest: The Cipher of Grenth"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Sparkfly Swamp",
+  "boss": "Waray Skullflayer",
+  "profession": "Mesmer",
+  "skill": "Migraine",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Sparkfly Swamp",
+  "boss": "Brynn Earthporter",
+  "profession": "Dervish",
+  "skill": "Ebon Dust Aura",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Verdant Cascades",
+  "boss": "Facet of Destruction",
+  "profession": "Warrior",
+  "skill": "Gladiator's Defense",
+  "guaranteed": true,
+  "note": "During quest: The Cipher of Balthazar"
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Verdant Cascades",
+  "boss": "Petraj the Evasive",
+  "profession": "Ranger",
+  "skill": "Glass Arrows",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Verdant Cascades",
+  "boss": "Kaykitt Hidemender",
+  "profession": "Monk",
+  "skill": "Withdraw Hexes",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Verdant Cascades",
+  "boss": "Wilderm Wrathspew",
+  "profession": "Mesmer",
+  "skill": "Migraine",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Finding the Bloodstone",
+  "boss": "Inscribed Sentry",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Tarnished Coast",
+  "location": "Genius Operated Living Enchanted Manifestation",
+  "boss": "Bringer of Destruction",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Arachni's Haunt",
+  "boss": "Brood Warden",
+  "profession": "Ranger",
+  "skill": "Crippling Shot",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Arachni's Haunt",
+  "boss": "Lok The Mischievous",
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Arachni's Haunt",
+  "boss": "Spider Matriarch",
+  "profession": "Paragon",
+  "skill": "Stunning Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Battledepths",
+  "boss": "Marln Steelfist",
+  "profession": "Warrior",
+  "skill": "Dwarven Battle Stance",
+  "guaranteed": true,
+  "note": "During quest: Attack on Jalis's Camp"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Battledepths",
+  "boss": "Taskmaster Larn",
+  "profession": "Ranger",
+  "skill": "Melandru's Arrows",
+  "guaranteed": true,
+  "note": "During quest: Attack on Jalis's Camp"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Battledepths",
+  "boss": "Taskmaster Nard",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": "During quest: Attack on Jalis's Camp"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Battledepths",
+  "boss": "Taskmaster Beld",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": "During quest: Attack on Jalis's Camp"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Bloodstone Caves",
+  "boss": "Crystal Ettin",
+  "profession": "Warrior",
+  "skill": "Backbreaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Bloodstone Caves",
+  "boss": "Paranoia Ettin",
+  "profession": "Warrior",
+  "skill": "Backbreaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Bloodstone Caves",
+  "boss": "First Inscribed",
+  "profession": "Warrior",
+  "skill": "Backbreaker",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Bogroot Growths",
+  "boss": "Ophil Patriarch",
+  "profession": "Ritualist",
+  "skill": "Spirit's Strength",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Catacombs of Kathandrax",
+  "boss": "Regent of Flame",
+  "profession": "Elementalist",
+  "skill": "Savannah Heat",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Cathedral of Flames",
+  "boss": "Murakai's Steward",
+  "profession": "Necromancer",
+  "skill": "Corrupt Enchantment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Cathedral of Flames",
+  "boss": "The Master",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Cathedral of Flames",
+  "boss": "The Keeper",
+  "profession": "Necromancer",
+  "skill": "Life Transfer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Cathedral of Flames",
+  "boss": "Faze Magekiller",
+  "profession": "Mesmer",
+  "skill": "Power Block",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Cathedral of Flames",
+  "boss": "Tynder Flamecaller",
+  "profession": "Elementalist",
+  "skill": "Ether Prodigy",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Cathedral of Flames",
+  "boss": "Vraxx the Condemned",
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Darkrime Delves",
+  "boss": "Grelk Icelash",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Darkrime Delves",
+  "boss": "Havok-kin",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Frostmaw's Burrows",
+  "boss": "Frostmaw Spawn",
+  "profession": "Ranger",
+  "skill": "Barrage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Heart of the Shiverpeaks",
+  "boss": "Gorlos Skinflayer",
+  "profession": "Monk",
+  "skill": "Ray of Judgment",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Heart of the Shiverpeaks",
+  "boss": "Jacado the Putrid",
+  "profession": "Necromancer",
+  "skill": "Toxic Chill",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Heart of the Shiverpeaks",
+  "boss": "Jacado the Putrid",
+  "profession": "Necromancer",
+  "skill": "Virulence",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Heart of the Shiverpeaks",
+  "boss": "Erasklion the Prolific",
+  "profession": "Paragon",
+  "skill": "Song of Restoration",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Oola's Lab",
+  "boss": "Malfunctioning Shield Golem",
+  "profession": "Warrior",
+  "skill": "Steady Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Oola's Lab",
+  "boss": "Flame Guardian (golem)",
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Oola's Lab",
+  "boss": "Malfunctioning Regulator Golem",
+  "profession": "Elementalist",
+  "skill": "Elemental Attunement",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Oola's Lab",
+  "boss": "Xien",
+  "profession": "Assassin",
+  "skill": "Shadow Prison",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Ooze Pit",
+  "boss": "Ancient Ooze",
+  "profession": "Warrior",
+  "skill": "Headbutt",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Ooze Pit",
+  "boss": "Gloop",
+  "profession": "Elementalist",
+  "skill": "Water Trident",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Raven's Point",
+  "boss": "Shadow Spawn",
+  "profession": "Elementalist",
+  "skill": "Invoke Lightning",
+  "guaranteed": true,
+  "note": "During quest: Shadows in the Night"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Raven's Point",
+  "boss": "Ancient Vaettir",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Raven's Point",
+  "boss": "Reaper of Destruction",
+  "profession": "Dervish",
+  "skill": "Wounding Strike",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Rragar's Menagerie",
+  "boss": "The Enforcer",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": "During quest: The Hunting of the Charr"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Rragar's Menagerie",
+  "boss": "Charr Warden",
+  "profession": "Ranger",
+  "skill": "Burning Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Rragar's Menagerie",
+  "boss": "Beastmaster Korg",
+  "profession": "Ranger",
+  "skill": "Scavenger's Focus",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Rragar's Menagerie",
+  "boss": "Flesheater",
+  "profession": "Necromancer",
+  "skill": "Toxic Chill",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Rragar's Menagerie",
+  "boss": "Rake Blazeclaw",
+  "profession": "Assassin",
+  "skill": "Golden Skull Strike",
+  "guaranteed": true,
+  "note": "During quest: The Hunting of the Charr"
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Rragar's Menagerie",
+  "boss": "Elder Nephilim",
+  "profession": "Paragon",
+  "skill": "Cruel Spear",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Sepulchre of Dragrimmar",
+  "boss": "Fragment of Antiquities",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Sepulchre of Dragrimmar",
+  "boss": "Regent of Ice",
+  "profession": "Elementalist",
+  "skill": "Shatterstone",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Shards of Orr",
+  "boss": "Cursed Brigand",
+  "profession": "Elementalist",
+  "skill": "Blinding Surge",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Slavers' Exile",
+  "boss": "Dark Watcher",
+  "profession": "Ritualist",
+  "skill": "Tranquil Was Tanasen",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Vloxen Excavations",
+  "boss": "Taskmaster Durgon",
+  "profession": "Warrior",
+  "skill": "Dwarven Battle Stance",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Vloxen Excavations",
+  "boss": "Zalnax",
+  "profession": "Ranger",
+  "skill": "Poison Arrow",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Vloxen Excavations",
+  "boss": "Taskmaster Bellok",
+  "profession": "Necromancer",
+  "skill": "Jagged Bones",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Vloxen Excavations",
+  "boss": "Taskmaster Kurg",
+  "profession": "Mesmer",
+  "skill": "Crippling Anguish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Vloxen Excavations",
+  "boss": "Sotanaht the Tomb Guardian",
+  "profession": "Paragon",
+  "skill": "Soldier's Fury",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Destruction's Depths",
+  "boss": "Avatar of Destruction (warrior)",
+  "profession": "Warrior",
+  "skill": "Battle Rage",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "Destruction's Depths",
+  "boss": "Avatar of Destruction (dervish)",
+  "profession": "Dervish",
+  "skill": "Onslaught",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Depths of Tyria",
+  "location": "The Elusive Golemancer",
+  "boss": "Indestructible Golem",
+  "profession": "Warrior",
+  "skill": "Enraged Smash",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Ascalon",
+  "location": "Special Ops: Flame Temple Corridor",
+  "boss": "Gorgaan Hatemonger",
+  "profession": "Warrior",
+  "skill": "Eviscerate",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Ascalon",
+  "location": "Special Ops: Flame Temple Corridor",
+  "boss": "Taag Relicbinder",
+  "profession": "Monk",
+  "skill": "Life Sheath",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Glint's Challenge",
+  "boss": "Hand of Destruction",
+  "profession": "Warrior",
+  "skill": "Devastating Hammer",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Glint's Challenge",
+  "boss": "Heart of Destruction",
+  "profession": "Warrior",
+  "skill": "Flourish",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Glint's Challenge",
+  "boss": "Heart of Destruction",
+  "profession": "Warrior",
+  "skill": "Skull Crack",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Glint's Challenge",
+  "boss": "Flesh of Destruction",
+  "profession": "Necromancer",
+  "skill": "Soul Leech",
+  "guaranteed": true,
+  "note": ""
+ },
+ {
+  "region": "Crystal Desert",
+  "location": "Glint's Challenge",
+  "boss": "Mind of Destruction",
+  "profession": "Mesmer",
+  "skill": "Hex Eater Vortex",
+  "guaranteed": true,
+  "note": ""
+ }
+]
