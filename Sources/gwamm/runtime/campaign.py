@@ -184,14 +184,20 @@ class Campaign:
             self.queue.remove(mid)
         else:
             self.queue.append(mid)
+            r = self.results.get(mid)
+            if r and r.get("result") != "complete":
+                r["attempts"], r["travel_fails"] = 0, 0      # chosen again by hand: a fresh go
         self.save()
 
     def queue_all(self, vanquished, region=None):
         """Queue every area that can be done, grouped so areas sharing an outpost run back to back."""
         regions = self.regions()
         ids = [m for m in (regions.get(region, []) if region else self.all_areas())
-               if not self.available(m, vanquished)
-               and self.results.get(m, {}).get("attempts", 0) < MAX_ATTEMPTS]
+               if not self.available(m, vanquished)]
+        for m in ids:                                    # asked for by hand: every unfinished area gets a fresh go
+            r = self.results.get(m)
+            if r and r.get("result") != "complete":
+                r["attempts"], r["travel_fails"] = 0, 0
         ids = self.order(ids)
         for m in ids:
             if m not in self.queue:

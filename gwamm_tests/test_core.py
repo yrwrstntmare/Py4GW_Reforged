@@ -103,6 +103,26 @@ def test_detour_on_wall():
     assert eng.next_step() is not None and eng.objective.kind != "guide"
 
 
+def test_step_clear():
+    """Caught on scenery: the spot is marked without calling in the known route, and there is
+    walkable ground nearby to step to that is further from the obstacle than we are."""
+    import json, math
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine
+    traps, start, _b = load()
+    route = [tuple(p) for p in json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                             "Sources", "gwamm", "data", "routes.json")))["91"]["points"]]
+    eng = Engine(traps, start, hints=route)
+    eng.update(start, [], 50, 0.0)
+    spot = eng.add_wall(start, (start[0] + 2000, start[1]), detour=False)
+    assert spot is not None and not eng._detour and not eng.guiding()
+    out = eng.escape_point(start, spot)
+    assert out is not None
+    assert 300.0 <= math.hypot(out[0] - start[0], out[1] - start[1]) <= 800.0
+    assert math.hypot(out[0] - spot[0], out[1] - spot[1]) > math.hypot(start[0] - spot[0], start[1] - spot[1])
+    assert eng.next_step() is not None
+
+
 def test_consumables():
     """Nothing is used unless switched on; death penalty comes first; each bonus obeys its own setting."""
     from Sources.gwamm.core import consumables as C
@@ -144,5 +164,6 @@ if __name__ == "__main__":
     test_full_runs()
     test_route_and_trap_together()
     test_detour_on_wall()
+    test_step_clear()
     test_consumables()
     print("ALL PASSED")

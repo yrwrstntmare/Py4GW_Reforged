@@ -122,6 +122,7 @@ class Engine:
         self.tour = self.rm.tour(self.start_region)
         self.guide, self.guide_i, self._guide_near = self._prepare_guide(guide, start_xy), 0, {}
         self._route_src = list(guide or hints or ())
+        self._deferred = set()        # map cells with no path while foes remain: retried after the vanquish
         self.walls, self.detours, self._detour = [], 0, False
         self.hint_regions = self._hint_regions(hints)
         self.route_pen = self._route_lanes(hints) if self.cfg.route_hints else None
@@ -257,6 +258,10 @@ class Engine:
         if self.player_node is not None:
             self.player_region = self._region_for(self.player_node, player_xy)
         self.foes_remaining = foes_remaining
+        if self._deferred and not self._vanquish_active():
+            for k in self._deferred:                     # the vanquish is done: those cells are worth the walk now
+                self.mem.blocked.pop(k, None)
+            self._deferred = set()
         self.mem.visit(player_xy)
         self.mem.observe(enemies, player_xy, now)
         self.clusters = self.mem.clusters()
@@ -682,6 +687,70 @@ class Engine:
                 return x, y, step[2]
         return step
 
+    def _soft_route(self, here, goal, pen=None):
+        """A path that may cross the outer part of the exit fences (never closer to an exit than
+        80% of the fence, and never under 650). For ground that is walled in by a fence: the
+        pocket beside the arrival point, say, which the fence cuts off by a few steps."""
+        nav = self.nav
+        r = max(650.0, 0.8 * self.exit_radius)
+        soft = [False] * len(nav.nodes)
+        for ex, ey in self.exits:
+            for i in nav.nodes_within(ex, ey, r):
+                soft[i] = True
+        hard, nav.forbidden = nav.forbidden, soft
+        try:
+            return nav.path(here, goal, pen)
+        finally:
+            nav.forbidden = hard
+
+    def _replan_without(self, obj, _depth=[0]):
+        self.mem.blocked[obj.key] = self.cfg.max_failures
+        self.objective = None
+        if _depth[0] >= 20:
+            return None
+        _depth[0] += 1
+        try:
+            return self._plain_step()
+        finally:
+            _depth[0] -= 1
+
+    def _no_path_step(self, obj, radius, here=None, goal=None, pen=None):
+        """No walkable path to the objective is known. Close by, walking straight at it is fine
+        (the game finds the last few steps). Far away it is not: a straight line across the map
+        runs into scenery and stands there.
+
+        A map cell with no path is usually fenced in beside an exit. While foes remain it is put
+        aside (crossing a fence risks leaving the area and losing the vanquish). Once the
+        vanquish is done it is walked to through the outer part of the fence. Anything else far
+        away with no path is given up and the next best thing is planned."""
+        px, py = self.player_xy
+        far = math.hypot(obj.pos[0] - px, obj.pos[1] - py) > 1.5 * self.cfg.step_length
+        if obj.kind == "carto" and here is not None and goal is not None:
+            if self._vanquish_active():
+                self._deferred.add(obj.key)              # back for it after the last foe
+                return self._replan_without(obj)
+            route = self._soft_route(here, goal, pen)
+            if route:
+                self.route_ahead = [self.nav.nodes[i] for i in route]
+                self.soft_paths = getattr(self, "soft_paths", 0) + 1
+                k, left = 0, self.cfg.step_length
+                while k + 1 < len(route) and left > 0:
+                    (ax, ay), (bx, by) = self.nav.nodes[route[k]], self.nav.nodes[route[k + 1]]
+                    left -= math.hypot(ax - bx, ay - by)
+                    k += 1
+                x, y = self.nav.nodes[route[k]]
+                return (x, y, radius)
+        if self.nav.in_no_go(*obj.pos):
+            return None
+        if far and obj.kind != "goto":
+            if obj.kind == "carto" and self.carto is not None:
+                self.carto.declined.add(tuple(obj.key[1]))
+                self.carto_given_up += 1
+            self.no_path_given_up = getattr(self, "no_path_given_up", 0) + 1
+            return self._replan_without(obj)
+        self.route_ahead = [(obj.pos[0], obj.pos[1])]        # shown on the map as a straight line
+        return (obj.pos[0], obj.pos[1], radius)
+
     def _plain_step(self):
         """Where to walk right now: a point up to `step_length` along the shortest walkable
         path to the objective. Returns (x, y, clear_radius) or None."""
@@ -699,8 +768,11 @@ class Engine:
                 radius = min(radius, 1000.0)
         goal = self.nav.nearest_node(obj.pos[0], obj.pos[1], allowed=self.rm.reachable)
         here = self.player_node
-        if goal is None or here is None:
+        if here is None:                 # we are off the known ground for a moment: no judgement on the objective
+            self.route_ahead = [(obj.pos[0], obj.pos[1])]
             return None if self.nav.in_no_go(*obj.pos) else (obj.pos[0], obj.pos[1], radius)
+        if goal is None:
+            return self._no_path_step(obj, radius, here)
         if obj.kind == "goto":
             route, left = (getattr(self, "_goto_route", None) or self._transit_route()), self.cfg.transit_step_length
         else:
@@ -717,7 +789,7 @@ class Engine:
             left = min(left, 450.0)      # short steps near a trap, so the walk keeps to the path round it
         self.route_ahead = [self.nav.nodes[i] for i in route]
         if not route:
-            return None if self.nav.in_no_go(*obj.pos) else (obj.pos[0], obj.pos[1], radius)
+            return self._no_path_step(obj, radius, here, goal, pen)
         k = 0
         while k + 1 < len(route) and left > 0:
             (ax, ay), (bx, by) = self.nav.nodes[route[k]], self.nav.nodes[route[k + 1]]
@@ -755,7 +827,24 @@ class Engine:
         x, y = self.nav.nodes[route[k]]      # an objective inside a no-go zone is approached, not entered
         return x, y, radius
 
-    def add_wall(self, player_xy, target):
+    def escape_point(self, player_xy, away_from):
+        """Somewhere close by to step to when pinned against something: walkable ground 300-800
+        away, as far from the obstacle as that allows. None if there is no such ground."""
+        px, py = player_xy
+        ax, ay = away_from if away_from is not None else player_xy
+        best, best_d = None, -1.0
+        for i in self.nav.nodes_within(px, py, 800.0):
+            if not self.rm.reachable[i]:
+                continue
+            x, y = self.nav.nodes[i]
+            if math.hypot(x - px, y - py) < 300.0 or self.nav.in_no_go(x, y):
+                continue
+            d = math.hypot(x - ax, y - ay)
+            if d > best_d:
+                best, best_d = (x, y), d
+        return best
+
+    def add_wall(self, player_xy, target, detour=True):
         """The party was pinned here while walking at `target`: something the ground data does
         not show is in the way. Route around it from now on."""
         dx, dy = target[0] - player_xy[0], target[1] - player_xy[1]
@@ -767,7 +856,8 @@ class Engine:
             return None
         walls.append(spot)
         self.player_node = None
-        self.start_detour()
+        if detour:
+            self.start_detour()
         return spot
 
     def start_detour(self, points=12):

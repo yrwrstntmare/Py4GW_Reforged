@@ -18,6 +18,8 @@ REPLAN_S = 1.0
 STEP_TIMEOUT_S = 240.0       # one walking step, fights included
 STUCK_GIVE_UP_S = 600.0     # pinned within 600 units for this long, nothing dying: the area cannot be finished
 STALL_S = 45.0               # no movement and no kill for this long: give the step up
+WALK_STALL_S = 12.0          # the same with no enemy anywhere near: we are caught on something, not fighting
+STALL_RADIUS = 350.0         # "no movement" = still inside this circle (rocking back and forth on a tree counts as none)
 
 
 from .guard import guarded_tick
@@ -100,19 +102,30 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
 
     _stuck_since, _stuck_xy = 0.0, None
 
-    def _pinned(self, eng, s, now):
+    _escape, _escape_until = None, 0.0
+
+    def _pinned(self, eng, s, now, walking=False):
         """A step stalled. If the party keeps stalling in the same spot, something the ground data
         does not show is in the way (a shut gate): mark it so the route goes round."""
         px, py = eng.player_xy
         if self._stuck_xy is None or math.hypot(px - self._stuck_xy[0], py - self._stuck_xy[1]) > 600.0:
             self._stuck_xy, self._stuck_since, self._stuck_n = (px, py), now, 0
         self._stuck_n = getattr(self, "_stuck_n", 0) + 1
-        if self._stuck_n >= 2 and self._target is not None:
-            spot = eng.add_wall((px, py), self._target)
-            if spot is not None:
-                s.log.event("wall", player=[round(px), round(py)], target=list(self._target),
-                            spot=[round(spot[0]), round(spot[1])], walls=len(eng.walls),
-                            detour=bool(eng._detour), route_points=len(eng.guide) if eng._detour else 0)
+        # Caught while just walking (no enemy near): it is the scenery. Mark it at once and step
+        # clear. In a fight, wait for a second stall in the same place before calling it a wall.
+        # The known route is only brought in when the same place stops us twice.
+        short = self._target is not None and math.hypot(px - self._target[0], py - self._target[1]) < 400.0
+        if short and walking and self._stuck_n < 2:
+            return                           # standing at the step's end, not caught on the way to it
+        if (walking or self._stuck_n >= 2) and self._target is not None:
+            spot = eng.add_wall((px, py), self._target, detour=self._stuck_n >= 2)
+            away = spot or (eng.walls[-1] if eng.walls else None)
+            self._escape = eng.escape_point((px, py), away)
+            s.log.event("wall", player=[round(px), round(py)], target=list(self._target),
+                        spot=None if spot is None else [round(spot[0]), round(spot[1])], walls=len(eng.walls),
+                        walking=walking, times_here=self._stuck_n,
+                        step_clear=None if self._escape is None else [round(self._escape[0]), round(self._escape[1])],
+                        detour=bool(eng._detour), route_points=len(eng.guide) if eng._detour else 0)
 
     def _tick_core(self):
         S, s = BehaviorTree.NodeState, self.session
@@ -312,7 +325,15 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                 s.log.event("finished", result=s.result, status=eng.status())
                 return S.FAILURE
             key = eng.objective.key
-            if self._child is None:
+            if self._escape is not None:
+                # just marked an obstacle: first a short step clear of it, then back to the plan
+                step, key = (self._escape[0], self._escape[1], 900.0), ("escape", int(now))
+                self._escape, self._escape_until = None, now + 6.0
+                self._drop_child()
+                self._start_step(step, key)
+            elif self._child is not None and self._key and self._key[0] == "escape" and now < self._escape_until:
+                pass                         # let the step clear finish
+            elif self._child is None:
                 self._start_step(step, key)
             elif key != self._key:
                 self._drop_child()           # the plan changed: abandon the walk in progress
@@ -335,9 +356,12 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                 pxy[0] - self._stuck_xy[0], pxy[1] - self._stuck_xy[1]) > 600.0):
             self._stuck_xy, self._stuck_since = None, 0.0      # got moving again
         if (self._progress_xy is None or kills != self._progress_kills
-                or math.hypot(pxy[0] - self._progress_xy[0], pxy[1] - self._progress_xy[1]) > 150.0):
+                or math.hypot(pxy[0] - self._progress_xy[0], pxy[1] - self._progress_xy[1]) > STALL_RADIUS):
             self._progress_at, self._progress_xy, self._progress_kills = now, pxy, kills
-        stalled = now - self._progress_at > STALL_S
+        walking = not bool(self.blackboard.get("COMBAT_ACTIVE", False)) and not any(
+            e.alive and e.in_range and math.hypot(e.xy[0] - pxy[0], e.xy[1] - pxy[1]) < 2500.0
+            for e in eng.mem.enemies.values())
+        stalled = now - self._progress_at > (WALK_STALL_S if walking else STALL_S)
         if getattr(self, "_same_steps", 0) >= 8 and now - self._progress_at > 6.0:
             stalled = True                   # the same step keeps "finishing" and we have not moved
             eng.player_node = None           # we may have the party on the wrong level: look again
@@ -349,9 +373,10 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
             near = [(e.id, round(e.xy[0]), round(e.xy[1])) for e in eng.mem.enemies.values() if e.alive and e.in_range]
             s.log.event("step_abandoned", reason="stalled" if stalled else "timeout", key=self._key,
                         target=self._target, player=list(eng.player_xy), seconds=round(now - self._started),
-                        combat_flag=bool(self.blackboard.get("COMBAT_ACTIVE", False)), enemies_in_view=near[:25])
+                        combat_flag=bool(self.blackboard.get("COMBAT_ACTIVE", False)), walking=walking,
+                        enemies_in_view=near[:25])
             if stalled:
-                self._pinned(eng, s, now)
+                self._pinned(eng, s, now, walking)
             eng.step_failed()
             self._drop_child()
             if self._stuck_since and now - self._stuck_since > STUCK_GIVE_UP_S and self.transit is None:

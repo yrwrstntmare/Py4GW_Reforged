@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.31.0"
+SCRIPT_VERSION = "0.31.2"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
@@ -320,6 +320,10 @@ def draw_status():
             _line("SEARCH", f"tightened {st['escalation']}x")
         if st["blocked"]:
             _line("UNREACHABLE", f"{len(st['blocked'])} objectives given up")
+        if eng._deferred:
+            _line("FENCED CELLS", f"{len(eng._deferred)} map cell(s) beside an exit, left until the last foe is down")
+        if getattr(eng, "no_path_given_up", 0):
+            _line("NO PATH", f"{eng.no_path_given_up} far objective(s) dropped: no walkable way to them is known")
         if getattr(eng, "walls", None):
             _line("BLOCKED SPOTS", f"{len(eng.walls)} found, {eng.detours} detour(s) along the known route")
         if st["deaths"]:
