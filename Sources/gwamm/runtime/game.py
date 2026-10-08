@@ -1045,6 +1045,26 @@ def party_hero_ids():
         return []
 
 
+def travel_to(map_id):
+    """Map-travel to an unlocked outpost (current region and language)."""
+    Map.Travel(int(map_id))
+
+
+def real_outpost(map_id):
+    """Is this a place the party can actually unlock by walking in? The world graph also holds
+    mission maps and other instances (map 383 beside Gandara has no name and is not on the
+    world map: walking "into" it led back to Pogahn Passage). Judged from the game's own map
+    table: it must have a name and be shown on the world map."""
+    try:
+        if map_name(map_id) in ("", "Unknown Map ID"):
+            return False
+        from Py4GWCoreLib.native_src.methods.MapMethods import MapMethods
+        info = MapMethods.GetMapInfo(map_id)
+        return info is None or bool(info.is_on_world_map)
+    except Exception:
+        return True
+
+
 def map_max_party(map_id):
     """Largest party the given map allows (0 if unknown)."""
     try:

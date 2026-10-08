@@ -81,18 +81,62 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             return state
         return BehaviorTree.ActionNode(name=f"Try: {what}", action_fn=run)
 
-    def _shrink_node(self, limit):
+    def _shrink_node(self, limit, outpost=None):
         """Dismiss heroes and henchmen and wait until the game agrees the party is small enough.
         A single dismiss right after arriving in an outpost was ignored (the party list was not
-        ready yet), so this waits first, checks the count, and tries again up to five times."""
-        st = {"t0": 0.0, "last": 0.0, "tries": 0}
+        ready yet), so this waits first, checks the count, and tries again up to five times.
+        With `outpost` (and no limit), first works out whether travelling there needs it at all."""
+        st = {"t0": 0.0, "last": 0.0, "tries": 0, "limit": limit, "logged": False}
         log = self.session.log
 
         def run():
             now = time.time()
             st["t0"] = st["t0"] or now
+            if st.get("stage") is not None:
+                if not game.map_ready() or game.map_id() != st["stage"] or game.is_explorable():
+                    if now - st["stage_t"] > 60.0:
+                        log.event("campaign", map_id=self.map_id, phase="shrink_party", result="staging travel failed")
+                        return BehaviorTree.NodeState.SUCCESS
+                    if now - st["stage_t"] > 25.0 and not st.get("retried"):
+                        st["retried"] = True
+                        game.travel_to(st["stage"])
+                    return BehaviorTree.NodeState.RUNNING
+                st["stage"], st["t0"] = None, now           # there: let the party list load, then shrink
+                return BehaviorTree.NodeState.RUNNING
+            if not game.map_ready():
+                return BehaviorTree.NodeState.RUNNING if now - st["t0"] < 30.0 else BehaviorTree.NodeState.SUCCESS
+            if outpost is not None and not st["logged"]:
+                cap = game.map_max_party(outpost)
+                if not cap or game.party_count() <= cap:
+                    return BehaviorTree.NodeState.SUCCESS      # nothing to do: no wait
             if now - st["t0"] < 3.0:                       # let the outpost finish loading the party
                 return BehaviorTree.NodeState.RUNNING
+            if outpost is not None and not st["logged"]:
+                st["logged"] = True
+                cap, have = game.map_max_party(outpost), game.party_count()
+                if not cap or have <= cap:
+                    return BehaviorTree.NodeState.SUCCESS
+                st["limit"] = cap
+                if self.session.cfg.multibox:
+                    # accounts cannot be sent home like heroes: this area is not for this party
+                    self._too_many = f"party of {have} is too large for {game.map_name(outpost)} (limit {cap})"
+                    return BehaviorTree.NodeState.FAILURE
+                if game.is_explorable():
+                    # Heroes cannot be sent home out here, and the game will not travel this party
+                    # to a smaller outpost (Cliffs of Dohjok -> Blacktide Den stopped on the yes/no
+                    # window). Travel first to an outpost that takes the whole party, shrink there.
+                    stage = self._staging_outpost(have)
+                    log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have, limit=cap,
+                              outpost=game.map_name(outpost), from_explorable=True,
+                              staging=game.map_name(stage) if stage else None)
+                    if stage is None:
+                        return BehaviorTree.NodeState.SUCCESS   # nothing better: let the travel try
+                    st.update(stage=stage, stage_t=now)
+                    game.travel_to(stage)
+                    return BehaviorTree.NodeState.RUNNING
+                log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have, limit=cap,
+                          outpost=game.map_name(outpost), multibox=self.session.cfg.multibox)
+            limit = st["limit"]
             have = game.party_count()
             if have <= limit:
                 log.event("campaign", map_id=self.map_id, phase="shrink_party", result="ok", party=have,
@@ -112,6 +156,22 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             return BehaviorTree.NodeState.RUNNING
         return BehaviorTree.ActionNode(name="Send the heroes home", action_fn=run)
 
+    def _staging_outpost(self, have):
+        """An unlocked outpost that takes a party of `have`: one beside where we are if possible."""
+        c = self.campaign
+        try:
+            ok = [o for o in c.unlocked(refresh=True) if game.map_max_party(o) >= have and game.real_outpost(o)]
+        except Exception:
+            return None
+        if not ok:
+            return None
+        near = []
+        try:
+            near = [o for o, _leg in c.world.outposts_from(game.map_id()) if o in ok]
+        except Exception:
+            pass
+        return (near or sorted(ok))[0]
+
     def _action(self, name, fn):
         def run():
             try:
@@ -128,8 +188,10 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         self.session.log.event("campaign", map_id=self.map_id, phase=phase)
 
     # ---- getting there ----
-    def _plan_route(self):
-        c = self.campaign
+    def _route_options(self):
+        """Every known way in, as (label, legs): the NPC entry, the recorded vanquish bots' walk
+        out of their outpost (proven: people run these), and the world map's own route."""
+        c, out = self.campaign, []
         try:
             from .npc_entries import entries
             ent = entries().get(self.map_id)
@@ -137,13 +199,9 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             ent = None
         if ent and game.map_unlocked(ent["outpost"]):
             # entered by talking to an NPC in the outpost, not through a gate
-            return [{"do": "travel", "outpost": ent["outpost"]},
-                    {"do": "npc_entry", "npc": list(ent["npc"]), "dialogs": ent["dialogs"], "expect": self.map_id}]
-        if c.world is not None:
-            legs = c.world.route(self.map_id, c.unlocked(refresh=True))
-            if legs:
-                return legs
-        e = self.entry                                   # no world route: fall back to the recorded one
+            out.append(("npc", [{"do": "travel", "outpost": ent["outpost"]},
+                                {"do": "npc_entry", "npc": list(ent["npc"]), "dialogs": ent["dialogs"], "expect": self.map_id}]))
+        e = self.entry
         if e and e["plain"] and game.map_unlocked(e["outpost"]):
             legs = [{"do": "travel", "outpost": e["outpost"]}]
             first = e["transit"][0]["map"] if e["transit"] else self.map_id
@@ -151,8 +209,41 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             for i, leg in enumerate(e["transit"]):
                 nxt = e["transit"][i + 1]["map"] if i + 1 < len(e["transit"]) else self.map_id
                 legs.append({"do": "gate", "path": leg["path"], "expect": nxt, "slow": True})
-            return legs
-        return None
+            out.append(("recorded", legs))
+        if c.world is not None:
+            legs = c.world.route(self.map_id, c.unlocked(refresh=True))
+            if legs and not any(legs == l for _n, l in out):
+                out.append(("world", legs))
+        # the way that worked last time first
+        good = (c.results.get(self.map_id) or {}).get("route")
+        out.sort(key=lambda o: o[0] != good)
+        return out
+
+    def _plan_route(self):
+        opts = self._route_options()
+        if not opts:
+            return None
+        k = getattr(self, "_route_skip", 0)
+        if k >= len(opts):
+            return None
+        self._route_label = opts[k][0]
+        self._route_count = len(opts)
+        return opts[k][1]
+
+    def _switch_route(self, why):
+        """This way in failed: start over from the next known way, if there is one."""
+        k = getattr(self, "_route_skip", 0) + 1
+        if k >= getattr(self, "_route_count", 1):
+            return False
+        self._route_skip = k
+        legs = self._plan_route()
+        if not legs:
+            return False
+        self.session.log.event("campaign", map_id=self.map_id, phase="route_switch", why=why, now=self._route_label,
+                               legs=[{kk: v for kk, v in leg.items() if kk != "path"} for leg in legs])
+        self._legs, self._leg_tries = legs, 0
+        self._next_leg()
+        return True
 
     def _leg_tree(self, leg):
         """The behaviour for one leg of the journey (or of the walk into an outpost afterwards)."""
@@ -165,20 +256,11 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                                        note="walking through other areas to get there: normal mode until the last outpost")
             travel = BT.Sequence(name=f"Outpost:{leg['outpost']}", map_id_or_name=leg["outpost"], hard_mode=hm,
                                  children=[BT.Wait(duration_ms=1500)])
-            limit, have = game.map_max_party(leg["outpost"]), game.party_count()
-            if limit and have > limit and game.map_ready() and not game.is_explorable() and game.map_id() != leg["outpost"]:
-                # The party is bigger than the destination allows: the game would put up its
-                # "party too large" window and not travel. Go alone; the team for that area's size
-                # is loaded on arrival anyway.
-                self.session.log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have,
-                                       limit=limit, outpost=game.map_name(leg["outpost"]), multibox=self.session.cfg.multibox)
-                if self.session.cfg.multibox:
-                    # accounts cannot be sent home like heroes: this area is not for this party
-                    self._too_many = f"party of {have} is too large for {game.map_name(leg['outpost'])} (limit {limit})"
-                    return BehaviorTree(BehaviorTree.ActionNode(
-                        name="Party too large", action_fn=lambda: BehaviorTree.NodeState.FAILURE))
-                return BT.Sequence(name="ShrinkThenTravel", children=[self._shrink_node(limit), travel])
-            return travel
+            # The party size is checked when the travel is about to happen, not when this leg is
+            # planned: planned the moment the last area ended, the map was still loading, the
+            # check was skipped, and the game's "party too large" yes/no window stopped
+            # everything (Blacktide Den, after Cliffs of Dohjok).
+            return BT.Sequence(name="ShrinkThenTravel", children=[self._shrink_node(None, leg["outpost"]), travel])
         if leg["do"] == "npc_entry":
             expect, t0 = leg["expect"], {}
 
@@ -299,6 +381,8 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                 self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode", note=self._outcome)
                 self._finish()
                 return
+            if getattr(self, "_route_label", ""):
+                self.campaign.results.setdefault(self.map_id, {"attempts": 0})["route"] = self._route_label
             self._set("vanquish", BehaviorTree(AdaptiveNode(self.session, target_map_id=self.map_id)))
             return
         if not self._legs:
@@ -369,7 +453,8 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                 self._outcome = "no route from your unlocked outposts"
                 self._conclude()
                 return S.SUCCESS
-            self.session.log.event("campaign", map_id=self.map_id, phase="route",
+            self.session.log.event("campaign", map_id=self.map_id, phase="route", way=getattr(self, "_route_label", ""),
+                                   ways_known=getattr(self, "_route_count", 1),
                                    legs=[{k: v for k, v in leg.items() if k != "path"} for leg in self._legs])
             # Standing in an area the route goes through (revived at a shrine after a wipe on the
             # way, or started from here): carry on from this area. Travelling back to the outpost
@@ -396,6 +481,8 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
 
         if self._phase == "travel":                       # arrived in the starting outpost
             if state != S.SUCCESS:
+                if not getattr(self, "_too_many", "") and self._switch_route("could not travel to the outpost"):
+                    return S.RUNNING
                 self._outcome = getattr(self, "_too_many", "") or "could not travel to the outpost"
                 self._conclude()
                 return S.SUCCESS
@@ -419,6 +506,10 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
 
         if self._phase == "walking":
             expect, here = self._leg.get("expect"), game.map_id()
+            if (state != S.SUCCESS and game.map_ready() and getattr(self, "_leg_tries", 0) >= 1
+                    and not game.party_defeated() and not game.is_explorable()
+                    and self._switch_route(f"stuck in {game.map_name(here)}")):
+                return S.RUNNING                      # the same way failed twice: another way in
             if (state != S.SUCCESS and game.map_ready() and here == getattr(self, "_leg_from", None)
                     and not game.party_defeated() and getattr(self, "_leg_tries", 0) < LEG_RETRIES):
                 # still in the same place and able to walk: try the leg again rather than leave
@@ -440,6 +531,8 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                     self.session.log.event("campaign", map_id=self.map_id, phase="leave_town", wrong_exit=list(xy),
                                            led_to=here, town=town)
                 self._outcome = f"door led to {game.map_name(here)}, expected {game.map_name(expect)}"
+                if not game.is_explorable() and self._switch_route(self._outcome):
+                    return S.RUNNING
                 self._finish()
             else:
                 self._next_leg()
@@ -479,7 +572,13 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
         if c.world is None:
             return False
         px, py = game.player_xy()
-        options = [(o, leg) for o, leg in c.world.outposts_from(self.map_id) if not game.map_unlocked(o)]
+        # A map the game has no name for is not a real outpost (Gandara and Dejarin Estate both
+        # "unlocked" 383, which is the mission map: the door led back to Pogahn Passage).
+        locked = [(o, leg) for o, leg in c.world.outposts_from(self.map_id) if not game.map_unlocked(o)]
+        options = [(o, leg) for o, leg in locked if game.real_outpost(o)]
+        if len(options) < len(locked):
+            self.session.log.event("campaign", map_id=self.map_id, phase="unlock_skipped",
+                                   not_outposts=[o for o, _l in locked if (o, _l) not in options])
         if need_gate:                    # only an outpost with its own gate into this area will do
             options = [(o, leg) for o, leg in options
                        if any(g.get("to_map") == self.map_id for g in c.world.gates.get(o, []))]

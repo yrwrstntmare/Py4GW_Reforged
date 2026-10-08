@@ -493,6 +493,22 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                             hp=round(cond["hp"], 2), energy=round(cond["energy"], 2), dead=cond["dead_allies"])
                 self._rest_since, s.resting = None, ""
 
+        # Backed off from a big crowd: hold here for it. If it does not come, it was not coming
+        # for us; leave that ground for later rather than walking back into it.
+        hold = self.__dict__.get("_crowd_hold")
+        if hold is not None:
+            until, (cx, cy), size = hold
+            px_, py_ = eng.player_xy
+            gap = min((math.hypot(e.xy[0] - px_, e.xy[1] - py_) for e in eng.mem.enemies.values()
+                       if e.alive and e.in_range), default=None)
+            if now < until and (gap is None or gap >= 1300.0):
+                self._drop_child()
+                return S.RUNNING
+            self._crowd_hold = None
+            if gap is None or gap >= 1300.0:
+                eng.postpone((cx, cy), 300.0)
+                s.log.event("crowd_left", at=[round(cx), round(cy)], size=size, gap=None if gap is None else round(gap))
+
         # Just raised in the middle of a fight, at a sliver of health: once clear of the enemy, stay
         # clear until health is back (or they come to us). Walking straight back in killed the
         # leader again one second after his retreat ended.

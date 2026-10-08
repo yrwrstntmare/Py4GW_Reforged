@@ -622,10 +622,35 @@ class Engine:
         r2 = self.cfg.danger_radius ** 2
         return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 for x, y, until in self.danger if until > self._now)
 
+    def _passes_danger(self, a, b, clear=1500.0):
+        """Does the straight line from a to b pass within `clear` of live danger (not counting
+        danger round a itself, which we are leaving)?"""
+        if self.cfg.keep_at_it:
+            return False
+        ax, ay = a
+        bx, by = b
+        dx, dy = bx - ax, by - ay
+        L2 = dx * dx + dy * dy or 1.0
+        for x, y, until in self.danger:
+            if until <= self._now or math.hypot(x - ax, y - ay) < clear:
+                continue
+            t = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / L2))
+            if math.hypot(ax + t * dx - x, ay + t * dy - y) < clear:
+                return True
+        return False
+
     def _candidates(self):
         out = self._all_candidates()
-        safe = [o for o in out if o.kind == "carto" or not self._dangerous(o.pos)]
-        return safe if any(o.kind != "carto" for o in safe) or not out else out
+        # Map-only targets may lie in danger, but not when the way there runs past ground left
+        # for later (Gandara: a carto walk went past two crowds just put off, into 18 of them).
+        px, py = self.player_xy
+        carto = [o for o in out if o.kind == "carto" and not self._passes_danger((px, py), o.pos)]
+        safe = [o for o in out if o.kind != "carto" and not self._dangerous(o.pos)] + carto
+        if not out:
+            return out
+        if any(o.kind != "carto" for o in safe) or carto:
+            return safe
+        return out
 
     def _all_candidates(self):
         if self.goto is not None:

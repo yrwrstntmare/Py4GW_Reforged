@@ -264,6 +264,11 @@ class FightMixin:
                 and now - st["fell_back_at"] > cfg.fall_back_cooldown and not busy):
             st["fell_back_at"] = now                          # counted even if no spot, so we do not retry every second
             if back_off("big pull on its way", cfg.fall_back_distance, 5.0):
+                # Wait where we fell back to and let them come. Walking on afterwards took the
+                # party straight back into the crowd it had just backed away from (Gandara).
+                cx = sum(e.xy[0] for e in near) / len(near)
+                cy = sum(e.xy[1] for e in near) / len(near)
+                self._crowd_hold = (now + 12.0, (cx, cy), len(near))
                 return True
         if cfg.call_targets:
             area = elites.AREAS.get(s.map_id) or []
