@@ -571,6 +571,19 @@ def test_no_restart_consumables():
     assert C.decide(cfg, C.Facts(**base, no_restart=True, foes_near=9))[0] is None      # switched off stays off
 
 
+def test_supports_allies():
+    """Enemies casting heals or protection on their own side are recognised as healers."""
+    from Sources.gwamm.core import tactics
+    assert tactics.supports_allies("Spell. Heal target ally for 60 Health.")
+    assert tactics.supports_allies("Enchantment Spell. For 8 seconds, all party members within earshot have a 50% chance to block attacks.")
+    assert tactics.supports_allies("Enchantment Spell. For 8 seconds, the next time target ally would take damage or life steal , that ally gains that amount of Health instead.")
+    assert not tactics.supports_allies("Hex Spell. Target foe suffers -3 Health degeneration.")
+    assert not tactics.supports_allies("Spell. Steal 30 Health from target foe.")
+    model = 999001
+    assert tactics.learn_role(model, "healer") and tactics.role_of(model) == "healer"
+    assert not tactics.learn_role(model, "fighter")          # never downgraded
+
+
 if __name__ == "__main__":
     test_geometry()
     test_cartography()
@@ -580,6 +593,7 @@ if __name__ == "__main__":
     test_detour_on_wall()
     test_step_clear()
     test_wipe_zone()
+    test_supports_allies()
     test_no_restart_consumables()
     test_cut_off_gives_up_nothing()
     test_pull_rule()

@@ -76,6 +76,33 @@ def heals_allies(description):
     return bool(helps and others and "steal" not in d)
 
 
+def supports_allies(description):
+    """A skill whose job is keeping someone else on its side going: heals, protection,
+    condition or hex removal for allies. Broader than heals_allies (which feeds the role
+    table built from the Enemy Tracker): a monk casting Aegis or Reversal of Fortune is the
+    one to kill first just as much as one casting Orison of Healing."""
+    import re
+    d = (description or "").lower()
+    if heals_allies(d):
+        return True
+    if re.search(r"\bsteals? (up to )?(\[|\d)", d) or not re.search(r"\b(target (other )?ally|other ally|party members?|all(y|ies))\b", d):
+        return False
+    return bool(re.search(r"gains? .{0,80}health|\bblock\b|remove .{0,40}(condition|hex)|conditions? .{0,20}transferred|"
+                          r"damage .{0,20}reduc|cannot be (killed|reduced)", d))
+
+
+def learn_role(model, role):
+    """A role seen in the fight itself (an enemy casting a heal is a healer), for types neither
+    our table nor the Enemy Tracker knew. Returns True when it is new."""
+    model = int(model or 0)
+    if not model or not role or ROLES.get(model) == role:
+        return False
+    if ROLES.get(model) and role != "healer":
+        return False                     # a healer sighting may upgrade a type; nothing downgrades one
+    ROLES[model] = role
+    return True
+
+
 def add_roles(extra):
     """Roles from another source (the Enemy Tracker widget's records) for enemy types our own
     table does not have. Ours, measured from recorded fights, wins where both know a type.
@@ -379,7 +406,7 @@ def join_chance(distance):
 
 
 def plan_fight(leader_xy, enemies, trail, max_take=9, aggro=1000.0, margin=150.0, look=2600.0,
-               near=None, far=1700.0, stand=None):
+               near=None, far=1700.0, stand=None, route_fn=None, leader_z=None):
     """Tell the groups in front of us apart and decide how to start: which one to wake, from
     where, where to fight it, and what else that would bring.
 
@@ -469,17 +496,34 @@ def plan_fight(leader_xy, enemies, trail, max_take=9, aggro=1000.0, margin=150.0
                     for q in packs if q not in woken for e in q)
         late = [q for q in packs if q not in woken and is_patrol(q)
                 and future(q, camp if camp is not None else tag) <= reach]
+        # The way the woken group walks to us, and the party fights along: any other group near
+        # that way is likely to join (Sunjiang: a group a level down came round the long way, past
+        # a bigger one, and the party fighting towards it woke that one too).
+        on_route = []
+        if route_fn is not None:
+            try:
+                way = route_fn(m["xy"], camp if camp is not None else tag) or []
+            except Exception:
+                way = []
+            way = way[::2] if len(way) > 40 else way
+            for q in packs:
+                if q in woken:
+                    continue
+                if any(math.hypot(e["xy"][0] - x, e["xy"][1] - y) <= reach * 0.8 for e in q for x, y in way):
+                    on_route.append(q)
+        other_level = (leader_z is not None and m.get("z") is not None and abs(m["z"] - leader_z) > 260.0)
         options.append({"target": m["id"], "target_xy": m["xy"], "tag_xy": tag, "distance": d,
                         "members": ids, "total": len(ids), "woken_groups": [len(q) for q in woken],
                         "patrol_first": is_patrol(pk), "camp": camp, "late": sum(len(q) for q in late),
-                        "likely": round(len(ids) + extra, 1)})
+                        "on_route": sum(len(q) for q in on_route), "other_level": other_level,
+                        "likely": round(len(ids) + extra + 0.7 * sum(len(q) for q in on_route), 1)})
     if not options:
         return None
     sizes = [len(pk) for pk in packs]
 
     def rank(o):       # fits and has somewhere to fight; then: nothing about to walk in; patrols first; least; nearest
         return (o["total"] > max_take, o["camp"] is None, o["late"] > 0, o["likely"] > max_take,
-                not o["patrol_first"], o["likely"], o["distance"])
+                o["other_level"], o["on_route"] > 0, not o["patrol_first"], o["likely"], o["distance"])
 
     best = min(options, key=rank)
     best["groups"] = sizes

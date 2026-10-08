@@ -10,6 +10,7 @@ import math
 import os
 
 _PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "world.json")
+STUB_SIZE = 5                # nodes this small are portal stubs, not ground to walk
 CROSSING_COST = 4000.0        # loading screens are not free: prefer routes with fewer areas
 
 
@@ -54,7 +55,12 @@ class World:
                 heapq.heappush(heap, (0.0, tie, g["node"], at, legs)); tie += 1
             n = self.outpost_node.get(o)
             if n is not None:
-                heapq.heappush(heap, (500.0, tie, n, None, [{"do": "travel", "outpost": o}])); tie += 1
+                legs = [{"do": "travel", "outpost": o}]
+                if self.nodes[n]["map"] is not None and not self.gates.get(o):
+                    # the outpost opens straight onto an area and no walk out was recorded:
+                    # leave by its own portal, found in the game when we are standing there
+                    legs.append({"do": "leave_town", "expect": self.nodes[n]["map"], "from": o})
+                heapq.heappush(heap, (500.0, tie, n, None, legs)); tie += 1
         while heap:
             cost, _t, node, at, legs = heapq.heappop(heap)
             if node == goal:
@@ -69,12 +75,27 @@ class World:
                 leg = {"do": "door", "xy": d["xy"], "beyond": d["beyond"], "portal": d["portal"],
                        "expect": self.nodes[nxt]["map"], "through": here["map"],
                        "fight": here["map"] is not None}
-                heapq.heappush(heap, (cost + step + CROSSING_COST, tie, nxt, self._door_back(nxt, node), legs + [leg]))
+                # A stub of a few trapezoids is the far side of a portal recorded in the wrong map
+                # file (the Leviathan Pits gate's "Silent Surf" is a 3-trapezoid patch of Leviathan
+                # Pits). The game carries the party across it; a leg for it would send the party
+                # walking at coordinates from another map.
+                add = [] if here.get("size", 99) <= STUB_SIZE else [leg]
+                heapq.heappush(heap, (cost + step + CROSSING_COST, tie, nxt, self._door_back(nxt, node), legs + add))
                 tie += 1
         return None
 
     def reachable(self, target_map, unlocked):
         return self.route(target_map, unlocked) is not None
+
+    def town_exit_hint(self, outpost):
+        """Where this outpost's way out is, as recorded from the area side (the door tagged with
+        the outpost's number). None if unknown."""
+        tag = f"{int(outpost):04d}"
+        for n in self.nodes.values():
+            for d in n["doors"]:
+                if d.get("tag") == tag and n["map"] is not None:
+                    return tuple(d.get("portal") or d["xy"])
+        return None
 
     def outposts_from(self, map_id):
         """Outposts that can be walked into from this area: [(outpost id, leg)]. Used after a

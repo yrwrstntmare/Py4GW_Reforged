@@ -22,7 +22,6 @@ class BlessingMixin:
         giver can be found in the log and added."""
         seen = self.__dict__.setdefault("_npc_seen", {})
         try:
-            known = {m for ids in game.BLESSING_NPCS.values() for m in ids}
             for agent_id, model, x, y in game.npcs_in_sight():
                 if seen.get(agent_id, 0) > 0 or len(seen) > 150:
                     continue
@@ -31,34 +30,57 @@ class BlessingMixin:
                 if name or seen[agent_id] < -3:
                     seen[agent_id] = 1
                     self.session.log.event("npc", agent=agent_id, model=model, name=name, pos=[round(x), round(y)],
-                                           blessing_giver=model in known)
+                                           blessing_giver=game.blessing_kind(agent_id, model))
         except Exception as e:
             if not seen.get("error"):
                 seen["error"] = 1
                 self.session.log.event("npc", error=repr(e))
 
     def _try_blessing(self, eng, now):
-        """Start walking to a blessing giver if one is close, we have no blessing, and no known
-        enemy is near us or it. True when a walk was started."""
+        """Take a blessing or bounty from a giver once it is safe to. A giver with enemies round
+        it is remembered and its enemies are fought first (the engine is told to favour them);
+        once they are dead the party walks back for it. True when a walk was started."""
         self._log_npcs()
+        givers = self.__dict__.setdefault("_givers", {})      # agent id -> (x, y, kind)
         try:
-            npcs = game.blessing_npcs()
-            if not npcs or game.has_blessing():
+            if game.has_blessing():
+                givers.clear()
+                eng.focus = None
                 return False
+            for agent_id, x, y, kind in game.blessing_npcs():
+                givers[agent_id] = (x, y, kind)
         except Exception as e:
             if not getattr(self, "_bless_err", False):
                 self._bless_err = True
                 self.session.log.event("blessing", stage="error", error=repr(e))
             return False
+        if not givers:
+            return False
         px, py = eng.player_xy
         foes = [e.xy for e in eng.mem.enemies.values() if e.alive and not e.lost]
-        for agent_id, x, y, kind in sorted(npcs, key=lambda n: (n[1] - px) ** 2 + (n[2] - py) ** 2):
+        clearing = self.__dict__.setdefault("_bless_clearing", set())
+        focus = None
+        for agent_id, (x, y, kind) in sorted(givers.items(), key=lambda g: (g[1][0] - px) ** 2 + (g[1][1] - py) ** 2):
             if self._bless_tries.get(agent_id, 0) >= 2 or eng.nav.in_no_go(x, y):
                 continue
-            if math.hypot(x - px, y - py) > eng.cfg.blessing_reach or eng._walk_distance((x, y)) > 1.5 * eng.cfg.blessing_reach:
+            known = agent_id in clearing                 # seen before and waited on: worth a longer walk back
+            if math.hypot(x - px, y - py) > (8000.0 if known else eng.cfg.blessing_reach):
                 continue
-            if any(math.hypot(fx - x, fy - y) < 1600.0 or math.hypot(fx - px, fy - py) < 1600.0 for fx, fy in foes):
+            walk = eng._walk_distance((x, y))
+            if walk is None or walk > (8000.0 if known else 1.5 * eng.cfg.blessing_reach):
                 continue
+            if any(math.hypot(fx - x, fy - y) < 1600.0 for fx, fy in foes):
+                if focus is None:
+                    focus = (x, y)
+                if agent_id not in clearing:
+                    clearing.add(agent_id)
+                    self.session.log.event("blessing", stage="clearing", npc=agent_id, npc_kind=kind, pos=[round(x), round(y)],
+                                           foes_near=sum(1 for fx, fy in foes if math.hypot(fx - x, fy - y) < 1600.0))
+                continue
+            if any(math.hypot(fx - px, fy - py) < 1600.0 for fx, fy in foes):
+                eng.focus = focus
+                return False                             # fight what is on us first
+            eng.focus = None
             self._bless_tries[agent_id] = self._bless_tries.get(agent_id, 0) + 1
             self._drop_child()
             self._child = BT.TakeBlessing(pos=(x, y), faction=kind if kind in ("kurzick", "luxon") else None,
@@ -66,8 +88,9 @@ class BlessingMixin:
             self._key, self._target, self._started = ("bless", agent_id), (x, y), now
             self._progress_at, self._progress_xy, self._progress_kills = now, None, -1
             self.session.log.event("blessing", stage="start", npc=agent_id, npc_kind=kind, pos=[round(x), round(y)],
-                                   attempt=self._bless_tries[agent_id])
+                                   attempt=self._bless_tries[agent_id], came_back=known)
             return True
+        eng.focus = focus
         return False
 
     # ---- elite capture ----

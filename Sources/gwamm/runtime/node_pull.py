@@ -62,6 +62,30 @@ class PullMixin:
             self._leader_on = on
             self.blackboard["combat_enabled_request"] = bool(on)
 
+    def _shot_spot(self, eng, tgt, here, members, live):
+        """A place to shoot the target from: within weapon range, with a clear line to it, on
+        walkable ground, and out of notice range of every enemy not in the target's group.
+        Nearest to the leader first. None if there is no such place."""
+        tx, ty = tgt.xy
+        others = [e.xy for e in live if e.id not in members and e.id != tgt.id]
+        best, best_d = None, None
+        for r in (PULL_RANGE - 80.0, PULL_RANGE - 300.0):
+            for k in range(24):
+                a = 2.0 * math.pi * k / 24
+                x, y = tx + r * math.cos(a), ty + r * math.sin(a)
+                if not eng.nav.on_mesh(x, y) or not eng.nav.line_clear((x, y), (tx, ty)):
+                    continue
+                if any(math.hypot(ox - x, oy - y) < 1050.0 for ox, oy in others):
+                    continue
+                if not game.sight_clear((x, y), (tx, ty)):        # a hill crest in the way
+                    continue
+                d = math.hypot(x - here[0], y - here[1])
+                if best is None or d < best_d:
+                    best, best_d = (x, y), d
+            if best is not None:
+                return best
+        return None
+
     def _flag_party(self, eng, centre, toward):
         """Park the heroes round `centre`, spread out and facing `toward`. Falls back to the one
         party flag when there are no heroes of our own to place one by one."""
@@ -149,12 +173,32 @@ class PullMixin:
             # that, a group hovering at the edge of the range switched the wait off and on, and
             # every "off" let the normal walk carry the party a little closer.
             ranged = cfg.pull_ranged and game.leader_ranged()
+            def walk_between(a, b, nav=eng.nav):
+                i, j = nav.nearest_node(a[0], a[1], max_radius=600.0), nav.nearest_node(b[0], b[1], max_radius=600.0)
+                if i is None or j is None:
+                    return []
+                return [nav.nodes[k] for k in nav.path(i, j)]
             plan = tactics.plan_fight((px, py), view, eng.mem.route, limit, far=2600.0 if waiting else 1700.0,
-                                      stand=PULL_RANGE if ranged else None)
+                                      stand=PULL_RANGE if ranged else None, route_fn=walk_between,
+                                      leader_z=getattr(eng, "player_z", None))
             # A room the party takes comfortably in an ordinary fight is not pulled at all. The
             # recordings: with up to six at once almost nobody dies, and a third of all pulls
             # brought nothing and cost 10-15 s each, nearly all of them in rooms like that.
             small = plan is not None and sum(plan["groups"]) <= max(cfg.pull_min_group, int(limit * 0.67))
+            if small:
+                # ...unless it is a nest of casters: six Afflicted with Mind Burn, Ray of Judgment
+                # and Lava Arrows took a party walking in bunched up from full health to dead in
+                # eight seconds (Sunjiang). Those are pulled, so the heroes stand spread out.
+                try:
+                    casters = sum(1 for i in plan.get("members") or ()
+                                  if tactics.role_of(game.enemy_model(i)) in ("caster", "healer"))
+                except Exception:
+                    casters = 0
+                if casters >= 3:
+                    small = False
+                    if not st.get("caster_said") or now - st["caster_said"] > 30.0:
+                        st["caster_said"] = now
+                        s.log.event("pull", stage="casters", casters=casters, total=plan["total"])
             if plan is None or small or (plan["total"] < cfg.pull_min_group and len(plan["groups"]) == 1 and not plan["incoming"]):
                 if waiting and plan is None and now - st.get("lost", now) < 4.0:
                     st.setdefault("lost", now)
@@ -226,15 +270,27 @@ class PullMixin:
             if easy or force:
                 pass
             elif plan["verdict"] == "avoid":
-                if not cfg.keep_at_it:
+                # A single group only a little over the limit is still one group: pulling it on
+                # its own is the best that can be done with it. And where every group is a big
+                # one (Sunjiang District), putting each off only sends the party walking round
+                # the map to find them all still there: after two put-offs in a few minutes, the
+                # next one is taken on.
+                recent = [t for t in self.__dict__.setdefault("_avoided_at", []) if now - t < 300.0]
+                self._avoided_at = recent
+                if plan["total"] <= limit + 2 or len(recent) >= 2:
+                    s.log.event("pull", stage="taking_it_on", total=plan["total"], limit=limit, put_off_lately=len(recent))
+                    go, force = True, True
+                elif not cfg.keep_at_it:
+                    self._avoided_at.append(now)
                     # one crowd, more than the party should take, and it cannot be split
                     eng.postpone(plan["target_xy"], 480.0)
                     s.log.event("pull", stage="avoided", total=plan["total"], limit=limit)
                     st.update(phase=None, cool=now + 5.0)
                     return False
-                go = waited > cfg.pull_wait_seconds     # testing: try it anyway, after a look
-                if plan["distance"] < 1500.0:
-                    give_ground(1500.0)
+                else:
+                    go = waited > cfg.pull_wait_seconds     # testing: try it anyway, after a look
+                    if plan["distance"] < 1500.0:
+                        give_ground(1500.0)
             elif plan["verdict"] == "probe":
                 go = waited > 12.0
             elif plan["verdict"] == "wait" and waited > cfg.pull_wait_seconds:
@@ -278,11 +334,13 @@ class PullMixin:
             st["released"] = False
             st.update(phase="go", camp=camp, t0=now, last=0.0, kills0=game.foes_killed(), came=0,
                       total=plan["total"], target=plan["target"], tag=plan["tag_xy"], at_tag=0.0,
+                      members=set(plan.get("members") or ()),
                       pos0={e.id: e.xy for e in live})
             s.log.event("pull", stage="start", verdict=plan["verdict"], camp=[round(camp[0]), round(camp[1])],
                         tag=[round(plan["tag_xy"][0]), round(plan["tag_xy"][1])], groups=plan["groups"],
                         would_wake=plan["woken_groups"], total=plan["total"], limit=limit,
-                        patrol_first=plan["patrol_first"], waited=round(waited, 1), ranged=ranged, likely=plan.get("likely"))
+                        patrol_first=plan["patrol_first"], waited=round(waited, 1), ranged=ranged, likely=plan.get("likely"),
+                        on_route=plan.get("on_route"), other_level=plan.get("other_level"))
             return True
 
         if now - st["t0"] > 150.0:
@@ -306,6 +364,25 @@ class PullMixin:
                 info = game.enemy_details(tgt.id)
                 if info is not None and info[0] < 0.995:
                     hit = True                                      # our shot landed: its group knows
+                elif (d_t <= PULL_RANGE + 500.0 and now - st.get("shot", 0.0) >= 1.5
+                      and not (eng.nav.line_clear((px, py), tgt.xy) and game.sight_clear((px, py), tgt.xy))):
+                    # Something stands between the leader and the target: the shot would not go
+                    # off (the game answers "target obstructed"). Move to a place with a clear
+                    # line to it first, instead of shooting at the wall.
+                    old = st.get("clear_spot")
+                    if (old is not None and math.hypot(old[0] - tgt.xy[0], old[1] - tgt.xy[1]) <= PULL_RANGE
+                            and eng.nav.line_clear(old, tgt.xy)):
+                        spot = old                       # the spot chosen still works: keep walking to it
+                    else:
+                        spot = self._shot_spot(eng, tgt, (px, py), st.get("members") or set(), live)
+                    if spot is not None and spot != old:
+                        st["clear_spot"] = spot
+                        st["tag"], st["at_tag"] = spot, 0.0
+                        s.log.event("pull", stage="no_clear_shot", target=tgt.id, move_to=[round(spot[0]), round(spot[1])],
+                                    from_xy=[round(px), round(py)])
+                    elif spot is None and not st.get("no_spot_said"):
+                        st["no_spot_said"] = True
+                        s.log.event("pull", stage="no_clear_shot", target=tgt.id, move_to=None)
                 elif d_t <= PULL_RANGE + 500.0 and now - st.get("shot", 0.0) >= 1.5:
                     # Attack it: the game itself walks the leader to exactly his weapon's range
                     # and no nearer, and follows the target if it moves. (Walking to a spot

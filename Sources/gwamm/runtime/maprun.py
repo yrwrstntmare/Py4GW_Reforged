@@ -130,6 +130,15 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
     # ---- getting there ----
     def _plan_route(self):
         c = self.campaign
+        try:
+            from .npc_entries import entries
+            ent = entries().get(self.map_id)
+        except Exception:
+            ent = None
+        if ent and game.map_unlocked(ent["outpost"]):
+            # entered by talking to an NPC in the outpost, not through a gate
+            return [{"do": "travel", "outpost": ent["outpost"]},
+                    {"do": "npc_entry", "npc": list(ent["npc"]), "dialogs": ent["dialogs"], "expect": self.map_id}]
         if c.world is not None:
             legs = c.world.route(self.map_id, c.unlocked(refresh=True))
             if legs:
@@ -150,7 +159,11 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         here = game.map_id()
         if leg["do"] == "travel":
             self._home = leg["outpost"]
-            travel = BT.Sequence(name=f"Outpost:{leg['outpost']}", map_id_or_name=leg["outpost"], hard_mode=True,
+            hm = not self._crosses_other_areas(self._legs)
+            if not hm:
+                self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
+                                       note="walking through other areas to get there: normal mode until the last outpost")
+            travel = BT.Sequence(name=f"Outpost:{leg['outpost']}", map_id_or_name=leg["outpost"], hard_mode=hm,
                                  children=[BT.Wait(duration_ms=1500)])
             limit, have = game.map_max_party(leg["outpost"]), game.party_count()
             if limit and have > limit and game.map_ready() and not game.is_explorable() and game.map_id() != leg["outpost"]:
@@ -166,6 +179,26 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                         name="Party too large", action_fn=lambda: BehaviorTree.NodeState.FAILURE))
                 return BT.Sequence(name="ShrinkThenTravel", children=[self._shrink_node(limit), travel])
             return travel
+        if leg["do"] == "npc_entry":
+            expect, t0 = leg["expect"], {}
+
+            def arrived():
+                t0.setdefault("t", time.time())
+                if game.map_ready() and game.map_id() == expect:
+                    return BehaviorTree.NodeState.SUCCESS
+                if time.time() - t0["t"] > 45.0:
+                    self.session.log.event("campaign", map_id=self.map_id, phase="npc_entry", note="no map change 45 s after the dialog")
+                    return BehaviorTree.NodeState.FAILURE
+                return BehaviorTree.NodeState.RUNNING
+            d = leg["dialogs"]
+            steps = [BT.MoveAndDialog(pos=tuple(leg["npc"]), dialog_id=d[0])]
+            for dialog in d[1:]:
+                steps += [BT.Wait(duration_ms=700), BT.SendDialog(dialog_id=dialog)]
+            steps.append(BehaviorTree(BehaviorTree.ActionNode(name="Wait for the area", action_fn=arrived)))
+            self.session.log.event("campaign", map_id=self.map_id, phase="npc_entry", npc=leg["npc"], dialogs=d)
+            return BT.Sequence(name="NpcEntry", children=steps)
+        if leg["do"] == "leave_town":
+            return BehaviorTree(BehaviorTree.SubtreeNode(name="LeaveTown", subtree_fn=lambda _n: self._leave_town_tree(leg)))
         if leg["do"] == "gate":
             return BT.MoveAndExitMap([tuple(p) for p in leg["path"]], target_map_id=leg["expect"],
                                      timeout_ms=600_000 if leg.get("slow") else 60_000, log=True)
@@ -178,9 +211,94 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                                          arrive_map=leg.get("expect")))
         return BT.Sequence(name="CrossArea", children=[walk, cross])
 
+    def _bad_exits_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "town_exits.json")
+
+    def _save_bad_town_exits(self):
+        try:
+            with open(self._bad_exits_path(), "w", encoding="utf-8") as f:
+                json.dump(self.campaign.__dict__.get("_bad_town_exits", {}), f)
+        except Exception:
+            pass
+
+    def _leave_town_tree(self, leg):
+        if "_bad_town_exits" not in self.campaign.__dict__:
+            try:
+                with open(self._bad_exits_path(), encoding="utf-8") as f:
+                    self.campaign.__dict__["_bad_town_exits"] = json.load(f)
+            except Exception:
+                self.campaign.__dict__["_bad_town_exits"] = {}
+        """Walk out of this outpost through its portal (the one nearest where we stand)."""
+        portals = []
+        try:
+            portals = game.travel_portals()          # real portals only (arrival points are not ways out)
+        except Exception:
+            pass
+        px, py = game.player_xy()
+        hint = None
+        try:
+            hint = self.campaign.world.town_exit_hint(leg.get("from") or game.map_id())
+        except Exception:
+            pass
+        # Best guide: the arrival point tagged with the map we want sits right beside the portal
+        # to it (a party coming from there appears at it). The world map's door is only a fallback
+        # (for Seafarer's Rest it pointed at the Silent Surf portal).
+        tagged = []
+        try:
+            tagged = [(x, y) for x, y, m in game.arrival_points() if m == int(leg["expect"])]
+        except Exception:
+            pass
+        bad = set(map(tuple, self.campaign.__dict__.setdefault("_bad_town_exits", {}).get(str(game.map_id()), [])))
+        portals = [p for p in portals if (round(p[0]), round(p[1])) not in bad] or portals
+        ref = (tagged[0] if tagged else None) or hint or (px, py)
+        self.session.log.event("campaign", map_id=self.map_id, phase="leave_town", portals=[list(p) for p in portals],
+                               hint=list(hint) if hint else None, arrival_for_target=[list(t) for t in tagged],
+                               player=[round(px), round(py)])
+        if not portals:
+            if hint is None:
+                return BehaviorTree(BehaviorTree.ActionNode(name="No portal", action_fn=lambda: BehaviorTree.NodeState.FAILURE))
+            portals = [hint]
+        x, y = min(portals, key=lambda p: (p[0] - ref[0]) ** 2 + (p[1] - ref[1]) ** 2)
+        self._town_exit = (game.map_id(), (round(x), round(y)))
+        return BehaviorTree(CrossNode(self.session, {"xy": [x, y], "beyond": [x, y], "expect": leg["expect"]},
+                                      game.map_id(), timeout_s=120.0))
+
+    def _crosses_other_areas(self, legs):
+        """True when these legs walk through an explorable area other than the one to vanquish
+        (getting there through other areas, or opening an outpost on the way)."""
+        c = self.campaign
+        towns = c.world.all_outposts() if c.world is not None else set()
+        for leg in legs:
+            for m in (leg.get("expect"), leg.get("through")):
+                if m and int(m) != self.map_id and int(m) not in towns:
+                    return True
+        return False
+
     def _next_leg(self):
         """Start the next leg, or the vanquish once we are standing in the area."""
         if game.map_ready() and game.map_id() == self.map_id and game.is_explorable():
+            if not game.hard_mode() and not getattr(self, "_hm_retry", False):
+                # got here in normal mode (no outpost on the way to switch in): go round by an
+                # outpost now open, in hard mode, if there is one that leads straight in
+                self._hm_retry = True
+                legs = self._plan_route() or []
+                if legs and legs[0]["do"] == "travel" and not self._crosses_other_areas(legs[1:]):
+                    self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
+                                           note="arrived in normal mode: going back round in hard mode")
+                    self._legs = legs
+                    self._next_leg()
+                    return
+                # No such outpost open yet: walk into one from here that has its own way into this
+                # area, then start again from it in hard mode.
+                if self._start_unlock(need_gate=True):
+                    self._rehome_hm = True
+                    self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
+                                           note="arrived in normal mode: opening an outpost to come back in hard mode")
+                    return
+                self._outcome = "reached the area in normal mode, with no outpost to switch to hard mode from"
+                self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode", note=self._outcome)
+                self._finish()
+                return
             self._set("vanquish", BehaviorTree(AdaptiveNode(self.session, target_map_id=self.map_id)))
             return
         if not self._legs:
@@ -197,7 +315,14 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             leg = {"do": "travel", "outpost": self._home}
         self._leg = leg
         self._leg_tries, self._leg_from = 0, game.map_id()
-        self._set("travel" if leg["do"] == "travel" else "walking", self._leg_tree(leg))
+        tree = self._leg_tree(leg)
+        if (leg["do"] != "travel" and game.map_ready() and not game.is_explorable() and not game.hard_mode()
+                and not self._crosses_other_areas([leg] + self._legs)):
+            # an outpost on the way, and from here the walk leads straight into the area: back to hard mode
+            self.session.log.event("campaign", map_id=self.map_id, phase="hard_mode", in_map=game.map_id())
+            tree = BT.Sequence(name="HardModeThenWalk", children=[BT.SetHardMode(hard_mode=True),
+                                                                  BT.Wait(duration_ms=800), tree])
+        self._set("travel" if leg["do"] == "travel" else "walking", tree)
 
     def _tick_impl(self):
         from .guard import guarded_tick
@@ -306,6 +431,14 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                 self._finish()
             elif expect and here != expect:
                 # the world map had this door wrong: remember, and do not vanquish the wrong place
+                if self._leg.get("do") == "leave_town" and getattr(self, "_town_exit", None):
+                    town, xy = self._town_exit
+                    bad = self.campaign.__dict__.setdefault("_bad_town_exits", {}).setdefault(str(town), [])
+                    if list(xy) not in bad:
+                        bad.append(list(xy))
+                    self._save_bad_town_exits()
+                    self.session.log.event("campaign", map_id=self.map_id, phase="leave_town", wrong_exit=list(xy),
+                                           led_to=here, town=town)
                 self._outcome = f"door led to {game.map_name(here)}, expected {game.map_name(expect)}"
                 self._finish()
             else:
@@ -322,6 +455,16 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
         if self._phase == "unlock":
             self.session.log.event("campaign", map_id=self.map_id, phase="unlock_result",
                                    now_in=game.map_name(game.map_id()), ok=(state == S.SUCCESS))
+            if getattr(self, "_rehome_hm", False):
+                self._rehome_hm = False
+                legs = self._plan_route() or []
+                if state == S.SUCCESS and legs and not self._crosses_other_areas(legs[1:]):
+                    self._legs = legs
+                    self._next_leg()                 # travel (hard mode) and walk straight in
+                    return S.RUNNING
+                self._outcome = "reached the area in normal mode, with no outpost to switch to hard mode from"
+                self._conclude()
+                return S.SUCCESS
             self._finish()
             return S.RUNNING
 
@@ -329,7 +472,7 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
         self._conclude()
         return S.SUCCESS
 
-    def _start_unlock(self):
+    def _start_unlock(self, need_gate=False):
         """The vanquish is complete, so leaving is safe: walk into a locked outpost that can be
         reached from here, which opens it for map travel from now on."""
         c = self.campaign
@@ -337,6 +480,9 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
             return False
         px, py = game.player_xy()
         options = [(o, leg) for o, leg in c.world.outposts_from(self.map_id) if not game.map_unlocked(o)]
+        if need_gate:                    # only an outpost with its own gate into this area will do
+            options = [(o, leg) for o, leg in options
+                       if any(g.get("to_map") == self.map_id for g in c.world.gates.get(o, []))]
         if not options:
             return False
         o, leg = min(options, key=lambda t: (t[1]["xy"][0] - px) ** 2 + (t[1]["xy"][1] - py) ** 2)

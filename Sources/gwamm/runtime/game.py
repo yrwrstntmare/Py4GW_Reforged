@@ -81,9 +81,10 @@ def read_level_links():
 # Shrine NPCs that hand out blessings and bounties (model ids and effect ids as listed in
 # Reforged's Sources/aC_Scripts/aC_api). Dialog ids per campaign follow PyQuishAI_BT.
 BLESSING_NPCS = {
-    "nightfall": (4778, 4776, 5384, 5383, 5632, 5547, 5548, 5615, 5218, 5683, 5002),
-    "kurzick": (593, 912, 3426),
-    "luxon": (1947, 3641),
+    "nightfall": (4778, 4776, 5384, 5383, 5632, 5547, 5548, 5615, 5218, 5683, 5002,
+                  4829, 4827, 5435, 5434, 5683, 5598, 5599, 5666, 5269, 5734, 5053),
+    "kurzick": (593, 912, 3426, 3477),
+    "luxon": (1947, 3641, 3692),
     "north": (5865, 1986, 1987, 6044, 6045, 6043, 6755, 6756, 6775, 6779, 6374, 6380),
 }
 BLESSING_DIALOG = {"nightfall": 0x85, "kurzick": 0x86, "luxon": 0x86, "north": 0x84}
@@ -97,13 +98,39 @@ BLESSING_EFFECTS = (
     2434, 2435, 2436, 2481, 2548, 2552, 2469, 2470, 2471, 2472, 2551, 2591, 2592, 2593, 2594)
 
 
+# Model ids move with game updates (every giver in the list above was 51 lower than in today's
+# game, so none was ever recognised); names do not. Recognised by name first, model as backup.
+BLESSING_NAMES = (
+    ("kurzick priest", "kurzick"), ("luxon priest", "luxon"),
+    ("sunspear scout", "nightfall"), ("wandering priest", "nightfall"), ("vabbian scout", "nightfall"),
+    ("ghostly scout", "nightfall"), ("ghostly priest", "nightfall"), ("whispers informant", "nightfall"),
+    ("forgotten warden", "nightfall"),
+    ("beacon", "north"), ("ascalonian refugee", "north"), ("krewe", "north"), ("norn hunter", "north"),
+)
+_name_kind = {}
+
+
+def blessing_kind(agent_id, model):
+    """'nightfall' / 'kurzick' / 'luxon' / 'north' for a blessing or bounty giver, else None."""
+    if agent_id in _name_kind:
+        return _name_kind[agent_id]
+    name = agent_name(agent_id).lower()
+    if not name:
+        return next((k for k, ids in BLESSING_NPCS.items() if model in ids), None)
+    kind = next((k for frag, k in BLESSING_NAMES if frag in name), None)
+    _name_kind[agent_id] = kind
+    return kind
+
+
 def blessing_npcs():
-    """Blessing givers in sight: [(agent id, x, y, kind)]."""
+    """Blessing (and bounty) givers in sight: [(agent id, x, y, kind)]."""
     out = []
+    if len(_name_kind) > 400:
+        _name_kind.clear()
     for agent_id in AgentArray.GetNPCMinipetArray():
         try:
             model = Agent.GetModelID(agent_id)
-            kind = next((k for k, ids in BLESSING_NPCS.items() if model in ids), None)
+            kind = blessing_kind(agent_id, model)
             if kind and Agent.IsAlive(agent_id):
                 x, y = Agent.GetXY(agent_id)
                 out.append((agent_id, x, y, kind))
@@ -177,6 +204,39 @@ def attack(agent_id):
     return False
 
 
+_SKILL_TEXT = None
+
+
+def skill_text(skill_id):
+    """Full description of a skill from Reforged's own skill table ("" if unknown)."""
+    global _SKILL_TEXT
+    if _SKILL_TEXT is None:
+        import json, os
+        try:
+            import PySystem
+            path = os.path.join(PySystem.Console.get_projects_path(), "Py4GWCoreLib", "skill_descriptions.json")
+            with open(path, encoding="utf-8") as f:
+                _SKILL_TEXT = {int(k): (v.get("desc_full") or v.get("description") or "") for k, v in json.load(f).items()}
+        except Exception:
+            _SKILL_TEXT = {}
+    return _SKILL_TEXT.get(int(skill_id or 0), "")
+
+
+def enemy_casting(agent_id):
+    try:
+        return int(Agent.GetCastingSkillID(agent_id) or 0)
+    except Exception:
+        return 0
+
+
+def leader_melee():
+    """True when the leader fights in melee (then standing among enemies is his job)."""
+    try:
+        return bool(Agent.IsMelee(Player.GetAgentID()))
+    except Exception:
+        return False
+
+
 def leader_ranged():
     """True when the leader's weapon reaches further than enemies notice (wand, staff, bow)."""
     try:
@@ -199,15 +259,23 @@ def tracker_roles():
     # Read the widget's file itself (json/Global/EnemyTracker/Data.json, seen on disk with 320
     # enemy types). Going through the JSON library's shared document came back empty.
     records = {}
+    # Reforged ships a larger collection in the same format (1,046 enemy types over 78 areas,
+    # gathered by its authors): read first, so your own widget's records win where both know a type.
+    try:
+        with open(os.path.join(root, "Examples and tests", "Legacy code and tests", "EnemyData",
+                               "EnemyTrackerData.json"), encoding="utf-8") as f:
+            records.update((json.load(f) or {}).get("enemies") or {})
+    except Exception:
+        pass
     try:
         with open(os.path.join(root, "json", "Global", "EnemyTracker", "Data.json"), encoding="utf-8") as f:
-            records = (json.load(f) or {}).get("enemies") or {}
+            records.update((json.load(f) or {}).get("enemies") or {})
     except Exception:
         try:
             from Py4GWCoreLib.py4gwcorelib_src.JsonFactory import JsonFactory
-            records = JsonFactory("EnemyTracker/Data.json", "global").get_json("enemies", {}) or {}
+            records.update(JsonFactory("EnemyTracker/Data.json", "global").get_json("enemies", {}) or {})
         except Exception:
-            records = {}
+            pass
     try:
         with open(os.path.join(root, "Py4GWCoreLib", "skill_descriptions.json"), encoding="utf-8") as f:
             texts = json.load(f)
@@ -218,7 +286,7 @@ def tracker_roles():
         if not isinstance(record, dict):
             continue
         skills = record.get("observed_skills") or {}
-        heals = sum(1 for key in skills if tactics.heals_allies((texts.get(str(key)) or {}).get("desc_full", "")))
+        heals = sum(1 for key in skills if tactics.supports_allies((texts.get(str(key)) or {}).get("desc_full", "")))
         primary = str(record.get("inferred_primary") or "")
         if heals >= 2 or (heals >= 1 and primary == "Monk"):
             role = "healer"
@@ -441,6 +509,140 @@ def skill_learnt(skill_id):
 exit_note = ""
 
 
+def ground_height(x, y):
+    """Height of the terrain at (x, y), larger = higher, or None if the game cannot say.
+    The game's own altitude query; which way is "up" is taken from the surface normal it
+    returns, so this does not depend on the sign convention of the z axis."""
+    try:
+        import PyMap
+        ok, alt, _nx, _ny, nz = PyMap.query_altitude(float(x), float(y), 100.0)
+    except Exception:
+        return None
+    if not ok or abs(nz) < 0.2:          # no answer, or a near-vertical face
+        return None
+    return alt if nz > 0 else -alt
+
+
+def sight_clear(a, b, eye=110.0, step=150.0, margin=25.0):
+    """False when the terrain rises above the straight line between two people standing at a
+    and b (a hill crest between a ranged attacker and the target: "target obstructed").
+    True when clear, or when the heights cannot be read (no judgement then)."""
+    ha, hb = ground_height(*a), ground_height(*b)
+    if ha is None or hb is None:
+        return True
+    d = math.hypot(b[0] - a[0], b[1] - a[1])
+    n = int(d // step)
+    for k in range(1, n):
+        t = k / n
+        h = ground_height(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+        if h is not None and h > ha + eye + (hb - ha) * t + margin:
+            return False
+    return True
+
+
+def loot_wanted(radius=1012.0):
+    """How many drops within reach your Loot Filters want (0 if it cannot be read)."""
+    try:
+        from Py4GWCoreLib.py4gwcorelib_src.system_settings.loot_filters import LootFilters
+        return len(LootFilters().GetLootArray(radius))
+    except Exception:
+        return 0
+
+
+def loot_left(radius=1012.0):
+    """The wanted drops still lying within reach: [{distance, owner, rarity, model}], for the log."""
+    from Py4GWCoreLib.py4gwcorelib_src.system_settings.loot_filters import LootFilters
+    from Py4GWCoreLib.Item import Item
+    px, py = Player.GetXY()
+    me = Player.GetAgentID()
+    out = []
+    for aid in LootFilters().GetLootArray(radius):
+        x, y = Agent.GetXY(aid)
+        owner = Agent.GetItemAgentOwnerID(aid)
+        ia = Agent.GetItemAgentByID(aid)
+        iid = ia.item_id if ia is not None else 0
+        out.append({"d": round(math.hypot(x - px, y - py)), "xy": [round(x), round(y)],
+                    "owner": "me" if owner == me else ("none" if owner == 0 else "other"),
+                    "rarity": Item.Rarity.GetRarity(iid)[1] if iid else None,
+                    "model": int(Item.GetModelID(iid)) if iid else None})
+    return out
+
+
+def pickup_running():
+    """True while a pick-up-loot job for this account is waiting or running in the Messaging
+    widget (it walks to each drop and picks it up; a walk order from us would cancel that)."""
+    try:
+        from Py4GWCoreLib import GLOBAL_CACHE, SharedCommandType
+        me = str(Player.GetAccountEmail() or "").strip()
+        for _i, m in GLOBAL_CACHE.ShMem.GetAllMessages():
+            if (m is not None and getattr(m, "Active", False)
+                    and str(getattr(m, "ReceiverEmail", "") or "").strip() == me
+                    and int(getattr(m, "Command", 0)) == int(SharedCommandType.PickUpLoot)):
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def loot_report(radius=1012.0):
+    """What lies on the ground nearby and what the Loot Filters make of it: for working out why
+    nothing is picked up. Counts by owner (you / nobody / someone else) and by rarity."""
+    from Py4GWCoreLib.AgentArray import AgentArray
+    from Py4GWCoreLib.Item import Item
+    me = Player.GetAgentID()
+    px, py = Player.GetXY()
+    out = {"items": 0, "mine": 0, "unassigned": 0, "others": 0, "rarity": {}, "wanted": None, "free_slots": None}
+    for aid in AgentArray.GetItemArray():
+        try:
+            x, y = Agent.GetXY(aid)
+            if math.hypot(x - px, y - py) > radius:
+                continue
+            out["items"] += 1
+            owner = Agent.GetItemAgentOwnerID(aid)
+            key = "mine" if owner == me else ("unassigned" if owner == 0 else "others")
+            out[key] += 1
+            item_agent = Agent.GetItemAgentByID(aid)
+            if item_agent is not None:
+                r = Item.Rarity.GetRarity(item_agent.item_id)[1]
+                out["rarity"][r] = out["rarity"].get(r, 0) + 1
+        except Exception:
+            continue
+    try:
+        from Py4GWCoreLib.py4gwcorelib_src.system_settings.loot_filters.controller import LootFilters
+        out["wanted"] = len(LootFilters().GetLootArray(radius))
+    except Exception as e:
+        out["wanted"] = repr(e)
+    try:
+        from Py4GWCoreLib import GLOBAL_CACHE
+        out["free_slots"] = int(GLOBAL_CACHE.Inventory.GetFreeSlotCount())
+    except Exception:
+        pass
+    return out
+
+
+def send_stuck():
+    """The game's /stuck command: moves a character caught in the scenery to open ground."""
+    Player.SendChatCommand("stuck")
+
+
+def arrival_points():
+    """Arrival points of the current map that belong to other maps: [(x, y, map id)]. The one
+    tagged with a map is where a party coming FROM that map appears, right beside the portal
+    that leads back TO it."""
+    out = []
+    s1, s2, _s3 = Map.Pathing.GetSpawns()
+    for sp in list(s1) + list(s2):
+        tag = str(getattr(sp, "tag", "") or "")
+        if tag.isdigit():
+            out.append((sp.x, sp.y, int(tag)))
+    return out
+
+
+def travel_portals():
+    """The portal props of the current map: [(x, y)]."""
+    return [(p.x, p.y) for p in Map.Pathing.GetTravelPortals()]
+
+
 def read_exits():
     """Places that lead out of this area (walking into one resets a vanquish).
 
@@ -484,6 +686,30 @@ def front_line_heroes(limit=2):
         except Exception:
             continue
     return [(a, p) for _rank, a, p in sorted(out)[:limit]]
+
+
+def hero_agent_ids():
+    out = []
+    for h in Party.GetHeroes():
+        try:
+            if int(h.agent_id):
+                out.append(int(h.agent_id))
+        except Exception:
+            continue
+    return out
+
+
+def hero_positions():
+    """Where the living heroes stand: [(x, y)]."""
+    out = []
+    for h in Party.GetHeroes():
+        try:
+            agent = int(h.agent_id)
+            if agent and Agent.IsValid(agent) and Agent.IsAlive(agent):
+                out.append(Agent.GetXY(agent))
+        except Exception:
+            continue
+    return out
 
 
 def flag_all_heroes(x, y):
@@ -609,6 +835,13 @@ def party_condition(radius=4500.0):
             continue
     return {"player_dead": bool(Agent.IsDead(me)), "hp": Agent.GetHealth(me), "energy": Agent.GetEnergy(me),
             "dead_allies": dead, "ally_hp": (sum(hps) / len(hps)) if hps else 1.0}
+
+
+def hard_mode():
+    try:
+        return bool(Party.IsHardMode())
+    except Exception:
+        return True                      # unknown: assume nothing needs changing
 
 
 def map_unlocked(map_id):

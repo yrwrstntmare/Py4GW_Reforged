@@ -19,6 +19,8 @@ STEP_TIMEOUT_S = 240.0       # one walking step, fights included
 STUCK_GIVE_UP_S = 600.0     # pinned within 600 units for this long, nothing dying: the area cannot be finished
 STALL_S = 45.0               # no movement and no kill for this long: give the step up
 WALK_STALL_S = 5.0          # the same with no enemy anywhere near: we are caught on something, not fighting
+LOOT_HOLD_S = 20.0          # longest the walk waits for HeroAI to pick up drops
+STUCK_CMD_S = 30.0          # not moved at all this long, with nothing to fight: /stuck
 STALL_RADIUS = 350.0         # "no movement" = still inside this circle (rocking back and forth on a tree counts as none)
 
 
@@ -68,6 +70,110 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             self._leader_fights(True)
         except Exception:
             pass
+        self._loot_casting_off, self._loot_since = False, 0.0
+
+    def _loot_check(self, s, eng, now):
+        """Once after each fight (nothing within 1500 for 4 s), log what is on the ground and what
+        the Loot Filters want of it, with HeroAI's looting flags. Diagnostics only."""
+        x, y = eng.player_xy
+        close = any(e.alive and e.in_range and math.hypot(e.xy[0] - x, e.xy[1] - y) < 1500.0
+                    for e in eng.mem.enemies.values())
+        if close:
+            self._loot_calm, self._loot_logged = 0.0, False
+            return
+        if not self.__dict__.get("_loot_calm"):
+            self._loot_calm = now
+            return
+        if self.__dict__.get("_loot_logged", True) or now - self._loot_calm < 4.0:
+            return
+        self._loot_logged = True
+        try:
+            rep = game.loot_report()
+        except Exception as e:
+            rep = {"error": repr(e)}
+        if rep.get("items"):
+            s.log.event("loot_check", heroai_looting=self.blackboard.get("looting_enabled"),
+                        looting_active=self.blackboard.get("LOOTING_ACTIVE"), **rep)
+
+    def _looting(self, s, eng, now):
+        """Reforged's HeroAI is picking up loot (by your Loot Filters, through the Messaging
+        widget): hold still so the next walk does not drag the leader off the drops. Only with no
+        enemy close, and never for more than LOOT_HOLD_S at a stretch. While holding, the leader's
+        own HeroAI casting is paused: upkeep spells cast between pickups stopped the walk to a drop
+        and the job hung."""
+        held = self._loot_hold(s, eng, now)
+        if held and not self.__dict__.get("_loot_casting_off"):
+            self._loot_casting_off = True
+            self._leader_fights(False)
+        elif not held and self.__dict__.get("_loot_casting_off"):
+            self._loot_casting_off = False
+            self._leader_fights(True)
+        return held
+
+    def _loot_hold(self, s, eng, now):
+        x, y = eng.player_xy
+        if any(e.alive and e.in_range and math.hypot(e.xy[0] - x, e.xy[1] - y) < 1200.0
+               for e in eng.mem.enemies.values()):
+            self._loot_since = 0.0
+            return False
+        # HeroAI's own flag is only up for a moment when it hands the job to the Messaging widget;
+        # the job itself (walking to each drop) runs on after it. Hold while the job is running,
+        # or while anything the Loot Filters want still lies within reach.
+        busy = bool(self.blackboard.get("LOOTING_ACTIVE", False))
+        if not busy and now - self.__dict__.get("_loot_polled", 0.0) >= 0.5:
+            self._loot_polled = now
+            self._loot_busy = game.pickup_running() or game.loot_wanted() > 0
+        busy = busy or self.__dict__.get("_loot_busy", False)
+        if not busy:
+            self._loot_since = 0.0
+            return False
+        if not self.__dict__.get("_loot_since"):
+            gx, gy = self.__dict__.get("_loot_gave_up_xy", (1e9, 1e9))
+            if math.hypot(x - gx, y - gy) < 1500.0:
+                return False                 # gave up on the drops here: not again until we have moved on
+            self._loot_since = now
+            self._drop_child()
+            s.log.event("looting", player=[round(x), round(y)], wanted=game.loot_wanted())
+        if now - self._loot_since < LOOT_HOLD_S:
+            return True
+        self._loot_gave_up_xy, self._loot_since, self._loot_busy = (x, y), 0.0, False
+        try:
+            left = game.loot_left()
+        except Exception as e:
+            left = repr(e)
+        s.log.event("looting", gave_up=True, left=left, pickup_running=game.pickup_running())
+        return False
+
+    def _unstick_check(self, s, eng, now):
+        """The leader has not moved at all for a long while, though steps keep being given and
+        no enemy is close: caught in the scenery (seen at the foot of a staircase, where every
+        walk and every sidestep went nowhere for fifteen minutes). Use the game's own /stuck,
+        which puts the character back on open ground nearby."""
+        x, y = eng.player_xy
+        last = self.__dict__.get("_still_at")
+        if last is None or math.hypot(x - last[0], y - last[1]) > 40.0:
+            self._still_at, self._still_since = (x, y), now
+            return
+        near = min((math.hypot(e.xy[0] - x, e.xy[1] - y) for e in eng.mem.enemies.values()
+                    if e.alive and e.in_range), default=9e9)
+        if (near < 1300.0 or self._child is None or self.__dict__.get("_loot_since")
+                or self.blackboard.get("COMBAT_ACTIVE", False)):
+            # standing still to fight, to loot or to wait is not being stuck: the clock only
+            # counts time spent trying to walk with nothing else going on
+            self._still_since = now
+            return
+        if (now - self._still_since < STUCK_CMD_S
+                or now - self.__dict__.get("_stuck_sent", 0.0) < STUCK_CMD_S):
+            return
+        self._stuck_sent = now
+        try:
+            game.send_stuck()
+            ok = True
+        except Exception as e:
+            ok = repr(e)
+        s.log.event("stuck_command", player=[round(x), round(y)], still_for=round(now - self._still_since),
+                    nearest_enemy=round(near) if near < 9e9 else None, sent=ok)
+        self._still_since = now
 
     def _drop_child(self):
         # A walk that has just started has asked Py4GW's path planner for a route; the answer is
@@ -167,6 +273,19 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             if getattr(self, "_no_map_said", False):
                 s.log.event("map_back", after=round(time.time() - self._no_map_since), map_id=game.map_id())
             self._no_map_since, self._no_map_said = 0.0, False
+        if self.transit is not None and not getattr(self, "_door_checked", False):
+            # The world map's door for this crossing must be on this map's own ground. Where the
+            # world data is wrong (a door recorded in another area's coordinates) walking at it
+            # sends the party across the map the wrong way: stop instead.
+            self._door_checked = True
+            eng = s.engine
+            gx, gy = self.transit["xy"]
+            i = eng.nav.nearest_node(gx, gy, allowed=eng.rm.reachable)
+            gap = None if i is None else math.hypot(eng.nav.nodes[i][0] - gx, eng.nav.nodes[i][1] - gy)
+            if gap is None or gap > 1500.0:
+                s.result = "the route's door is not on this map's ground (world data wrong for this crossing)"
+                s.log.event("finished", result=s.result, door=[gx, gy], nearest_ground=None if gap is None else round(gap))
+                return S.FAILURE
         if game.party_defeated():
             self._drop_child()
             s.result = "party defeated"
@@ -180,6 +299,10 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             return S.FAILURE
         s.perceive()
         eng, now = s.engine, time.time()
+        self._unstick_check(s, eng, now)
+        self._loot_check(s, eng, now)
+        if self._looting(s, eng, now):
+            return S.RUNNING
         # every boss seen goes in the log once (name, profession), so missed elites can be traced
         seen = self.__dict__.setdefault("_boss_seen", set())
         for e in eng.mem.enemies.values():
@@ -235,6 +358,8 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                         near = [repr(e)]
                     s.save_hazards()
                     s.log.event("hazard", player=[round(px), round(py)], known=len(eng.hazards), gadgets_near=near[:30])
+                if isinstance(foes_near, int) and foes_near >= 7:
+                    s.note_hard_spot(eng.player_xy)
                 s.log.event("death", player=list(eng.player_xy), key=self._key, deaths=eng.deaths, foes_near=foes_near,
                             enemies_in_view=sum(1 for e in eng.mem.enemies.values() if e.alive and e.in_range),
                             consumables=s.pcons.state(eng) if s.cfg.pcons_on else "off")
@@ -282,7 +407,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if self._key is not None and self._key[0] == "bless":
             self._child.root.blackboard = self.blackboard
             state = self._child.root.tick()
-            if state == S.RUNNING and now - self._started < 45.0:
+            if state == S.RUNNING and now - self._started < 60.0:
                 return S.RUNNING
             s.log.event("blessing", stage="done", npc=self._key[1], got=self._has_blessing(),
                         seconds=round(now - self._started, 1), finished=(state != S.RUNNING))
@@ -294,7 +419,15 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 return S.RUNNING
 
         # --- rest: before walking on, wait for health, energy and the dead to be back ---
-        if self._child is None and cond is not None:
+        # (This used to wait for a moment with no walk in progress. Since walks are handed on
+        # from one stretch to the next without stopping, there never was one: no rest was taken
+        # from 0.46 on, and the party walked into fights with heroes dead and energy low.)
+        # Rest gate. Walks hand over to the next stretch while still moving, so the old "only when no
+        # step is running" test never came true and resting silently stopped (0.46-0.49.3). Now: rest
+        # whenever nothing is fighting, no pull is under way and we are not escaping or blessing.
+        pulling = (self.__dict__.get("_pull") or {}).get("phase") in ("go", "back", "hold", "shift")
+        if cond is not None and not pulling and not (self._key is not None and self._key[0] in ("escape", "bless")) \
+                and not bool(self.blackboard.get("COMBAT_ACTIVE", False)):
             px, py = eng.player_xy
             threatened = any(e.alive and e.in_range and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1500.0
                              for e in eng.mem.enemies.values())
@@ -305,12 +438,17 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                    "party health" if cond["ally_hp"] < min(0.95, cfg.rest_ally_hp + 0.05 * eng.caution()) else "")
             if why and eng.in_hazard(px, py):
                 why = ""                     # never stand and rest under a trap: move on first
+            if why == "energy" and self.transit is not None and self._rest_since is None:
+                why = ""                     # just passing through: energy refills on the walk
             if why and self._alone():
                 why = ""                     # nobody left to raise anyone: waiting changes nothing
             if why and not threatened:
                 if self._rest_since is None:
                     self._rest_since = now
                     s.resting = why
+                    self._drop_child()
+                    s.log.event("resting", reason=why, hp=round(cond["hp"], 2), energy=round(cond["energy"], 2),
+                                dead=cond["dead_allies"], party_hp=round(cond["ally_hp"], 2))
                 if now - self._rest_since < cfg.rest_max_seconds:
                     if cond["dead_allies"]:
                         self._walk_to_the_dead(eng, now)

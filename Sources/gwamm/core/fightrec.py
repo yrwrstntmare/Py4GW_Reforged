@@ -153,7 +153,8 @@ class FightRecorder:
             sm["leader_deaths"] += 1
         sm["leader_dead"] = bool(snap["me"].get("dead"))
         for a in snap["allies"]:
-            if a.get("hp") is not None and not a.get("dead"):
+            # the party only: spirits and minions sit near zero health as a matter of course
+            if a.get("hp") is not None and not a.get("dead") and a.get("kind") in ("party", "leader"):
                 sm["lowest_ally_hp"] = min(sm["lowest_ally_hp"], a["hp"])
         if close:
             self._quiet_since = None

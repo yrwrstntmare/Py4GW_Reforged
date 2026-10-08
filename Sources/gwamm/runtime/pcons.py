@@ -144,6 +144,8 @@ class Pcons:
                 in_bags.add(it.key)
             if effect and bc.local_effect_active(effect):
                 running.add(it.key)
+            elif time.time() - self.__dict__.get("_just_used", {}).get(it.key, 0.0) < 15.0:
+                running.add(it.key)       # used a moment ago; the effect can take a few seconds to show
             if target is not None:
                 targets[it.key] = target
         try:
@@ -230,6 +232,7 @@ class Pcons:
         if item_id <= 0:
             return
         GLOBAL_CACHE.Inventory.UseItem(item_id)
+        self.__dict__.setdefault("_just_used", {})[item.key] = now
         self.used += 1
         self.last = item.name
         if self.spent["wipes0"] is None:

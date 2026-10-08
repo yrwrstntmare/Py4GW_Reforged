@@ -1,4 +1,5 @@
 """One vanquish attempt: owns the engine for the current instance and keeps it fed."""
+import math
 import json
 import os
 import time
@@ -72,6 +73,57 @@ class Session:
                 return {k: [tuple(p) for p in v] for k, v in json.load(f).items()}
         except Exception:
             return {}
+
+    def _roles_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "learned_roles.json")
+
+    def load_learned_roles(self):
+        """Enemy roles learnt in earlier fights (healers seen healing), kept between runs."""
+        try:
+            with open(self._roles_path()) as f:
+                return {int(k): v for k, v in json.load(f).items()}
+        except Exception:
+            return {}
+
+    def note_learned_role(self, model, role, skill):
+        try:
+            data = {str(k): v for k, v in self.load_learned_roles().items()}
+            data[str(int(model))] = role
+            with open(self._roles_path(), "w") as f:
+                json.dump(data, f)
+        except Exception:
+            pass
+        self.log.event("role_learnt", model=int(model), role=role, skill=int(skill))
+
+    def _hard_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "hard_spots.json")
+
+    def _load_hard(self):
+        """Where the leader died with a crowd round him, per map, kept between runs."""
+        try:
+            with open(self._hard_path()) as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def note_hard_spot(self, xy):
+        """A death with many enemies near: remember the place for this visit and later ones."""
+        eng = self.engine
+        if eng is None or not self.map_id:
+            return
+        for w in eng.hard_spots:
+            if math.hypot(w[0] - xy[0], w[1] - xy[1]) < 1000.0:
+                w[2] += 1
+                break
+        else:
+            eng.hard_spots.append([float(xy[0]), float(xy[1]), 1])
+        try:
+            data = self._load_hard()
+            data[str(self.map_id)] = [[round(x), round(y), int(n)] for x, y, n in eng.hard_spots]
+            with open(self._hard_path(), "w") as f:
+                json.dump(data, f)
+        except Exception:
+            pass
 
     def _snag_path(self):
         return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "snags.json")
@@ -302,6 +354,8 @@ class Session:
             try:                                     # enemy types the Enemy Tracker widget knows and we do not
                 from ..core import tactics
                 self.tracker_roles = tactics.add_roles(game.tracker_roles())
+                for m, r in self.load_learned_roles().items():
+                    tactics.learn_role(m, r)
             except Exception as e:
                 self.tracker_roles = f"unreadable: {e!r}"
             if guide:
@@ -327,6 +381,7 @@ class Session:
                 self.engine.doors = []
             self.engine.hazards = list(self._load_hazards().get(str(mid), []))
             self.engine.snags = [tuple(p) for p in self._load_snags().get(str(mid), [])]
+            self.engine.hard_spots = [[float(p[0]), float(p[1]), int(p[2])] for p in self._load_hard().get(str(mid), [])]
             self._built_for = want
             self.exits_found = len(found)
             self.exits = self.engine.exits                            # only the ones that matter here
@@ -414,6 +469,17 @@ class Session:
         self.engine.update(game.player_xy(), game.read_enemies(), game.foes_remaining(), now, grid)
         if self.cfg.record_fights:
             self.fights.tick(now, game.map_id(), self._fight_context)
+            try:
+                if getattr(self, "casts", None) is None or self.casts.log is not self.log:
+                    from .castwatch import CastWatch
+                    self.casts = CastWatch(self.log)
+                px, py = self.engine.player_xy
+                near = [(e.id, e.alive) for e in self.engine.mem.enemies.values()
+                        if e.in_range and (e.xy[0] - px) ** 2 + (e.xy[1] - py) ** 2 <= 1600.0 ** 2]
+                if near:
+                    self.casts.tick(now, near, game.hero_agent_ids())
+            except Exception:
+                pass
         if now - self.__dict__.get("_last_resume_save", 0.0) >= 20.0:
             self._last_resume_save = now
             self.save_resume()

@@ -157,14 +157,27 @@ class Campaign:
 
     def all_areas(self):
         ids = set(self.travel)
+        try:
+            from .npc_entries import entries
+            ids |= set(entries())              # entered through an NPC (Zen Daijun, Bahdok Caverns)
+        except Exception:
+            pass
         if self.world is not None:
             ids |= {m for m in self.world.vanquishable if m in self.world.area_node}
         return ids
 
+    # Vanquishable areas the world map knows but the recorded travel table does not: without a
+    # region they were listed under "Other areas", out of sight of their title's count
+    # (Zen Daijun is one of the 33 for the Canthan title).
+    EXTRA_REGIONS = {246: "Factions_ShingJeaIsland", 377: "NF_Kourna", 41: "Proph_Maguuma", 546: "EOTN_Far_Silverpeaks",
+                     482: "EOTN_Far_Silverpeaks", 558: "EOTN_Tarnished_Coast", 649: "EOTN_Charr_Homelands",
+                     651: "EOTN_Charr_Homelands"}
+
     def regions(self):
         out = {}
         for mid in self.all_areas():
-            region = self.travel[mid]["region"] if mid in self.travel else "Other areas"
+            region = (self.travel[mid]["region"] if mid in self.travel
+                      else self.EXTRA_REGIONS.get(mid, "Other areas"))
             out.setdefault(region, []).append(mid)
         return {r: sorted(ids, key=game.map_name) for r, ids in sorted(out.items())}
 
@@ -173,6 +186,14 @@ class Campaign:
         outpost you have). None = no way there yet."""
         if mid not in self._hops:
             legs = self.world.route(mid, self.unlocked()) if self.world else None
+            try:
+                from .npc_entries import entries
+                ent = entries().get(mid)
+            except Exception:
+                ent = None
+            if legs is None and ent:
+                self._hops[mid] = 0 if game.map_unlocked(ent["outpost"]) else None
+                return self._hops[mid]
             if legs is None:
                 t = self.travel.get(mid)
                 ok = t and t["plain"] and t["outpost"] in self.unlocked()

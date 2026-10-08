@@ -60,7 +60,9 @@ class Config:
     transit_step_length = 1200.0     # crossing an area on the way somewhere: shorter steps,
     transit_avoid_radius = 1900.0    # keep this far from known enemies when there is a way round,
     transit_avoid_factor = 5.0       # (a detour up to this many times longer is accepted)
-    transit_block_radius = 1500.0    # a group this close to the path ahead is fought first, alone
+    transit_block_radius = 1100.0    # a standing group this close to the path ahead is fought first, alone
+                                     # (recorded fights: enemies notice the party at about 1000)
+    transit_patrol_radius = 1500.0   # a patrol this close to the path ahead will walk into it: fought first
     transit_lookahead = 3500.0
     rest_hp = 0.85               # do not start toward the next objective below this health...
     rest_energy = 0.60           # ...or this energy...
@@ -74,6 +76,7 @@ class Config:
     carto_leftover_walk = 0.0    # after the vanquish, skip a leftover map cell that needs a longer walk than this (0 = no limit)
     carto_fetch_slack = 0.6
     route_hints = True           # search first where the area's known route goes; the rest only if foes remain
+    authored_approach = True     # into crowded or deadly ground, come in from the side the area's known route does
     route_hint_radius = 2500.0
     off_route_cost = 1.25        # walking off the known route's lanes counts as this much longer
     use_routes = False           # follow the area's known route when there is one, instead of sweeping every corner
@@ -142,6 +145,8 @@ class Engine:
         self.tour = self.rm.tour(self.start_region)
         self.guide, self.guide_i, self._guide_near = self._prepare_guide(guide, start_xy), 0, {}
         self._route_src = list(guide or hints or ())
+        self.focus = None             # (x, y) of a blessing giver with enemies round it: those are fought first
+        self._via, self._via_done, self.approach_detours = {}, set(), 0   # authored approach points per objective
         self._deferred = set()        # map cells with no path while foes remain: retried after the vanquish
         self.walls, self.detours, self._detour = [], 0, False
         self.hint_regions = self._hint_regions(hints)
@@ -167,6 +172,8 @@ class Engine:
         self.snags = []              # (x, y): scenery the party got caught on while walking. Kept between runs.
         self.walled = set()          # enemies near in a straight line but a long walk away (next corridor over)
         self.wipes = []              # [x, y, times]: where the whole party went down. Left for last, walked round.
+        self.hard_spots = []         # [x, y, times]: where the leader died with a crowd round him, this
+                                     # visit or an earlier one. Taken in small bites, pulls kept small.
         self._zone_pen = (None, None)
         self.deaths = 0
 
@@ -580,6 +587,10 @@ class Engine:
         self.wipes.append([xy[0], xy[1], 1])
         return 1
 
+    def near_hard_spot(self, pos, radius=1500.0):
+        r2 = radius * radius
+        return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 for x, y, _n in self.hard_spots)
+
     def in_wipe_zone(self, pos):
         r2 = self.cfg.danger_radius ** 2
         return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 for x, y, _n in self.wipes)
@@ -633,12 +644,18 @@ class Engine:
                     break
             ahead.append(self.player_xy)
             px, py = self.player_xy
+            from .memory import is_patrol
             near2 = self.cfg.transit_block_radius ** 2
+            roam2 = self.cfg.transit_patrol_radius ** 2
             for c in self.clusters:
                 if self.mem.blocked.get(c.key, 0) >= self.cfg.max_failures:
                     continue
-                spots = [self.mem.enemies[i].xy for i in c.members]
-                if not any((sx - x) ** 2 + (sy - y) ** 2 <= near2 for sx, sy in spots for x, y in ahead):
+                members = [self.mem.enemies[i] for i in c.members]
+                spots = [e.xy for e in members]
+                # only a group that would notice the party on its way (or walk into it) is fought;
+                # one that stays out of sight of the path is left alone
+                if not any((e.xy[0] - x) ** 2 + (e.xy[1] - y) ** 2 <= (roam2 if is_patrol(e) else near2)
+                           for e in members for x, y in ahead):
                     continue
                 spot = min(spots, key=lambda p: (p[0] - px) ** 2 + (p[1] - py) ** 2)
                 obj = Objective("cluster", c.key, spot, self.rm.region_at(*spot), 20.0 + len(c.members), c)
@@ -747,7 +764,11 @@ class Engine:
 
     def _score(self, obj):
         cost = obj.walk if obj.walk is not None else self._cost(obj.pos, obj.region)
-        return obj.value / (cost + 1500.0)
+        score = obj.value / (cost + 1500.0)
+        if self.focus is not None and obj.kind == "cluster" and \
+                math.hypot(obj.pos[0] - self.focus[0], obj.pos[1] - self.focus[1]) <= 2000.0:
+            score *= 4.0                 # the enemies standing round a blessing giver go first
+        return score
 
     def _still_valid(self, obj):
         if obj is None or self.mem.blocked.get(obj.key, 0) >= self.cfg.max_failures:
@@ -983,6 +1004,54 @@ class Engine:
         self.route_ahead = [(obj.pos[0], obj.pos[1])]        # shown on the map as a straight line
         return (obj.pos[0], obj.pos[1], radius)
 
+    def _approach_via(self, obj):
+        """Where to come in from, for crowded or deadly ground. The area's known route was walked
+        by people who learnt which way into each crowd works; the first time it comes near the
+        objective, the point it came from is the side to arrive from. Coming from elsewhere
+        (Sunjiang: down the stairs into a nest, instead of up from below) wiped the party.
+        Returns that point while it is still worth walking to, else None."""
+        pts = self._route_src
+        if not pts or not self.cfg.authored_approach or self.goto is not None or obj.key in self._via_done:
+            return None
+        tx, ty = obj.pos
+        via = self._via.get(obj.key)
+        if via is None:
+            crowd = sum(1 for e in self.mem.enemies.values()
+                        if e.alive and not e.lost and math.hypot(e.xy[0] - tx, e.xy[1] - ty) <= 2200.0)
+            if not (crowd >= 12 or self.near_hard_spot(obj.pos) or self.in_wipe_zone(obj.pos)):
+                return None              # ordinary ground: our own order is as good as theirs
+            first = next((i for i, (x, y) in enumerate(pts) if math.hypot(x - tx, y - ty) <= 1500.0), None)
+            for j in range(-1 if first is None else first - 1, -1, -1):
+                if math.hypot(pts[j][0] - tx, pts[j][1] - ty) >= 1300.0:
+                    via = (float(pts[j][0]), float(pts[j][1]))
+                    break
+            if via is None or self.nav.in_no_go(*via) or self.near_hard_spot(via, 900.0):
+                self._via_done.add(obj.key)
+                return None
+            px, py = self.player_xy
+            if math.hypot(via[0] - px, via[1] - py) > math.hypot(tx - px, ty - py) + 3500.0:
+                self._via_done.add(obj.key)  # the far side of the map: not worth the walk
+                return None
+            here, vn = self.player_node, self.nav.nearest_node(via[0], via[1], allowed=self.rm.reachable)
+            way = self.nav.path(here, vn) if here is not None and vn is not None else []
+            if not way or any(math.hypot(self.nav.nodes[i][0] - tx, self.nav.nodes[i][1] - ty) < 1000.0 for i in way):
+                self._via_done.add(obj.key)  # no way there, or the way there runs through the crowd itself
+                return None
+            self._via[obj.key] = via
+        px, py = self.player_xy
+        ax, ay, bx, by = px - tx, py - ty, via[0] - tx, via[1] - ty
+        da, db = math.hypot(ax, ay) or 1.0, math.hypot(bx, by) or 1.0
+        arrived = math.hypot(via[0] - px, via[1] - py) <= 400.0
+        same_side = (ax * bx + ay * by) / (da * db) >= 0.8 and da <= db + 400.0
+        if arrived or same_side:
+            self._via_done.add(obj.key)
+            return None
+        if obj.key not in getattr(self, "_via_noted", set()):
+            self.__dict__.setdefault("_via_noted", set()).add(obj.key)
+            self.approach_detours += 1
+            self.note = f"coming into the {obj.kind} at ({tx:.0f}, {ty:.0f}) the way the known route does, via ({via[0]:.0f}, {via[1]:.0f})"
+        return via
+
     def _plain_step(self):
         """Where to walk right now: a point up to `step_length` along the shortest walkable
         path to the objective. Returns (x, y, clear_radius) or None."""
@@ -998,7 +1067,7 @@ class Engine:
                         if e.alive and not e.lost and math.hypot(e.xy[0] - tx, e.xy[1] - ty) <= 2200.0)
             if crowd >= 12:
                 radius = min(radius, 1000.0)
-            if self.in_wipe_zone(obj.pos):
+            if self.in_wipe_zone(obj.pos) or self.near_hard_spot(obj.pos):
                 radius = min(radius, 900.0)      # the party died to this before: take as little of it at a time as possible
         self.walled = self.walled_off() if obj.kind != "goto" else set()
         if self.walled:
@@ -1013,6 +1082,11 @@ class Engine:
             return None if self.nav.in_no_go(*obj.pos) else (obj.pos[0], obj.pos[1], radius)
         if goal is None:
             return self._no_path_step(obj, radius, here)
+        via = self._approach_via(obj) if obj.kind != "goto" else None
+        if via is not None:
+            g2 = self.nav.nearest_node(via[0], via[1], allowed=self.rm.reachable)
+            if g2 is not None:
+                goal = g2
         if obj.kind == "goto":
             route, left = (getattr(self, "_goto_route", None) or self._transit_route()), self.cfg.transit_step_length
         else:
@@ -1168,6 +1242,7 @@ class Engine:
             "carto_stand_cells": len(self.carto.stand) if self.carto else 0,
             "carto_given_up": self.carto_given_up,
             "route_points": len(self.guide), "route_done": self.guide_i,
+            "approach_detours": self.approach_detours,
             "route_regions": len(self.hint_regions), "searching_off_route": bool(getattr(self, "searching_off_route", False)),
             "carto_skipped_far": len(self.carto_skipped_far),
             "danger_zones": sum(1 for d in self.danger if d[2] > self._now),

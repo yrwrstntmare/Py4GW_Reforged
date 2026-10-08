@@ -207,11 +207,46 @@ class FightMixin:
                         to=[round(spot[0]), round(spot[1])])
             return True
 
-        # brought back to life in the middle of it: get out from under them before doing anything
-        # else, instead of standing up at a sliver of health where we fell
+        def tuck(reason):
+            """Step in behind the heroes: the point a little past their middle, on the side away
+            from the enemy. The heroes keep fighting where they are, and whatever chases the
+            leader runs into them. (Backing off along the trail instead took the leader out of
+            his healers' reach while the melee followed him: Zen Daijun, three deaths in two
+            minutes to Afflicted.)"""
+            heroes = game.hero_positions()
+            if len(heroes) < 3:
+                return False
+            hx, hy = sum(h[0] for h in heroes) / len(heroes), sum(h[1] for h in heroes) / len(heroes)
+            ex, ey = sum(e.xy[0] for e in near) / len(near), sum(e.xy[1] for e in near) / len(near)
+            d = math.hypot(hx - ex, hy - ey) or 1.0
+            for back in (250.0, 120.0, 0.0):
+                spot = (hx + (hx - ex) * back / d, hy + (hy - ey) * back / d)
+                if eng.nav.on_mesh(*spot) and not eng.nav.in_no_go(*spot) and eng.nav.line_clear((px, py), spot):
+                    break
+            else:
+                return False
+            if math.hypot(spot[0] - px, spot[1] - py) < 150.0:
+                return False                                      # already there
+            self._drop_child()
+            self._leader_fights(False)                            # walk, do not stop to cast
+            st.update(to=spot, until=now + 4.0, moved=0.0, tucked_at=now)
+            s.log.event("fall_back", stage="start", reason=reason, enemies=len(near), player=[round(px), round(py)],
+                        to=[round(spot[0]), round(spot[1])], behind_heroes=True)
+            return True
+
+        # brought back to life in the middle of it: in behind the heroes, still in their healers'
+        # reach. Only with most of the party down is it a real retreat along the trail.
         if cfg.fall_back and not busy and now - self.__dict__.get("_revived_at", 0.0) < 2.0 and closest < 1300.0:
             self._revived_at = 0.0
+            if tuck("revived among enemies"):
+                return True
             if back_off("revived among enemies", 1200.0, 6.0):
+                return True
+        # the leader (a caster) has ended up in front, with melee on him: back in behind the heroes
+        adjacent = [e for e in near if math.hypot(e.xy[0] - px, e.xy[1] - py) <= 220.0]
+        if (cfg.fall_back and not busy and len(adjacent) >= 2 and not game.leader_melee()
+                and now - st.get("tucked_at", 0.0) > 10.0 and game.my_health() < 0.85):
+            if tuck(f"{len(adjacent)} on the leader"):
                 return True
         # the fight is being lost: several of the party are down and the enemy is still here.
         # The living pull right back so it does not become a full wipe; the rest gate then
@@ -250,8 +285,14 @@ class FightMixin:
                 if e.boss and area:
                     name = game.agent_name(e.id).lower()
                     prof = next((b.profession for b in area if name and (b.boss.lower() in name or name in b.boss.lower())), 0)
+                model = game.enemy_model(e.id)
+                cast = game.enemy_casting(e.id)
+                if cast and tactics.role_of(model) != "healer" and tactics.supports_allies(game.skill_text(cast)):
+                    # seen keeping its side alive: a healer, now and for the rest of the run
+                    if tactics.learn_role(model, "healer"):
+                        s.note_learned_role(model, "healer", cast)
                 infos.append({"id": e.id, "xy": e.xy, "hp": d[0], "level": d[1], "caster": d[2], "boss": e.boss, "prof": prof,
-                              "role": tactics.role_of(game.enemy_model(e.id))})
+                              "role": tactics.role_of(model)})
             target = tactics.pick_target(infos, (px, py), st["called"])
             if target and (target != st["called"] or now - st["called_at"] > 8.0):
                 try:
