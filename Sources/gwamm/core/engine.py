@@ -671,6 +671,13 @@ class Engine:
             # once a known route has been walked to its end, whatever is left is leftovers:
             # go straight for every group we know of, wherever it is
             cleanup = self.mode == CLEANUP or (bool(self.guide) and not self.guiding())
+            if not cleanup and self.foes_remaining is not None and self.foes_remaining <= cfg.cleanup_threshold:
+                # The tail: few left and the map (nearly) all searched, or the search already
+                # re-opened. A group we know of is the surest of those few: go for it before
+                # combing ground again (Dejarin Estate: 8 known alive, 5 left, and ten minutes
+                # spent re-searching both ends of the map instead).
+                searched = mem.counts()[SEARCHED]
+                cleanup = mem.escalation > 0 or searched >= 0.9 * len(self.rm.regions)
             px, py = self.player_xy
             for c in self.clusters:
                 if blocked(c.key):

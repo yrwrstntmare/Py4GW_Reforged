@@ -1,4 +1,4 @@
-GWAMM Vanquish 0.50.2
+GWAMM Vanquish 0.50.4
 
 INSTALL
   1. Copy the folder  Sources/gwamm  into your Py4GW Reforged  Sources  folder.

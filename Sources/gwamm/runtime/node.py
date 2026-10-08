@@ -240,6 +240,23 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                         step_clear=None if self._escape is None else [round(self._escape[0]), round(self._escape[1])],
                         detour=bool(eng._detour), route_points=len(eng.guide) if eng._detour else 0)
 
+    def _energy_rate(self, now, energy):
+        """Leader's energy refill per second (0-1 scale) out of combat, measured as he walks;
+        0.012 (about 4 pips on 80 energy) until there is a measurement."""
+        hist = self.__dict__.setdefault("_energy_hist", [])
+        if bool(self.blackboard.get("COMBAT_ACTIVE", False)):
+            hist.clear()                      # casting in a fight is not regeneration
+        else:
+            hist.append((now, energy))
+            while hist and now - hist[0][0] > 12.0:
+                hist.pop(0)
+        rate = self.__dict__.get("_energy_rate_v", 0.012)
+        if len(hist) >= 2 and hist[-1][0] - hist[0][0] >= 8.0 and hist[-1][1] > hist[0][1] and hist[-1][1] < 0.99:
+            seen = (hist[-1][1] - hist[0][1]) / (hist[-1][0] - hist[0][0])
+            rate = 0.7 * rate + 0.3 * max(0.003, min(0.05, seen))
+            self._energy_rate_v = rate
+        return rate
+
     def _tick_core(self):
         S, s = BehaviorTree.NodeState, self.session
         s.transit = self.transit
@@ -429,6 +446,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if cond is not None and not pulling and not (self._key is not None and self._key[0] in ("escape", "bless")) \
                 and not bool(self.blackboard.get("COMBAT_ACTIVE", False)):
             px, py = eng.player_xy
+            e_rate = self._energy_rate(now, cond["energy"])
             threatened = any(e.alive and e.in_range and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1500.0
                              for e in eng.mem.enemies.values())
             cfg = eng.cfg
@@ -436,6 +454,21 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                    "health" if cond["hp"] < min(0.97, cfg.rest_hp + 0.04 * eng.caution()) else
                    "energy" if cond["energy"] < min(0.9, cfg.rest_energy + 0.08 * eng.caution()) else
                    "party health" if cond["ally_hp"] < min(0.95, cfg.rest_ally_hp + 0.05 * eng.caution()) else "")
+            # Energy and party health come back on the way to the next fight: stop only for what
+            # the walk there will not refill. (Own health and the dead still mean stopping.)
+            if why in ("energy", "party health"):
+                gap = min((math.hypot(e.xy[0] - px, e.xy[1] - py) for e in eng.mem.enemies.values()
+                           if e.alive and not e.lost), default=4000.0)
+                if why == "energy":
+                    need = min(0.9, cfg.rest_energy + 0.08 * eng.caution())
+                    if tactics.on_arrival(cond["energy"], e_rate, gap) >= need:
+                        why = ""
+                else:
+                    need = min(0.95, cfg.rest_ally_hp + 0.05 * eng.caution())
+                    if tactics.on_arrival(cond["ally_hp"], 0.015, gap) >= need:
+                        why = ""
+            if why and cond["hp"] <= 0.0 and cond["energy"] <= 0.0:
+                why = ""                     # a blank read (loading, just raised): not a reason to stop
             if why and eng.in_hazard(px, py):
                 why = ""                     # never stand and rest under a trap: move on first
             if why == "energy" and self.transit is not None and self._rest_since is None:
@@ -448,7 +481,8 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                     s.resting = why
                     self._drop_child()
                     s.log.event("resting", reason=why, hp=round(cond["hp"], 2), energy=round(cond["energy"], 2),
-                                dead=cond["dead_allies"], party_hp=round(cond["ally_hp"], 2))
+                                dead=cond["dead_allies"], party_hp=round(cond["ally_hp"], 2),
+                                energy_per_s=round(e_rate, 4))
                 if now - self._rest_since < cfg.rest_max_seconds:
                     if cond["dead_allies"]:
                         self._walk_to_the_dead(eng, now)

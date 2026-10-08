@@ -41,7 +41,9 @@ class BlessingMixin:
         it is remembered and its enemies are fought first (the engine is told to favour them);
         once they are dead the party walks back for it. True when a walk was started."""
         self._log_npcs()
-        givers = self.__dict__.setdefault("_givers", {})      # agent id -> (x, y, kind)
+        if self.__dict__.get("_givers_eng") is not eng:      # new instance: agent ids mean something else now
+            self._givers_eng, self._givers, self._bless_clearing, self._bless_tries = eng, {}, set(), {}
+        givers = self._givers                                 # agent id -> (x, y, kind)
         try:
             if game.has_blessing():
                 givers.clear()

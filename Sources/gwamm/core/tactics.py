@@ -622,3 +622,12 @@ def shift_camp(trail, camp, enemies, engaged=(), nearest=700.0, furthest=1600.0,
         if d >= nearest and all(math.hypot(p[0] - x, p[1] - y) >= clear for x, y in keep_off):
             return (p[0], p[1])
     return None
+
+
+def on_arrival(level, rate, gap, speed=290.0, notice=1000.0, cap=8000.0):
+    """What a 0-1 level (energy, party health) will be by the time the party reaches the next
+    fight `gap` away, refilling at `rate` per second while it walks. The fight starts about
+    `notice` short of the enemy; at most `cap` of walking is counted
+    (the caller passes a short gap when nothing is known ahead: an unseen group can be round the corner)."""
+    walk = max(0.0, min(gap, cap) - notice) / speed
+    return min(1.0, level + max(0.0, rate) * walk)

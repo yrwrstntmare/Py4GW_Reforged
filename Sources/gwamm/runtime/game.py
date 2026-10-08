@@ -112,13 +112,14 @@ _name_kind = {}
 
 def blessing_kind(agent_id, model):
     """'nightfall' / 'kurzick' / 'luxon' / 'north' for a blessing or bounty giver, else None."""
-    if agent_id in _name_kind:
-        return _name_kind[agent_id]
+    key = (agent_id, model)                      # agent ids are reused from one map to the next
+    if key in _name_kind:
+        return _name_kind[key]
     name = agent_name(agent_id).lower()
     if not name:
         return next((k for k, ids in BLESSING_NPCS.items() if model in ids), None)
     kind = next((k for frag, k in BLESSING_NAMES if frag in name), None)
-    _name_kind[agent_id] = kind
+    _name_kind[key] = kind
     return kind
 
 
