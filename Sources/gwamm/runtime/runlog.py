@@ -11,6 +11,30 @@ import PySystem
 
 HEARTBEAT_S = 5.0
 
+_PRIVATE = None
+
+
+def scrub(line):
+    """Take this computer's own details out of a line before it is written: the Windows user
+    folder, user name and computer name (they turn up in error traces and file paths). Logs get
+    shared; none of that is needed to read them."""
+    global _PRIVATE
+    if _PRIVATE is None:
+        found = []
+        home = os.path.expanduser("~")
+        if home and home != "~":
+            found.append((home, "~"))
+            found.append((home.replace("\\", "\\\\"), "~"))        # as it appears inside JSON
+        for var, shown in (("USERNAME", "<user>"), ("COMPUTERNAME", "<pc>")):
+            v = os.environ.get(var, "")
+            if len(v) >= 3:
+                found.append((v, shown))
+        _PRIVATE = found
+    for secret, shown in _PRIVATE:
+        if secret in line:
+            line = line.replace(secret, shown)
+    return line
+
 
 class RunLog:
     def __init__(self):
@@ -46,7 +70,7 @@ class RunLog:
             return
         try:
             data.update({"t": round(time.time(), 2), "clock": time.strftime("%H:%M:%S"), "event": kind})
-            self._file.write(json.dumps(data, default=str) + "\n")
+            self._file.write(scrub(json.dumps(data, default=str)) + "\n")
             self._file.flush()
         except Exception:
             pass

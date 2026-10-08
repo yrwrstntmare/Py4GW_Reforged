@@ -68,7 +68,9 @@ BY_KEY = {i.key: i for i in CATALOGUE}
 
 class Facts:
     """What the runtime saw this tick."""
-    def __init__(self, deaths=0, foes_left=None, my_morale=100, party_morale=(), in_bags=(), running=(), targets=None):
+    def __init__(self, deaths=0, foes_left=None, my_morale=100, party_morale=(), in_bags=(), running=(), targets=None,
+                 morale_used=0, timed_used=0, wipes_since_first=0, kills_since_morale=None,
+                 no_restart=False, foes_near=0):
         self.deaths = deaths
         self.foes_left = foes_left
         self.my_morale = my_morale or 100
@@ -76,6 +78,13 @@ class Facts:
         self.in_bags = set(in_bags)          # item keys we hold at least one of
         self.running = set(running)          # item keys whose bonus is active on us now
         self.targets = targets or {}         # item key -> morale it stops helping at (library)
+        # what has already been spent in this area, and what it bought
+        self.morale_used = morale_used               # death-penalty items used here so far
+        self.timed_used = timed_used                 # timed bonuses started here so far
+        self.wipes_since_first = wipes_since_first   # party wipes here since the first item was used
+        self.kills_since_morale = kills_since_morale # foes killed since the last death-penalty item (None: none used)
+        self.no_restart = no_restart                 # a wipe here has ended the run before (no shrine to come back at)
+        self.foes_near = foes_near                   # living enemies in sight close to the party right now
 
 
 def area_is_hard(cfg, facts):
@@ -90,6 +99,10 @@ def why_not(cfg, facts):
         return "not a vanquish"
     if facts.foes_left <= 0:
         return "nothing left to fight"
+    # Items are for turning an area round, not for feeding one that is being lost anyway.
+    if facts.wipes_since_first >= int(cfg.pcons_stop_wipes):
+        return (f"stopped for this area: the party has wiped {facts.wipes_since_first} times since items were "
+                f"first used here, they are not turning it round")
     return ""
 
 
@@ -105,29 +118,51 @@ def decide(cfg, facts):
     # 1. Death penalty first: it is what ends runs.
     party = facts.party_morale or [facts.my_morale]
     low = sum(1 for m in party if m <= limit)
-    if low >= max(1, int(cfg.pcons_dp_members)) and facts.foes_left >= 8:
+    morale_ok, morale_why = True, ""
+    if facts.morale_used >= int(cfg.pcons_max_morale):
+        morale_ok, morale_why = False, f"death-penalty items: the limit of {cfg.pcons_max_morale} for one area is used up"
+    elif facts.kills_since_morale is not None and facts.kills_since_morale < int(cfg.pcons_morale_worth):
+        morale_ok = False
+        morale_why = (f"death-penalty items held: the last one bought only {facts.kills_since_morale} kills "
+                      f"(another is not used until {cfg.pcons_morale_worth})")
+    # Whoever is one death from the floor (-60%) decides it too: a party all the way down that
+    # is beaten once more is sent back to the outpost by the game, and the whole run is lost.
+    floor = sum(1 for m in party if m <= 55)
+    critical = facts.my_morale <= 55 or floor >= 2
+    if morale_ok and (low >= max(1, int(cfg.pcons_dp_members)) or critical) and facts.foes_left >= 8:
         for it in CATALOGUE:
             if (it.kind == PARTY_MORALE and getattr(cfg, it.setting) and it.key in facts.in_bags
                     and min(party) < facts.targets.get(it.key, 100)):
+                if critical:
+                    return it, "one more death and the game sends the party back to the outpost"
                 return it, f"{low} of the party at {100 - limit}% death penalty or worse"
-    if facts.my_morale <= limit and facts.foes_left >= 8:
+    if morale_ok and facts.my_morale <= limit and facts.foes_left >= 8:
         for it in CATALOGUE:
             if (it.kind == SELF_MORALE and getattr(cfg, it.setting) and it.key in facts.in_bags
                     and facts.my_morale < facts.targets.get(it.key, 100)):
                 return it, f"your death penalty is {100 - facts.my_morale}%"
 
     # 2. Timed bonuses, each under its own setting.
-    waiting = ""
+    waiting = morale_why if (low or facts.my_morale <= limit) else ""
+    if facts.timed_used >= int(cfg.pcons_max_timed):
+        return None, waiting or f"timed bonuses: the limit of {cfg.pcons_max_timed} for one area is used up"
     for it in CATALOGUE:
         if it.kind != EFFECT:
             continue
         mode = int(getattr(cfg, it.setting))
         if mode == OFF or it.key in facts.running or it.key not in facts.in_bags:
             continue
+        # Where one wipe ends the run, waiting for deaths is waiting too long: the bonus goes on
+        # for the first fight big enough to cost lives, and a short tail does not hold it back.
+        last_chance = facts.no_restart and facts.foes_near >= int(cfg.pcons_big_fight) and facts.foes_left >= 15
+        if last_chance:
+            return it, f"a wipe ends the run in this area, and {facts.foes_near} enemies are close"
         if mode == HARD and not hard:
-            waiting = waiting or f"{it.name} held until {cfg.pcons_after_deaths} deaths (now {facts.deaths})"
+            why = (f"{it.name} held for a fight of {cfg.pcons_big_fight}+ (a wipe ends the run here)" if facts.no_restart
+                   else f"{it.name} held until {cfg.pcons_after_deaths} deaths (now {facts.deaths})")
+            waiting = waiting or why
             continue
-        if tail and not hard:
+        if tail:                         # a half-hour bonus is not started for the last few foes, however it is going
             waiting = waiting or f"{it.name} not started with only {facts.foes_left} foes left"
             continue
         return it, ("the area is going badly" if mode == HARD else "set to always")

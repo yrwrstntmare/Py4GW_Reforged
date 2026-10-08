@@ -1,0 +1,397 @@
+{
+"3008": {
+"level": 5,
+"role": "minion",
+"seen": 15,
+"skills": []
+},
+"3745": {
+"level": 30,
+"role": "fighter",
+"seen": 8,
+"skills": [
+"Enfeebling Blood",
+"Oppressive Gaze",
+"Cultist's Fervor"
+]
+},
+"3746": {
+"level": 30,
+"role": "fighter",
+"seen": 8,
+"skills": [
+"Healing Signet"
+]
+},
+"3759": {
+"level": 26,
+"role": "caster",
+"seen": 64,
+"skills": [
+"Vampiric Swarm",
+"Blood Drinker",
+"Vampiric Spirit",
+"Parasitic Bond"
+]
+},
+"3760": {
+"level": 26,
+"role": "caster",
+"seen": 75,
+"skills": [
+"Vampiric Bite",
+"Weaken Knees",
+"Fetid Ground",
+"Vampiric Gaze"
+]
+},
+"3761": {
+"level": 30,
+"role": "caster",
+"seen": 57,
+"skills": [
+"1152",
+"Shadow Refuge",
+"Scorpion Wire",
+"Shadow Shroud"
+]
+},
+"3762": {
+"level": 26,
+"role": "fighter",
+"seen": 65,
+"skills": [
+"Shadow Refuge",
+"Locust's Fury"
+]
+},
+"3763": {
+"level": 26,
+"role": "fighter",
+"seen": 43,
+"skills": [
+"Crippling Anguish",
+"Ether Feast",
+"Accumulated Pain",
+"Conjure Nightmare",
+"Fragility"
+]
+},
+"3764": {
+"level": 26,
+"role": "caster",
+"seen": 49,
+"skills": [
+"Icy Prism",
+"Maelstrom",
+"Teinai's Crystals",
+"Ash Blast",
+"Obsidian Flesh"
+]
+},
+"3765": {
+"level": 26,
+"role": "healer",
+"seen": 54,
+"skills": [
+"Signet of Rejuvenation",
+"Healing Whisper",
+"Empathic Removal",
+"Healing Breeze"
+]
+},
+"3766": {
+"level": 26,
+"role": "caster",
+"seen": 14,
+"skills": [
+"Clamor of Souls",
+"Pain",
+"Destruction",
+"Bloodsong",
+"Painful Bond"
+]
+},
+"3768": {
+"level": 26,
+"role": "caster",
+"seen": 245,
+"skills": [
+"Barbs",
+"Animate Vampiric Horror",
+"1153",
+"Defile Flesh",
+"Tainted Flesh"
+]
+},
+"3769": {
+"level": 26,
+"role": "fighter",
+"seen": 103,
+"skills": [
+"Shadow Refuge",
+"Aura of Displacement"
+]
+},
+"3770": {
+"level": 26,
+"role": "healer",
+"seen": 69,
+"skills": [
+"Boon Signet",
+"Life Bond",
+"Shield Guardian",
+"Reversal of Fortune",
+"Shielding Hands"
+]
+},
+"3771": {
+"level": 26,
+"role": "fighter",
+"seen": 112,
+"skills": [
+"Shove",
+"Healing Signet"
+]
+},
+"3772": {
+"level": 26,
+"role": "caster",
+"seen": 136,
+"skills": [
+"Archer's Signet",
+"Apply Poison",
+"Snare",
+"Troll Unguent"
+]
+},
+"3773": {
+"level": 26,
+"role": "caster",
+"seen": 145,
+"skills": [
+"Shatterstone",
+"Arc Lightning",
+"Water Attunement",
+"Aura of Restoration"
+]
+},
+"3774": {
+"level": 26,
+"role": "fighter",
+"seen": 104,
+"skills": []
+},
+"3775": {
+"level": 26,
+"role": "caster",
+"seen": 12,
+"skills": [
+"Stone Daggers",
+"Teinai's Wind",
+"Gale",
+"Shockwave"
+]
+},
+"3776": {
+"level": 26,
+"role": "caster",
+"seen": 14,
+"skills": [
+"Weaken Knees",
+"Chilblains",
+"Suffering",
+"Defile Flesh"
+]
+},
+"3778": {
+"level": 26,
+"role": "fighter",
+"seen": 8,
+"skills": []
+},
+"3779": {
+"level": 26,
+"role": "caster",
+"seen": 77,
+"skills": [
+"Energy Surge",
+"Shatter Enchantment",
+"Shatter Hex",
+"Cry of Frustration"
+]
+},
+"3780": {
+"level": 25,
+"role": "fighter",
+"seen": 51,
+"skills": [
+"Shatter Enchantment",
+"Cry of Frustration"
+]
+},
+"3781": {
+"level": 26,
+"role": "caster",
+"seen": 85,
+"skills": [
+"Stoning",
+"Glyph of Lesser Energy",
+"Churning Earth",
+"Aura of Restoration",
+"Shockwave"
+]
+},
+"3782": {
+"level": 26,
+"role": "fighter",
+"seen": 143,
+"skills": []
+},
+"3783": {
+"level": 26,
+"role": "fighter",
+"seen": 145,
+"skills": [
+"Healing Signet"
+]
+},
+"3784": {
+"level": 25,
+"role": "fighter",
+"seen": 50,
+"skills": []
+},
+"3785": {
+"level": 26,
+"role": "caster",
+"seen": 138,
+"skills": [
+"Barbed Trap",
+"Lacerate",
+"Brambles"
+]
+},
+"3786": {
+"level": 26,
+"role": "caster",
+"seen": 157,
+"skills": [
+"Barbed Trap",
+"Troll Unguent",
+"Lacerate",
+"Brambles"
+]
+},
+"3787": {
+"level": 25,
+"role": "caster",
+"seen": 88,
+"skills": [
+"Snare",
+"Barbed Trap",
+"Brambles"
+]
+},
+"3788": {
+"level": 26,
+"role": "healer",
+"seen": 92,
+"skills": [
+"Splinter Weapon",
+"Spirit Light",
+"Consume Soul",
+"Wielder's Boon"
+]
+},
+"3789": {
+"level": 26,
+"role": "healer",
+"seen": 118,
+"skills": [
+"Consume Soul",
+"Spirit Light",
+"Splinter Weapon",
+"Recuperation",
+"Wielder's Boon"
+]
+},
+"3790": {
+"level": 25,
+"role": "healer",
+"seen": 43,
+"skills": [
+"Spirit Light",
+"Splinter Weapon",
+"Wielder's Boon"
+]
+},
+"4261": {
+"level": 22,
+"role": "minion",
+"seen": 121,
+"skills": []
+},
+"4264": {
+"level": 13,
+"role": "minion",
+"seen": 8,
+"skills": []
+},
+"4265": {
+"level": 16,
+"role": "minion",
+"seen": 13,
+"skills": []
+},
+"4266": {
+"level": 18,
+"role": "minion",
+"seen": 18,
+"skills": []
+},
+"4269": {
+"level": 11,
+"role": "minion",
+"seen": 28,
+"skills": []
+},
+"4271": {
+"level": 18,
+"role": "minion",
+"seen": 79,
+"skills": []
+},
+"4272": {
+"level": 16,
+"role": "minion",
+"seen": 8,
+"skills": []
+},
+"4276": {
+"level": 16,
+"role": "minion",
+"seen": 8,
+"skills": []
+},
+"4278": {
+"level": 16,
+"role": "minion",
+"seen": 15,
+"skills": []
+},
+"4283": {
+"level": 11,
+"role": "fighter",
+"seen": 264,
+"skills": [
+"Apply Poison"
+]
+},
+"4290": {
+"level": 13,
+"role": "minion",
+"seen": 278,
+"skills": []
+}
+}

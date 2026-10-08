@@ -56,6 +56,11 @@ no game running. If a planning change needs something from the game, add a funct
   that step with Reforged's `MoveAndKill` → report back. Deaths, resting and stuck handling
   are here; the rest is in three mixins so two people rarely need the same file:
   - `node_fight.py` – target calling, falling back, walking to the dead
+  - `fightlog.py` – writes one record per fight to `gwamm_logs/fights/` (the logic is
+    `core/fightrec.py`, the game reads are `game.fight_snapshot`); read-only, decides nothing
+  - `node_pull.py` – pulling: park the heroes, fetch the nearest group, fight it at the camp
+    (the plan is `core/tactics.plan_fight`: tells groups apart, picks what to wake, from where,
+    and where to fight it; `gwamm_tests/sim_combat.py` is where such rules are tried first)
   - `node_blessing.py` – shrine blessings and bounties
   - `node_capture.py` – elite capture
 - `cross.py` – `CrossNode`: step through a door into the next area.
@@ -95,6 +100,14 @@ no game running. If a planning change needs something from the game, add a funct
 6. **Fix, do not remove,** a feature someone wants to test. Hide unfinished ones from the
    window instead of leaving confusing switches.
 7. `gwamm_logs/` is personal run data and is ignored by git. Never commit it.
+8. **Look in `Widgets/` before building.** Reforged ships about 200 widgets. Before adding a
+   feature, check whether a widget already does it or already keeps the data, and use that
+   (read its data file, or tell the user to switch it on) instead of writing it again. In use
+   today: **Enemy Tracker** (System) feeds enemy types to target calling through
+   `game.tracker_roles`; **HeroHelper** (Automation > Enhancements) is run beside the bot for
+   hero skill use. Looked at and worth a second look when relevant: Pycons (consumables),
+   CombatPrep (multibox formations), Vanquish/Factions (hand-made routes), Combat Events
+   (who targets whom; disabled in the 1 Oct 2026 copy).
 
 ## Working on it together
 
@@ -114,6 +127,7 @@ python gwamm_tests/test_core.py        # planner: geometry, cartography, elites,
 python gwamm_tests/smoke_campaign.py   # the campaign flow against a stubbed game
 python gwamm_tests/sim_transit.py      # crossing an area
 python gwamm_tests/check_names.py      # every name each file uses is imported there
+python gwamm_tests/sim_combat.py       # fight simulator: behaviours x situations (groups, patrols, walls)
 ```
 
 Run them before every push. A change to `core/` that has no test is not finished.

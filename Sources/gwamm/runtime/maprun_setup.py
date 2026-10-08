@@ -169,9 +169,19 @@ class SetupMixin:
             steps += [self._action("Dismiss heroes", game.kick_all_heroes), BT.Wait(duration_ms=1000)]
             for hero_id in wanted_heroes:
                 steps += [self._action(f"Add hero {hero_id}", lambda h=hero_id: game.add_hero(h)), BT.Wait(duration_ms=700)]
-        for pos, (_hero_id, template, _behaviour) in enumerate(team.heroes, start=1):
+        # The game does not always seat heroes in the order they were added, so each bar goes to
+        # wherever its hero actually sits now, never to the place it has in the saved team.
+        def hero_bar(hero_id, template, fallback):
+            now = game.party_hero_ids()
+            if hero_id in now:
+                game.load_hero_template(now.index(hero_id) + 1, template)
+            elif not now:
+                game.load_hero_template(fallback, template)      # party unreadable: saved order
+            else:
+                log.event("campaign", map_id=self.map_id, phase="team", note=f"hero {hero_id} not in party; bar not loaded")
+        for pos, (hero_id, template, _behaviour) in enumerate(team.heroes, start=1):
             if template:
-                steps += [self._action(f"Hero {pos} bar", lambda p=pos, t=template: game.load_hero_template(p, t)),
+                steps += [self._action(f"Hero {hero_id} bar", lambda h=hero_id, t=template, p=pos: hero_bar(h, t, p)),
                           BT.Wait(duration_ms=350)]
         steps += [self._action("Your bar", lambda: game.load_bar_template(bar)), BT.Wait(duration_ms=2000),
                   self._action("Report team", lambda: log.event(
@@ -180,6 +190,26 @@ class SetupMixin:
         if signets > 0:
             steps.append(BehaviorTree.SubtreeNode(name="TopUpSignets", subtree_fn=lambda _n: self._buy_tree(bar, signets)))
         return BT.Sequence(name=f"Team:{self.map_id}", children=steps)
+
+    def _to_trainer(self):
+        """Walk to the skill trainer and open the shop. Our own route, in short hops, then
+        Reforged's walk-and-talk for the last step (see geometry.town_waypoints for why)."""
+        log = self.session.log
+
+        def build(_node):
+            hops = []
+            try:
+                from ..core.geometry import town_waypoints
+                plane, _z = game.player_level()
+                hops = town_waypoints(game.read_trapezoids(), game.read_level_links(), game.player_xy(),
+                                      SKILL_TRAINER_XY, start_plane=plane)
+            except Exception as e:
+                log.event("campaign", map_id=self.map_id, phase="signets", note=f"town route unreadable: {e!r}")
+            self.session.errand_note = f"skill trainer: {len(hops)} hops" if hops else "skill trainer: straight there (no route found)"
+            walk = [BT.Move(pos=(float(x), float(y)), tolerance=180.0) for x, y in hops[:-1]]
+            return BT.Sequence(name="ToTrainer", children=walk + [
+                BT.MoveAndDialog(pos=SKILL_TRAINER_XY, dialog_id=SKILL_TRAINER_DIALOG)])
+        return BehaviorTree.SubtreeNode(name="ToTrainer", subtree_fn=build)
 
     def _buy_tree(self, bar, want):
         """Buy the signets the bar is short of at the Eye of the North, come back, reload the bar."""
@@ -196,8 +226,8 @@ class SetupMixin:
         return BT.Sequence(name="BuySignets", children=[
             self._always(BT.Sequence(name="Shop", children=[
                 BT.Travel(target_map_id=EYE_OF_THE_NORTH), BT.Wait(duration_ms=2000),
-                BT.MoveAndDialog(pos=SKILL_TRAINER_XY, dialog_id=SKILL_TRAINER_DIALOG), BT.Wait(duration_ms=800),
-                *buy]), "buying signets"),
+                self._to_trainer(), BT.Wait(duration_ms=800),
+                *buy]), "buying signets", limit_s=150.0),
             BT.Travel(target_map_id=self._home, hard_mode=True), BT.Wait(duration_ms=2000),
             self._action("Your bar", lambda: game.load_bar_template(bar)), BT.Wait(duration_ms=2000),
             self._action("Count signets", lambda: log.event("campaign", map_id=self.map_id, phase="signets",
@@ -228,9 +258,9 @@ class SetupMixin:
                 self._always(BT.Sequence(name="Shop", children=[
                     BT.Travel(target_map_id=EYE_OF_THE_NORTH),
                     BT.Wait(duration_ms=2000),
-                    BT.MoveAndDialog(pos=SKILL_TRAINER_XY, dialog_id=SKILL_TRAINER_DIALOG),
+                    self._to_trainer(),
                     BT.Wait(duration_ms=800),
-                    *buy]), "buying signets"),
+                    *buy]), "buying signets", limit_s=150.0),
                 BT.Travel(target_map_id=self._home, hard_mode=True),
                 BT.Wait(duration_ms=2000),
                 self._action("Put signets on the bar", lambda: game.load_bar_template(bar)),

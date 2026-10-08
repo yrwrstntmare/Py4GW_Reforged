@@ -128,20 +128,77 @@ class NavGraph:
                         out.append(i)
         return out
 
-    def nearest_node(self, x, y, allowed=None, max_radius=20000.0):
-        radius = _HASH
-        while radius <= max_radius:
+    # ---- is this point, this straight line, on walkable ground? ----
+    def _trap_grid(self):
+        grid = self.__dict__.get("_tgrid")
+        if grid is None:
+            grid = self._tgrid = {}
+            for i, t in enumerate(self.traps):
+                x0, x1 = min(t[1], t[4]), max(t[2], t[5])
+                y0, y1 = min(t[3], t[6]), max(t[3], t[6])
+                for cx in range(int(x0 // 400), int(x1 // 400) + 1):
+                    for cy in range(int(y0 // 400), int(y1 // 400) + 1):
+                        grid.setdefault((cx, cy), []).append(i)
+        return grid
+
+    def on_ground(self, x, y, slack=12.0):
+        """True if (x, y) lies on a walkable piece of ground (any level)."""
+        for i in self._trap_grid().get((int(x // 400), int(y // 400)), ()):
+            t = self.traps[i]
+            yt, yb = max(t[3], t[6]), min(t[3], t[6])
+            if y > yt + slack or y < yb - slack:
+                continue
+            f = 0.5 if yt == yb else (y - t[6]) / (t[3] - t[6])      # 0 at the bottom edge, 1 at the top
+            f = min(1.0, max(0.0, f))
+            left, right = t[4] + (t[1] - t[4]) * f, t[5] + (t[2] - t[5]) * f
+            if left - slack <= x <= right + slack:
+                return True
+        return False
+
+    def line_clear(self, a, b, step=90.0):
+        """True if the straight line from a to b stays on walkable ground the whole way."""
+        d = math.hypot(b[0] - a[0], b[1] - a[1])
+        n = max(1, int(d // step))
+        return all(self.on_ground(a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n) for k in range(n + 1))
+
+    def node_plane(self, i):
+        """Which of the map's ground pieces (pathing planes) a node lies on."""
+        return self.traps[self.node_trap[i]][0]
+
+    def reach_costs(self, start, limit):
+        """Walking distance from `start` to every node within `limit` of it (one sweep; used
+        when many "how far is the walk to X" questions are asked at once)."""
+        best, heap = {start: 0.0}, [(0.0, start)]
+        while heap:
+            g, u = heapq.heappop(heap)
+            if g > best.get(u, math.inf):
+                continue
+            for v, w in self.adj[u]:
+                ng = g + w
+                if ng <= limit and ng < best.get(v, math.inf) and (self.forbidden[u] or not self.forbidden[v]):
+                    best[v] = ng
+                    heapq.heappush(heap, (ng, v))
+        return best
+
+    def nearest_node(self, x, y, allowed=None, max_radius=20000.0, plane=None):
+        """Nearest node to a point. `plane`: only nodes on that ground piece (where one level
+        lies over another, the nearest node in plan view can be on the wrong one)."""
+        radius = min(_HASH, max_radius)      # (a limit under the first search ring used to find nothing at all)
+        while True:
             best, best_d = None, None
             for i in self.nodes_within(x, y, radius):
                 if allowed is not None and not allowed[i]:
+                    continue
+                if plane is not None and self.traps[self.node_trap[i]][0] != plane:
                     continue
                 d = (self.nodes[i][0] - x) ** 2 + (self.nodes[i][1] - y) ** 2
                 if best is None or d < best_d:
                     best, best_d = i, d
             if best is not None:
                 return best
-            radius *= 2
-        return None
+            if radius >= max_radius:
+                return None
+            radius = min(radius * 2, max_radius)
 
     def component(self, start):
         """Flags for every node reachable from `start`."""
@@ -209,6 +266,37 @@ class NavGraph:
                     vx, vy = self.nodes[v]
                     heapq.heappush(heap, (ng + math.hypot(vx - gx, vy - gy), ng, v))
         return []
+
+
+def town_waypoints(traps, links, start_xy, goal_xy, start_plane=None, gap=450.0):
+    """Points to walk through, in order, from `start_xy` to `goal_xy` over this ground: one
+    about every `gap`, and always one where the way changes level. For errands in towns.
+
+    The game's own walk goes to a spot on the level the character is standing on. A town on
+    several levels (the Eye of the North has 24 pieces of ground) sends it to the floor under
+    or over the target when the arrival point is on another level, and it paces about there.
+    Walking our own route in short hops keeps each hop on one level. [] if there is no route."""
+    nav = NavGraph(traps, links=links)
+    a = nav.nearest_node(start_xy[0], start_xy[1], max_radius=600.0, plane=start_plane) if start_plane is not None else None
+    if a is None:
+        a = nav.nearest_node(start_xy[0], start_xy[1])
+    b = nav.nearest_node(goal_xy[0], goal_xy[1])
+    if a is None or b is None:
+        return []
+    route = nav.path(a, b)
+    if not route:
+        return []
+    out, since = [], 0.0
+    for i in range(1, len(route)):
+        since += math.hypot(nav.nodes[route[i]][0] - nav.nodes[route[i - 1]][0],
+                            nav.nodes[route[i]][1] - nav.nodes[route[i - 1]][1])
+        changed = nav.node_plane(route[i]) != nav.node_plane(route[i - 1])
+        if changed or since >= gap:
+            out.append(nav.nodes[route[i]])
+            since = 0.0
+    if not out or math.hypot(out[-1][0] - goal_xy[0], out[-1][1] - goal_xy[1]) > 150.0:
+        out.append((goal_xy[0], goal_xy[1]))
+    return out
 
 
 def loose_links(traps, vert_tol=100.2, horiz_tol=100.6):

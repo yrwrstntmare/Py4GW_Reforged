@@ -12,12 +12,26 @@ STATE_NAMES = {UNKNOWN: "UNKNOWN", SEEN: "SEEN", SEARCHED: "SEARCHED"}
 SEARCHED_SHARE = 0.92        # share of a region's nodes that must be searched
 
 
+PATROL_WATCH = 1700.0        # further from the party than this, an enemy's movement is its own doing
+PATROL_ROAM = 700.0          # moved this far from where it was first seen: it patrols
+
+
+def is_patrol(e):
+    """Seen walking about on its own: either it has gone a fair way from where it was first
+    seen, or it has gone some way and is walking right now."""
+    return e.roam >= PATROL_ROAM or (e.roam >= 250.0 and math.hypot(e.vel[0], e.vel[1]) >= 70.0)
+
+
 class Enemy:
     __slots__ = ("id", "xy", "first_xy", "first_seen", "last_seen", "alive",
-                 "in_range", "lost", "boss")
+                 "in_range", "lost", "boss", "roam", "trail", "vel", "plane", "z")
 
     def __init__(self, eid, xy, now, boss):
         self.id, self.xy, self.first_xy = eid, xy, xy
+        self.roam = 0.0              # furthest it has been seen from where it was first seen, while not reacting to us
+        self.trail = [xy]            # where it has been (sampled): a patrol's beat
+        self.vel = (0.0, 0.0)        # how it is moving right now (units a second), smoothed
+        self.plane, self.z = None, None      # which piece of ground it stands on, and its height
         self.first_seen = self.last_seen = now
         self.alive, self.in_range, self.lost, self.boss = True, True, False, boss
 
@@ -146,15 +160,33 @@ class InstanceMemory:
     def observe(self, seen, player_xy, now):
         """`seen` is a list of (agent_id, x, y, alive, boss) for every enemy currently visible."""
         ids = set()
-        for eid, x, y, alive, boss in seen:
+        for eid, x, y, alive, boss, *level in seen:
             ids.add(eid)
             e = self.enemies.get(eid)
             if e is None:
                 if not alive:
                     continue
                 e = self.enemies[eid] = Enemy(eid, (x, y), now, boss)
+            dt = now - e.last_seen
+            if 0.05 < dt < 3.0:
+                vx, vy = (x - e.xy[0]) / dt, (y - e.xy[1]) / dt
+                if math.hypot(vx, vy) < 600.0:           # faster than anything walks: a glitch, not movement
+                    e.vel = (0.6 * e.vel[0] + 0.4 * vx, 0.6 * e.vel[1] + 0.4 * vy)
+            elif dt >= 3.0:
+                e.vel = (0.0, 0.0)
             e.xy, e.last_seen, e.alive, e.boss = (x, y), now, alive, boss or e.boss
             e.in_range, e.lost = True, False
+            if len(level) >= 2:
+                e.plane, e.z = level[0], level[1]
+            # Movement seen while the party is too far off to be the cause is the enemy's own:
+            # a patrol. (Closer than that it may simply be coming for us.)
+            if alive and math.hypot(x - player_xy[0], y - player_xy[1]) > PATROL_WATCH:
+                e.roam = max(e.roam, math.hypot(x - e.first_xy[0], y - e.first_xy[1]))
+                lx, ly = e.trail[-1]
+                if math.hypot(x - lx, y - ly) > 350.0:
+                    e.trail.append((x, y))
+                    if len(e.trail) > 24:
+                        del e.trail[0:len(e.trail) - 24]
         check = self.sight_radius * 0.8
         for eid, e in self.enemies.items():
             if eid in ids:
@@ -163,6 +195,10 @@ class InstanceMemory:
             # We are standing where it was and it is not here: it moved or died out of sight.
             if e.alive and not e.lost and math.hypot(e.xy[0] - player_xy[0], e.xy[1] - player_xy[1]) < check:
                 e.lost = True
+
+    def patrollers(self):
+        """Living enemies that have been seen walking about on their own."""
+        return [e for e in self.enemies.values() if e.alive and not e.lost and is_patrol(e)]
 
     def live_enemies(self):
         return [e for e in self.enemies.values() if e.alive and not e.lost]

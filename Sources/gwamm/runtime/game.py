@@ -169,6 +169,81 @@ def enemy_details(agent_id):
         return None
 
 
+def attack(agent_id):
+    """Have the leader attack this enemy (the client walks into weapon range and starts)."""
+    if agent_id and Agent.IsValid(agent_id) and Agent.IsAlive(agent_id):
+        Player.Interact(agent_id, False)
+        return True
+    return False
+
+
+def leader_ranged():
+    """True when the leader's weapon reaches further than enemies notice (wand, staff, bow)."""
+    try:
+        me = Player.GetAgentID()
+        return bool(Agent.IsCaster(me) or Agent.IsRanged(me)) and not Agent.IsMelee(me)
+    except Exception:
+        return False
+
+
+def tracker_roles():
+    """What the Enemy Tracker widget (Widgets/System) has learnt about enemy types, as
+    {model id: "healer" | "caster" | "fighter"}. That widget watches every enemy near the
+    player whenever Py4GW runs and keeps the skills each type was seen using, so it covers
+    areas our own fight recordings have not reached. Empty if it has no data."""
+    import json
+    import os
+    import PySystem
+    from ..core import tactics
+    root = PySystem.Console.get_projects_path()
+    # Read the widget's file itself (json/Global/EnemyTracker/Data.json, seen on disk with 320
+    # enemy types). Going through the JSON library's shared document came back empty.
+    records = {}
+    try:
+        with open(os.path.join(root, "json", "Global", "EnemyTracker", "Data.json"), encoding="utf-8") as f:
+            records = (json.load(f) or {}).get("enemies") or {}
+    except Exception:
+        try:
+            from Py4GWCoreLib.py4gwcorelib_src.JsonFactory import JsonFactory
+            records = JsonFactory("EnemyTracker/Data.json", "global").get_json("enemies", {}) or {}
+        except Exception:
+            records = {}
+    try:
+        with open(os.path.join(root, "Py4GWCoreLib", "skill_descriptions.json"), encoding="utf-8") as f:
+            texts = json.load(f)
+    except Exception:
+        texts = {}
+    out = {}
+    for record in records.values():
+        if not isinstance(record, dict):
+            continue
+        skills = record.get("observed_skills") or {}
+        heals = sum(1 for key in skills if tactics.heals_allies((texts.get(str(key)) or {}).get("desc_full", "")))
+        primary = str(record.get("inferred_primary") or "")
+        if heals >= 2 or (heals >= 1 and primary == "Monk"):
+            role = "healer"
+        elif primary in ("Monk", "Ritualist", "Mesmer", "Elementalist", "Necromancer"):
+            role = "caster"
+        elif primary:
+            role = "fighter"
+        else:
+            continue
+        for model in record.get("model_ids") or ():
+            try:
+                out[int(model)] = role
+            except (TypeError, ValueError):
+                continue
+    return out
+
+
+def enemy_model(agent_id):
+    """The model number of a live enemy (identifies its type), 0 if it cannot be read."""
+    try:
+        return int(Agent.GetModelID(agent_id)) if Agent.IsValid(agent_id) else 0
+    except Exception:
+        return 0
+
+
 def call_target(agent_id):
     if agent_id and Agent.IsValid(agent_id) and Agent.IsAlive(agent_id):
         Player.CallTarget(agent_id)
@@ -202,10 +277,118 @@ def read_enemies():
             x, y = Agent.GetXY(agent_id)
             if not (math.isfinite(x) and math.isfinite(y)):
                 continue                     # the game hands out blank positions for agents mid-spawn
-            out.append((agent_id, x, y, Agent.IsAlive(agent_id), Agent.HasBossGlow(agent_id)))
+            try:                             # which piece of ground it stands on, and how high
+                plane, z = int(Agent.GetZPlane(agent_id)), float(Agent.GetXYZ(agent_id)[2])
+            except Exception:
+                plane, z = None, None
+            out.append((agent_id, x, y, Agent.IsAlive(agent_id), Agent.HasBossGlow(agent_id), plane, z))
         except Exception:
             continue
     return out
+
+
+def _agent_facts(agent_id, with_energy=False, named=True):
+    """Everything the client knows about one living agent that is useful after a fight.
+    Each read is guarded on its own: one missing field must not lose the rest."""
+    def get(fn, default=None):
+        try:
+            return fn(agent_id)
+        except Exception:
+            return default
+    x, y, z = Agent.GetXYZ(agent_id)
+    if not (math.isfinite(x) and math.isfinite(y)):
+        return None
+    prof = get(Agent.GetProfessionIDs, (0, 0))
+    a = {"id": int(agent_id), "xy": (float(x), float(y)), "z": float(z),
+         "plane": get(Agent.GetZPlane), "hp": get(Agent.GetHealth), "max_hp": get(Agent.GetMaxHealth),
+         "alive": bool(get(Agent.IsAlive, True)), "dead": bool(get(Agent.IsDead, False)),
+         "model": get(Agent.GetModelID), "level": get(Agent.GetLevel), "prof": list(prof or (0, 0)),
+         "boss": bool(get(Agent.HasBossGlow, False)), "vel": get(Agent.GetVelocityXY),
+         "cast": get(Agent.GetCastingSkillID, 0), "atk": bool(get(Agent.IsAttacking, False)),
+         "mv": bool(get(Agent.IsMoving, False)), "kd": bool(get(Agent.IsKnockedDown, False)),
+         "hex": bool(get(Agent.IsHexed, False)), "ench": bool(get(Agent.IsEnchanted, False)),
+         "cond": bool(get(Agent.IsConditioned, False)), "dw": bool(get(Agent.IsDeepWounded, False)),
+         "regen": get(Agent.GetHealthRegen), "weapon": get(Agent.GetWeaponType),
+         "name": ""}        # no name lookups here: asking the game for names right after a shrine jump crashed it; the model id identifies the type
+    if isinstance(a["weapon"], tuple):
+        a["weapon"] = a["weapon"][0]
+    if with_energy:
+        a["en"] = get(Agent.GetEnergy)
+    return a
+
+
+def fight_snapshot(radius=3200.0, known=()):
+    """What is around the leader right now, for the fight recorder. None when there is nothing
+    hostile within `radius` (the common case: one cheap pass over the enemy list)."""
+    me = Player.GetAgentID()
+    px, py = Player.GetXY()
+    r2 = radius * radius
+    near = []
+    for agent_id in AgentArray.GetEnemyArray():
+        try:
+            x, y = Agent.GetXY(agent_id)
+            if (x - px) ** 2 + (y - py) ** 2 <= r2:
+                near.append(agent_id)
+        except Exception:
+            continue
+    if not near:
+        return None
+    enemies = [f for f in (_agent_facts(i, named=i not in known) for i in near) if f is not None]
+    allies = []
+    for kind, ids in (("party", AgentArray.GetAllyArray()), ("spirit", AgentArray.GetSpiritPetArray()),
+                      ("minion", AgentArray.GetMinionArray())):
+        for agent_id in ids:
+            try:
+                if agent_id == me:
+                    continue
+                x, y = Agent.GetXY(agent_id)
+                if (x - px) ** 2 + (y - py) ** 2 > 3000.0 ** 2:
+                    continue
+                f = _agent_facts(agent_id, with_energy=True, named=agent_id not in known)
+                if f is not None:
+                    f["kind"] = kind
+                    allies.append(f)
+            except Exception:
+                continue
+    mine = _agent_facts(me, with_energy=True, named=me not in known) or {"id": int(me), "xy": (px, py)}
+    mine["kind"] = "leader"
+    try:
+        mine["bar"] = [int(s) for s in SkillBar.GetSkillbar()]
+    except Exception:
+        pass
+    try:
+        if mine.get("dead"):
+            raise ValueError("dead")
+        from Py4GWCoreLib.Effect import Effects
+        mine["effects"] = sorted({int(e.skill_id) for e in Effects.GetEffects(me)})
+    except Exception:
+        pass
+    allies.insert(0, mine)
+    out = {"me": {"xy": (px, py), "z": mine.get("z"), "plane": mine.get("plane"), "dead": bool(mine.get("dead"))},
+           "allies": allies, "enemies": enemies}
+    for key, fn in (("foes", foes_remaining), ("killed", foes_killed), ("morale", my_morale)):
+        try:
+            out[key] = fn()
+        except Exception:
+            out[key] = None
+    return out
+
+
+def my_health():
+    """The leader's health, 0-1 (1.0 if it cannot be read)."""
+    try:
+        return float(Agent.GetHealth(Player.GetAgentID()))
+    except Exception:
+        return 1.0
+
+
+def player_level():
+    """(plane, height) of the leader: the piece of ground he stands on and how high it is."""
+    try:
+        me = Player.GetAgentID()
+        return int(Agent.GetZPlane(me)), float(Agent.GetXYZ(me)[2])
+    except Exception:
+        return None, None
 
 
 def foes_remaining():
@@ -301,6 +484,38 @@ def front_line_heroes(limit=2):
         except Exception:
             continue
     return [(a, p) for _rank, a, p in sorted(out)[:limit]]
+
+
+def flag_all_heroes(x, y):
+    """The party-wide flag: every hero (and henchman) goes to this spot and stays."""
+    Party.Heroes.FlagAllHeroes(x, y)
+
+
+def flag_heroes_spread(places, usable=None):
+    """Flag each of our own heroes to its own place (fighters to the first places), so they do
+    not stand in one heap. `usable(x, y)`: is this spot walkable; a place that is not is
+    replaced by the middle one. Returns how many were placed; 0 means there are no heroes of
+    ours to place (henchmen, other players) and the caller should use the party flag."""
+    heroes = []
+    for h in Party.GetHeroes():
+        try:
+            agent = int(h.agent_id)
+            if agent and Agent.IsValid(agent) and Agent.IsAlive(agent):
+                prof = int(Agent.GetProfessionIDs(agent)[0])
+                heroes.append((FRONT_LINE.get(prof, 9), agent))
+        except Exception:
+            continue
+    heroes.sort()
+    done = 0
+    for (_rank, agent), (x, y) in zip(heroes, places):
+        if usable is not None and not usable(x, y):
+            x, y = places[0]
+        try:
+            Party.Heroes.FlagHero(agent, x, y)
+            done += 1
+        except Exception:
+            continue
+    return done
 
 
 def flag_hero(agent_id, x, y):

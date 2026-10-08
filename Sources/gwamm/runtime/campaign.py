@@ -76,6 +76,14 @@ class Campaign:
             self.toolbox_path = data.get("toolbox_path", "")
         except Exception:
             pass
+        try:                             # this computer's own paths live apart from what gets shared
+            with open(self._local_path(), encoding="utf-8") as f:
+                self.toolbox_path = json.load(f).get("toolbox_path", "") or self.toolbox_path
+        except Exception:
+            pass
+
+    def _local_path(self):
+        return os.path.join(os.path.dirname(self._path), "local.json")
 
     def save(self):
         try:
@@ -84,7 +92,9 @@ class Campaign:
                 json.dump({"queue": self.queue, "results": self.results,
                            "capture_template": self.capture_template, "signet_slots": self.signet_slots,
                            "max_signets": self.max_signets, "nodata_signets": self.nodata_signets, "exit_when_done": self.exit_when_done,
-                           "builds": self.builds, "library": self.library, "toolbox_path": self.toolbox_path}, f)
+                           "builds": self.builds, "library": self.library}, f)
+            with open(self._local_path(), "w", encoding="utf-8") as f:
+                json.dump({"toolbox_path": self.toolbox_path}, f)
         except Exception:
             pass
 

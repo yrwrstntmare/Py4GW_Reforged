@@ -56,14 +56,24 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         return [self._child.root] if self._child is not None else []
 
     # ---- capture signets ----
-    def _always(self, child, what):
+    def _always(self, child, what, limit_s=None):
         """Run `child`; if it fails, log it and carry on. A failed errand (the skill trainer was
         not reached) must not leave the party in the wrong town with the rest of the plan skipped."""
         log, mid = self.session.log, self.map_id
         tree = BehaviorTree(child)
 
+        began = [0.0]
+
         def run(node):
             tree.root.blackboard = node.blackboard
+            began[0] = began[0] or time.time()
+            if limit_s is not None and time.time() - began[0] > limit_s:
+                # an errand that is going nowhere (pacing a room without reaching the trader) is
+                # given up, and the run goes on without it
+                log.event("campaign", map_id=mid, phase="errand_failed", what=what, in_map=game.map_id(), why=f"took over {int(limit_s)} s")
+                self.session.errand_note = f"{what}: given up after {int(limit_s)} s"
+                game.move_to(*game.player_xy())
+                return BehaviorTree.NodeState.SUCCESS
             state = tree.root.tick()
             if state == BehaviorTree.NodeState.FAILURE:
                 log.event("campaign", map_id=mid, phase="errand_failed", what=what, in_map=game.map_id())
@@ -213,7 +223,7 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             if time.time() - since > 6 * 3600:
                 n, since = 0, time.time()
             starts[self.map_id] = (n + 1, since)
-            if n + 1 > MAX_STARTS and not (game.map_ready() and game.map_id() == self.map_id and game.is_explorable()):
+            if n + 1 > MAX_STARTS and not self.session.cfg.keep_at_it and not (game.map_ready() and game.map_id() == self.map_id and game.is_explorable()):
                 self.session.log.event("campaign", map_id=self.map_id, phase="gave_up", starts=n + 1)
                 c.record(self.map_id, f"gave up after being sent back to town {n} times", self._started)
                 c.record(      # twice on purpose: reaches the attempt limit, which takes it off the queue

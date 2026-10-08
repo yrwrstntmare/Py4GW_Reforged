@@ -10,6 +10,7 @@ from ..core import elites
 from ..core.engine import DONE, FAILED, Config, Engine
 from ..core.world import World
 from . import game
+from .fightlog import FightLog
 from .runlog import RunLog
 
 ARRIVAL_WINDOW_MS = 20000      # building this soon after the map loads: we are standing at the way in
@@ -46,6 +47,7 @@ class Session:
         self.targets, self.captured = [], set()
         self.captures = []           # elite capture attempts this session
         self.log = RunLog()
+        self.fights = FightLog()
         self.stalls = 0              # steps abandoned because nothing moved and nothing died
         self._last_perceive = 0.0
         self._last_carto = 0.0
@@ -55,6 +57,7 @@ class Session:
         if self.engine is not None:
             self.log.event("instance_end", reason="map changed or loading", result=self.result)
             self.log.close()
+        self.fights.close()
         self.engine = None
         self.map_id = 0
         self._built_for = None
@@ -69,6 +72,28 @@ class Session:
                 return {k: [tuple(p) for p in v] for k, v in json.load(f).items()}
         except Exception:
             return {}
+
+    def _snag_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "snags.json")
+
+    def _load_snags(self):
+        """Scenery the party got caught on while walking, per map, kept between runs."""
+        try:
+            with open(self._snag_path()) as f:
+                return {k: [tuple(p) for p in v] for k, v in json.load(f).items()}
+        except Exception:
+            return {}
+
+    def save_snags(self):
+        if self.engine is None or self.map_id is None:
+            return
+        try:
+            data = self._load_snags()
+            data[str(self.map_id)] = [[round(p[0]), round(p[1])] for p in self.engine.snags]
+            with open(self._snag_path(), "w") as f:
+                json.dump(data, f)
+        except Exception:
+            pass
 
     def save_hazards(self):
         if self.engine is None or self.map_id is None:
@@ -151,6 +176,7 @@ class Session:
                     "route": [[round(x), round(y)] for x, y in mem.route],
                     "strict": bool(mem.strict), "search_radius": mem.search_radius, "escalation": mem.escalation,
                     "deaths": eng.deaths, "fresh_starts": eng.fresh_starts,
+                    "wipes": [[round(w[0]), round(w[1]), int(w[2])] for w in eng.wipes],
                     "declined": sorted(list(c) for c in (eng.carto.declined if eng.carto else ())),
                     "carto_given_up": eng.carto_given_up,
                     "captured": sorted(self.captured), "captures": self.captures[-10:],
@@ -189,6 +215,7 @@ class Session:
                 mem.visit((float(x), float(y)))
             mem._last_xy = None                       # do not count the jump to where we stand now as walking
             eng.deaths, eng.fresh_starts = int(d.get("deaths", 0)), int(d.get("fresh_starts", 0))
+            eng.wipes = [[float(w[0]), float(w[1]), int(w[2])] for w in d.get("wipes", [])]
             if eng.carto is not None:
                 eng.carto.declined |= {tuple(c) for c in d.get("declined", [])}
                 eng.carto_given_up = int(d.get("carto_given_up", 0))
@@ -225,7 +252,15 @@ class Session:
             return False
         mid = game.map_id()
         want = (mid, tuple(self.transit["xy"]) if self.transit else None)
-        if self.engine is not None and self._built_for == want:
+        # Leaving and coming straight back to the same area is a new visit even though the map
+        # number is unchanged: the instance clock starting over is what tells them apart.
+        try:
+            uptime = game.instance_uptime_ms()
+        except Exception:
+            uptime = 0
+        fresh = 0 < uptime + 3000 < getattr(self, "_seen_uptime", 0)
+        self._seen_uptime = uptime
+        if self.engine is not None and self._built_for == want and not fresh:
             return True
         self.drop()
         try:
@@ -264,6 +299,11 @@ class Session:
                     self.route_note = f"route unreadable: {e!r}"
             self.engine = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=links, guide=guide, hints=hints)
             self.pcons.reset()
+            try:                                     # enemy types the Enemy Tracker widget knows and we do not
+                from ..core import tactics
+                self.tracker_roles = tactics.add_roles(game.tracker_roles())
+            except Exception as e:
+                self.tracker_roles = f"unreadable: {e!r}"
             if guide:
                 self.route_note += f", {len(self.engine.guide)} usable from here"
             elif hints:
@@ -286,6 +326,7 @@ class Session:
             except Exception:
                 self.engine.doors = []
             self.engine.hazards = list(self._load_hazards().get(str(mid), []))
+            self.engine.snags = [tuple(p) for p in self._load_snags().get(str(mid), [])]
             self._built_for = want
             self.exits_found = len(found)
             self.exits = self.engine.exits                            # only the ones that matter here
@@ -295,7 +336,7 @@ class Session:
             self._plan_elites(mid)
             eng = self.engine
             self.log.open(mid)
-            self.log.event("start", version=__version__, map_id=mid, player=list(eng.player_xy), regions=len(eng.rm.regions),
+            self.log.event("start", enemy_tracker_roles=getattr(self, "tracker_roles", None), version=__version__, map_id=mid, player=list(eng.player_xy), regions=len(eng.rm.regions),
                            nodes=len(eng.nav.nodes), reachable=sum(eng.rm.reachable), exits=self.exits,
                            carto=None if eng.carto is None else {"anchor": [eng.carto.proj.ax, eng.carto.proj.ay],
                                                                  "stand_cells": len(eng.carto.stand),
@@ -369,10 +410,25 @@ class Session:
         if self.engine.carto is not None and now - self._last_carto >= CARTO_S:
             self._last_carto = now
             grid = game.read_carto_grid()
+        self.engine.player_plane, self.engine.player_z = game.player_level()
         self.engine.update(game.player_xy(), game.read_enemies(), game.foes_remaining(), now, grid)
+        if self.cfg.record_fights:
+            self.fights.tick(now, game.map_id(), self._fight_context)
         if now - self.__dict__.get("_last_resume_save", 0.0) >= 20.0:
             self._last_resume_save = now
             self.save_resume()
+
+    def _fight_context(self):
+        """What the bot was up to when a fight began, kept with the record of that fight."""
+        eng, cfg = self.engine, self.cfg
+        o = eng.objective
+        return {"version": __version__, "mode": eng.mode,
+                "objective": None if o is None else [o.kind, round(o.pos[0]), round(o.pos[1])],
+                "plan": getattr(eng, "last_plan", None), "blocked": sorted(eng.walled),
+                "deaths": getattr(eng, "deaths", None), "wipe_zone": bool(eng.in_wipe_zone(eng.player_xy)),
+                "party": game.party_makeup(), "hard_mode": game.foes_remaining() is not None,
+                "settings": {k: getattr(cfg, k) for k in ("pull_groups", "pull_min_group", "pull_max_take",
+                                                          "engage_radius", "keep_at_it", "pcons_on", "multibox")}}
 
     def finished(self):
         return self.engine is not None and self.engine.mode in (DONE, FAILED)

@@ -65,7 +65,7 @@ class BlessingMixin:
                                           blessing_dialog_id=game.BLESSING_DIALOG[kind], multi_account=False, log=True)
             self._key, self._target, self._started = ("bless", agent_id), (x, y), now
             self._progress_at, self._progress_xy, self._progress_kills = now, None, -1
-            self.session.log.event("blessing", stage="start", npc=agent_id, kind=kind, pos=[round(x), round(y)],
+            self.session.log.event("blessing", stage="start", npc=agent_id, npc_kind=kind, pos=[round(x), round(y)],
                                    attempt=self._bless_tries[agent_id])
             return True
         return False

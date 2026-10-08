@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.31.2"
+SCRIPT_VERSION = "0.46.8"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
@@ -328,6 +328,10 @@ def draw_status():
             _line("BLOCKED SPOTS", f"{len(eng.walls)} found, {eng.detours} detour(s) along the known route")
         if st["deaths"]:
             _line("DEATHS", f"{st['deaths']}, avoiding {st['danger_zones']} spots for now")
+        if st["patrols"]:
+            _line("PATROLS", f"{st['patrols']} enemies seen walking a beat (their paths are kept and checked before a fight is started)")
+        if st["wipe_zones"]:
+            _line("PARTY WIPES", f"{st['wipes']} at {st['wipe_zones']} place(s): left for last and walked round (red rings on the map)", BAD)
         if session.stalls:
             _line("STALLS", f"{session.stalls} recovered")
         if getattr(session, "route_note", ""):
@@ -336,6 +340,11 @@ def draw_status():
             _line("EXITS", f"{len(session.exits)} avoided (keeping {eng.cfg.exit_avoid_radius:.0f} away)")
         else:
             _line("EXITS", "none detected on this map: exit avoidance is OFF", WARN)
+        if eng.snags:
+            _line("SNAGS", f"{len(eng.snags)} bits of scenery learnt here (grey on the map; kept between runs, walked round)")
+            if not botting_tree.IsStarted() and PyImGui.button("Forget the snags learnt in this area"):
+                eng.snags = []
+                session.save_snags()
         if eng.hazards:
             _line("TRAPS", f"{len(eng.hazards)} learnt here (purple on the map; kept between runs)")
             if not botting_tree.IsStarted() and PyImGui.button("Forget the traps learnt in this area"):
@@ -396,6 +405,10 @@ def dump_debug():
 def draw_developer():
     """Data-building tools used while writing the bot. Nobody needs them to run it."""
     running = botting_tree is not None and botting_tree.IsStarted()
+    cfg = session.cfg
+    cfg.record_fights = PyImGui.checkbox("Record every fight in detail (gwamm_logs/fights), to learn from", cfg.record_fights)
+    if session.fights.written or session.fights.error:
+        PyImGui.text(f"Fights recorded this session: {session.fights.written}" + (f"   (problem: {session.fights.error})" if session.fights.error else ""))
     View.show_reforged = PyImGui.checkbox("Show Reforged's own bot window (behaviour tree view)", View.show_reforged)
     if world_dump.running():
         PyImGui.text(f"WORLD DATA: reading map {world_dump.progress} of 900...")
@@ -428,7 +441,16 @@ def draw_consumables():
     from Sources.gwamm.core import consumables as C
     cfg, pc = session.cfg, session.pcons
     cfg.pcons_after_deaths = PyImGui.slider_int('Deaths in an area that count as "going badly"', cfg.pcons_after_deaths, 1, 10)
+    cfg.pcons_big_fight = PyImGui.slider_int("Where a wipe ends the run: start timed bonuses for a fight of", cfg.pcons_big_fight, 4, 15)
     cfg.pcons_min_foes = PyImGui.slider_int("Do not start a timed bonus with fewer foes left than", cfg.pcons_min_foes, 0, 80)
+    PyImGui.separator()
+    PyImGui.text("Limits, so nothing is wasted on an area that is being lost anyway")
+    cfg.pcons_max_morale = PyImGui.slider_int("Death-penalty items per area, at most", cfg.pcons_max_morale, 0, 6)
+    cfg.pcons_morale_worth = PyImGui.slider_int("...and not another until the last one bought this many kills", cfg.pcons_morale_worth, 0, 60)
+    cfg.pcons_max_timed = PyImGui.slider_int("Timed bonuses started per area, at most", cfg.pcons_max_timed, 0, 18)
+    cfg.pcons_stop_wipes = PyImGui.slider_int("Stop using items in an area after this many wipes since the first one", cfg.pcons_stop_wipes, 1, 6)
+    sp = pc.spent
+    PyImGui.text(f"This area so far: {sp['morale']} death-penalty, {sp['timed']} timed, {sp['summons']} summons.   {pc.note}")
     groups = (("Timed bonuses for the whole party (you use them)", lambda i: i.kind == C.EFFECT and i.helps == "party"),
               ("Timed bonuses for one character", lambda i: i.kind == C.EFFECT and i.helps == "self"),
               ("Death penalty: whole party", lambda i: i.kind == C.PARTY_MORALE),
@@ -446,11 +468,21 @@ def draw_consumables():
                 setattr(cfg, it.setting, PyImGui.combo(f"{label}##{it.key}", int(getattr(cfg, it.setting)), _PC_MODES))
             else:
                 setattr(cfg, it.setting, PyImGui.checkbox(f"{label}##{it.key}", bool(getattr(cfg, it.setting))))
+    PyImGui.separator()
+    PyImGui.text("Summoning stones (an extra ally)")
+    stones = [(n, c) for n, c in View.pc_counts.get("stones", []) if c > 0]
+    have = ", ".join(f"{n} x{c}" for n, c in stones) if stones else "none in your bags"
+    cfg.summon_stones = PyImGui.checkbox(f"Call a summoned ally whenever none is out (you have: {have})##summon", cfg.summon_stones)
     import time as _t
     if _t.time() - View.pc_counts.get("t", 0) > 5.0:          # recount the bags every few seconds
         View.pc_counts = {"t": _t.time()}
         for it in C.CATALOGUE:
             View.pc_counts[it.key] = pc.count(it.key)
+        try:
+            from Sources.gwamm.runtime.pcons import summon_stones
+            View.pc_counts["stones"] = [(n, c) for n, _m, c in summon_stones()]
+        except Exception:
+            View.pc_counts["stones"] = []
     if cfg.multibox:
         PyImGui.text_wrapped("Shared party: single-character bonuses are also requested from the other accounts, "
                              "which use their own. Death-penalty items for one character are yours only.")
@@ -495,6 +527,13 @@ def draw_options():
     cfg.route_hints = PyImGui.checkbox("Use the area's known route as a guide (and as the way round when blocked)", cfg.route_hints)
     cfg.edge_pass = PyImGui.checkbox("After the vanquish, also clear map cells beside exits (takes extra time)", cfg.edge_pass)
     cfg.call_targets = PyImGui.checkbox("Call targets: healers, bosses and casters first", cfg.call_targets)
+    cfg.keep_at_it = PyImGui.checkbox("Testing: keep at the fight in front of us (deaths and wipes do not send the party elsewhere; never give the area up)", cfg.keep_at_it)
+    cfg.pull_groups = PyImGui.checkbox("New, untested: pull the nearest group back to the party before fighting (heroes and henchmen only)", cfg.pull_groups)
+    cfg.pull_ranged = PyImGui.checkbox("Pull from weapon range (wand, staff or bow): hit one enemy from outside their notice range, so only its group comes", cfg.pull_ranged)
+    if cfg.pull_groups:
+        cfg.pull_min_group = PyImGui.slider_int("Pull groups of at least this many", cfg.pull_min_group, 2, 10)
+        cfg.pull_max_take = PyImGui.slider_int("Hold off if more than this many would come at once", cfg.pull_max_take, 4, 20)
+        cfg.pull_wait_seconds = PyImGui.slider_float("Longest wait for a patrol to move on (seconds)", cfg.pull_wait_seconds, 10.0, 120.0)
     cfg.fall_back = PyImGui.checkbox("Fall back along cleared ground when a pull is too big", cfg.fall_back)
     cfg.crowd_size = PyImGui.slider_int("Enemies around us that count as too big a pull", cfg.crowd_size, 5, 20)
     cfg.buy_signets = PyImGui.checkbox("Buy Signets of Capture when short (campaigns)", cfg.buy_signets)
@@ -763,6 +802,7 @@ def draw_map():
         View.show_map = False
 
 
+
 def _canvas(eng):
     avail_w, avail_h = PyImGui.get_content_region_avail()
     if avail_w < 50 or avail_h < 50:
@@ -839,6 +879,8 @@ def _canvas(eng):
 
             route = mem.route
             for i in range(max(1, len(route) - 4000), len(route)):
+                if abs(route[i][0] - route[i - 1][0]) + abs(route[i][1] - route[i - 1][1]) > 1500.0:
+                    continue                                 # a jump to a shrine: not a walk, no line across the map
                 a, b = S(*route[i - 1]), S(*route[i])
                 PyImGui.draw_list_add_line(a[0], a[1], b[0], b[1], COL_WALKED, 1.5)
 
@@ -856,7 +898,9 @@ def _canvas(eng):
                     continue
                 sx, sy = S(*e.xy)
                 if visible(sx, sy):
-                    if e.in_range:
+                    if e.id in eng.walled:               # other level / behind a wall: hollow yellow
+                        PyImGui.draw_list_add_circle(sx, sy, 4.5, _col(255, 220, 60), 8, 2.0)
+                    elif e.in_range:
                         PyImGui.draw_list_add_circle_filled(sx, sy, 5.0 if e.boss else 3.5, COL_BOSS if e.boss else COL_ENEMY, 8)
                     else:
                         PyImGui.draw_list_add_circle(sx, sy, 4.0, COL_STALE, 8, 1.5)
@@ -866,6 +910,15 @@ def _canvas(eng):
                     sx, sy = S(dx_, dy_)
                     PyImGui.draw_list_add_circle(sx, sy, eng.cfg.danger_radius * scale, _col(255, 140, 0, 220), 32, 2.0)
 
+            # (These two loops used to store their screen position in cx, cy: the very names the
+            # map's own centre is kept in. Every wipe ring or snag drawn moved the centre, so
+            # everything drawn after it, the player marker included, landed in the wrong place.)
+            for wx, wy, _n in eng.wipes:                     # where the whole party went down: red ring, left for last
+                rx, ry = S(wx, wy)
+                PyImGui.draw_list_add_circle(rx, ry, max(6.0, eng.cfg.danger_radius * scale), _col(255, 70, 60), 32, 3.0)
+            for gx, gy in eng.snags:                         # scenery we were caught on: grey
+                rx, ry = S(gx, gy)
+                PyImGui.draw_list_add_circle(rx, ry, max(3.0, 300.0 * scale), _col(170, 170, 170, 230), 12, 1.5)
             for hx, hy in eng.hazards:                       # traps learnt from deaths: purple
                 sx, sy = S(hx, hy)
                 PyImGui.draw_list_add_circle(sx, sy, max(4.0, eng.cfg.hazard_radius * scale), _col(200, 60, 255, 255), 16, 2.5)

@@ -8,3 +8,4 @@ Read `ARCHITECTURE.md` in this folder first; its "Standing rules" are binding.
 - Bump the version in both `GWAMM_Vanquish.py` and `Sources/gwamm/__init__.py` together.
 - Never stage `gwamm_logs/`. Never edit files outside `GWAMM_Vanquish.py`, `Sources/gwamm/`, `gwamm_tests/`, `gwamm_tools/`.
 - No anti-detection, ban-evasion or process-hiding code, ever.
+- Before building a feature, check `Widgets/` for one that already does it or already keeps the data (ARCHITECTURE.md, standing rule 8).

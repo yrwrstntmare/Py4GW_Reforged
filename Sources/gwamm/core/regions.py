@@ -28,6 +28,7 @@ class RegionMap:
         start = nav.nearest_node(*start_xy, allowed=self.reachable)
         if start is None:
             raise ValueError("no walkable ground outside the no-go zones")
+        start = self._main_ground(start, start_xy)
         self.regions = []
         self._pick_viewpoints(start)
         dist, owner = nav.dijkstra([r.node for r in self.regions])
@@ -46,6 +47,31 @@ class RegionMap:
                         self.regions[ru].neighbors[rv] = d
                         self.regions[rv].neighbors[ru] = d
         self.dist, self.next_hop = self._all_pairs()
+
+    def _main_ground(self, start, start_xy):
+        """Where the search spreads from. The party arrives beside a door, and the fences round
+        the doors can cut the arrival spot off as a small pocket of its own: spreading from
+        there found one region and nothing to search (Gyala Hatchery). The fences are one-way
+        (the party can always walk out of one), so when the ground under the start is a small
+        pocket, spread from the nearest point of the largest piece instead."""
+        nav, piece, sizes = self.nav, {}, []
+        for i in range(len(nav.nodes)):
+            if not self.reachable[i] or i in piece:
+                continue
+            piece[i], stack, n = len(sizes), [i], 0
+            while stack:
+                u = stack.pop()
+                n += 1
+                for v, _ in nav.adj[u]:
+                    if self.reachable[v] and v not in piece:
+                        piece[v] = len(sizes)
+                        stack.append(v)
+            sizes.append(n)
+        big = max(range(len(sizes)), key=sizes.__getitem__)
+        if piece[start] == big or sizes[piece[start]] * 10 >= sizes[big]:
+            return start
+        main = [k == big for k in (piece.get(i, -1) for i in range(len(nav.nodes)))]
+        return nav.nearest_node(*start_xy, allowed=main) or start
 
     def _pick_viewpoints(self, start):
         nav, covered = self.nav, [False] * len(self.nav.nodes)

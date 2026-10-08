@@ -31,7 +31,20 @@ class Config:
     max_failures = 2
     edge_exit_radius = 350.0     # once the vanquish is done, how close to an exit the map-clearing may go
     edge_pass = False            # after the vanquish, also clear map cells that sit beside exits (extra time)
-    retreat_when_losing = True   # several of the party down and the enemy still here: the living pull right back
+    retreat_when_losing = False  # several of the party down: the living pull right back. Off: the recordings show
+                                 # the heroes die on the run and the leader is left alone, which helps nobody
+    record_fights = True         # keep a second-by-second record of every fight (gwamm_logs/fights) to learn from
+    pull_ranged = True           # a leader with a ranged weapon wakes a group by hitting one of it from weapon
+                                 # range, outside everyone's notice range, instead of walking up to it
+    summon_stones = False        # call a summoned ally (summoning stone) whenever none is out; needs consumables on
+    pull_shift = False           # drag a fight away from a group that is walking in. Off: every time it was tried
+                                 # in the recorded runs the leader outran the heroes and it cost a death
+    keep_at_it = False           # testing: stay on the fight in front of us. Deaths, wipes and postponed fights
+                                 # do not send the party elsewhere in the area, and the area is never given up.
+    pull_groups = False          # bring the nearest group back to the parked party instead of walking into it
+    pull_min_group = 4           # ...when it has at least this many members
+    pull_max_take = 9            # more than this would come at once: hold off and look again, do not start it
+    pull_wait_seconds = 40.0     # how long to stand off waiting for a patrol to move on before doing something else
     heroes_first = False         # (off: wasted more time than it saved in live runs) before a fight, send the heroes in ahead so they take the first hits, not you
     call_targets = True          # call healers, bosses and casters first so the party focuses them
     fall_back = True             # on a big pull, back up along cleared ground so it strings out
@@ -55,6 +68,8 @@ class Config:
     rest_max_seconds = 75.0      # but never wait longer than this
     danger_radius = 2500.0       # after a death, leave this much ground around it for later
     danger_seconds = 600.0
+    danger_path_factor = 3.0     # paths elsewhere accept a detour this many times longer to stay off ground we died on
+    wipe_path_factor = 6.0       # ...and this many times longer round a place the whole party died
     carto_fetch_limit = -1.0     # (off: no gain in simulation) fetch a far map cell when the plan brings us nearest, up to this walk
     carto_leftover_walk = 0.0    # after the vanquish, skip a leftover map cell that needs a longer walk than this (0 = no limit)
     carto_fetch_slack = 0.6
@@ -74,8 +89,13 @@ class Config:
     party_mode = 0               # 0 work it out from the party, 1 always treat as heroes only, 2 always as shared
     pcons_on = False             # consumables at all. Each item also has its own switch (pc_<item>, added below)
     pcons_after_deaths = 2       # deaths in this area that make it "going badly"
-    pcons_min_foes = 25          # timed bonuses are not started with fewer foes left than this
+    pcons_big_fight = 7          # where a wipe ends the run: timed bonuses go on for a fight this size
+    pcons_min_foes = 60          # timed bonuses are not started with fewer foes left than this
     pcons_dp_threshold = 30      # death penalty (%) at which a morale item is worth using
+    pcons_max_morale = 2         # death-penalty items used in one area, at most
+    pcons_max_timed = 6          # timed bonuses started in one area, at most (6 = the three-item set twice)
+    pcons_stop_wipes = 2         # party wipes after the first item in an area: stop using items there
+    pcons_morale_worth = 15      # kills the last death-penalty item must have bought before another is used
     pcons_dp_members = 3         # party members that far down before a whole-party morale item is used
     buy_signets = True           # campaigns: top the bar back up with signets between areas
     change_secondary = True      # campaigns: switch secondary in the outpost for the best elites
@@ -144,6 +164,10 @@ class Engine:
         self.carto_given_up = 0
         self.carto_skipped_far = set()
         self.danger = []             # (x, y, expires) around places the party died
+        self.snags = []              # (x, y): scenery the party got caught on while walking. Kept between runs.
+        self.walled = set()          # enemies near in a straight line but a long walk away (next corridor over)
+        self.wipes = []              # [x, y, times]: where the whole party went down. Left for last, walked round.
+        self._zone_pen = (None, None)
         self.deaths = 0
 
     def _relevant_exits(self, exits, start_xy):
@@ -253,6 +277,15 @@ class Engine:
 
     # ---- perception ----
     def update(self, player_xy, enemies, foes_remaining, now, carto_grid=None):
+        # A jump of the leader across the map shortly after dying is a shrine: the whole party
+        # went down. Noticed here, not in the runner, because a wipe restarts the runner.
+        prev, last = self.player_xy, getattr(self, "last_death", None)
+        if last is not None:
+            if math.hypot(player_xy[0] - prev[0], player_xy[1] - prev[1]) > 2500.0 and now - last[2] < 240.0:
+                self.wipe_seen = (last[0], last[1], self.record_wipe((last[0], last[1])))
+                self.last_death = None
+            elif now - last[2] > 240.0:
+                self.last_death = None
         self.player_xy = player_xy
         self.player_node = self._track_node(player_xy)
         if self.player_node is not None:
@@ -310,6 +343,15 @@ class Engine:
     def _track_node(self, xy):
         """The graph node under the party. Where planes overlap (a bridge over ground) the
         nearest point can be on the wrong level, so prefer nodes a few links from the last one."""
+        # The game says which piece of ground the leader stands on (its plane). On a bridge the
+        # nearest point in plan view is often the ground underneath, and a route planned from
+        # there starts by trying to walk "under" the bridge from on top of it. So when there is
+        # ground of the leader's own plane right here, that is where he is.
+        plane = getattr(self, "player_plane", None)
+        if plane is not None:
+            mine = self.nav.nearest_node(xy[0], xy[1], allowed=self.rm.reachable, max_radius=300.0, plane=plane)
+            if mine is not None:
+                return mine
         prev = self.player_node
         if prev is not None:
             near, frontier = {prev}, [prev]
@@ -342,6 +384,53 @@ class Engine:
         nodes = self.nav.nodes
         return sum(math.hypot(nodes[a][0] - nodes[b][0], nodes[a][1] - nodes[b][1]) for a, b in zip(route, route[1:]))
 
+    def walled_off(self):
+        """Ids of enemies that are close in plan view but a long walk away: the next corridor
+        over, the far side of a wall, the level below or above. Fighting them from here drags
+        them (and whatever they pass) round to us, or drags us round into what stands between.
+        They are left alone until the walk brings the party to their side.
+
+        Height matters: where one level lies over another, the ground "nearest" an enemy in
+        plan view may be the floor above it. So each enemy is matched to the piece of ground
+        the game says it stands on (its plane), and the party likewise, before the walk between
+        them is measured. One sweep from the party gives every walk at once."""
+        out, px, py = set(), self.player_xy[0], self.player_xy[1]
+        here = self.player_node
+        plane = getattr(self, "player_plane", None)
+        if plane is not None:
+            mine = self.nav.nearest_node(px, py, allowed=self.rm.reachable, max_radius=400.0, plane=plane)
+            here = mine if mine is not None else here
+        if here is None:
+            return out
+        near = [e for e in self.mem.enemies.values()
+                if e.alive and not e.lost and math.hypot(e.xy[0] - px, e.xy[1] - py) <= 2700.0]
+        if not near:
+            return out
+        cache = self.__dict__.setdefault("_walk_cache", {"t": -99.0, "from": None, "costs": {}})
+        if self._now - cache["t"] > 2.0 or cache["from"] != here:
+            cache.update(t=self._now, **{"from": here}, costs=self.nav.reach_costs(here, 7000.0))
+        costs = cache["costs"]
+        for e in near:
+            line = math.hypot(e.xy[0] - px, e.xy[1] - py)
+            goal = None
+            if e.plane is not None:
+                goal = self.nav.nearest_node(e.xy[0], e.xy[1], allowed=self.rm.reachable, max_radius=500.0, plane=e.plane)
+            if goal is None:
+                goal = self.nav.nearest_node(e.xy[0], e.xy[1], allowed=self.rm.reachable, max_radius=500.0)
+            walk = costs.get(goal, math.inf) if goal is not None else math.inf
+            if walk > max(2.0 * line, line + 1200.0):
+                out.add(e.id)
+        # One reading is not trusted: the party's own footing changes as it walks, and a verdict
+        # that flips every tick made the plan flip with it. An enemy counts as out of reach
+        # only once it has been judged so for 1.5 s running.
+        since = self.__dict__.setdefault("_walled_since", {})
+        for i in list(since):
+            if i not in out:
+                del since[i]
+        for i in out:
+            since.setdefault(i, self._now)
+        return {i for i in out if self._now - since[i] >= 1.5}
+
     def _vanquish_active(self):
         if self.goto is not None:
             return False
@@ -349,9 +438,13 @@ class Engine:
 
     def _hazard_penalty(self):
         walls = getattr(self, "walls", ())
-        if not self.hazards and not walls:
+        zones = self._zone_penalty()
+        if not self.hazards and not walls and not zones and not self.snags:
             return None
-        pen = {}
+        pen = dict(zones)
+        for x, y in self.snags:              # scenery we were caught on before (this run or an earlier one)
+            for i in self.nav.nodes_within(x, y, 300.0):
+                pen[i] = 25.0
         for x, y in walls:                   # ground the party could not walk through (a shut gate)
             for i in self.nav.nodes_within(x, y, 400.0):
                 pen[i] = 1000.0
@@ -359,6 +452,74 @@ class Engine:
             for i in self.nav.nodes_within(x, y, self.cfg.hazard_radius):
                 pen[i] = self.cfg.hazard_factor
         return pen
+
+    def _keep_off(self):
+        """(x, y, radius) of everything a walked line must not touch: traps, snags, shut gates."""
+        return ([(x, y, self.cfg.hazard_radius) for x, y in self.hazards]
+                + [(x, y, 300.0) for x, y in self.snags] + [(x, y, 400.0) for x, y in self.walls])
+
+    def _straighten(self, route, k):
+        """Near a trap or a snag the steps are kept short so the walk follows the planned path
+        and not the game's own line. But the planned path runs from node to node and weaves; a
+        string of short steps along it makes the party weave too. So: from where we stand, aim
+        at the furthest point of the path (up to a normal step ahead) that can be reached in a
+        straight line over walkable ground without touching anything we are keeping off."""
+        px, py = self.player_xy
+        nodes, off = self.nav.nodes, self._keep_off()
+
+        def safe(b):
+            dx, dy = b[0] - px, b[1] - py
+            d2 = dx * dx + dy * dy or 1.0
+            for x, y, r in off:
+                t = max(0.0, min(1.0, ((x - px) * dx + (y - py) * dy) / d2))
+                if math.hypot(px + dx * t - x, py + dy * t - y) <= r:
+                    return False
+            return self.nav.line_clear((px, py), b)
+
+        best, left, j = k, self.cfg.step_length, 0
+        while j + 1 < len(route) and left > 0:
+            (ax, ay), (bx, by) = nodes[route[j]], nodes[route[j + 1]]
+            left -= math.hypot(ax - bx, ay - by)
+            j += 1
+            if j > k and safe(nodes[route[j]]):
+                best = j
+        return best
+
+    def _level_cap(self, route, k):
+        """Do not aim a step at ground on another level. The game's own walk goes to a spot ON
+        THE LEVEL THE LEADER IS STANDING ON: told to walk to a point on a bridge while he is on
+        the ground, he walks to the ground underneath it, and the plan (which wanted the bridge)
+        then sends him back to the ramp, for ever. So a step ends where the path changes level:
+        just onto the new piece, far enough to be standing on it. The next step, planned from up
+        there, can then run along it."""
+        nav = self.nav
+        mine = nav.node_plane(route[0])
+        game = getattr(self, "player_plane", None)
+        if game is not None and any(nav.node_plane(i) == game for i in route[:3]):
+            mine = game
+        change = next((j for j in range(1, k + 1) if nav.node_plane(route[j]) != mine), None)
+        if change is None:
+            return k
+        new, px, py = nav.node_plane(route[change]), self.player_xy[0], self.player_xy[1]
+        j, onto = change, 0.0
+        while j < k and nav.node_plane(route[j + 1]) == new and (
+                onto < 300.0 or math.hypot(nav.nodes[route[j]][0] - px, nav.nodes[route[j]][1] - py) < 350.0):
+            onto += math.hypot(nav.nodes[route[j + 1]][0] - nav.nodes[route[j]][0],
+                               nav.nodes[route[j + 1]][1] - nav.nodes[route[j]][1])
+            j += 1
+        if math.hypot(nav.nodes[route[j]][0] - px, nav.nodes[route[j]][1] - py) < 200.0:
+            return k                     # already standing on the join: a step to here would go nowhere
+        return j
+
+    def _snag_near(self, reach):
+        px, py = self.player_xy
+        return any(math.hypot(x - px, y - py) <= reach for x, y in list(self.snags) + list(self.walls))
+
+    def add_snag(self, spot):
+        if spot is None or any(math.hypot(spot[0] - x, spot[1] - y) < 200.0 for x, y in self.snags):
+            return False
+        self.snags.append((float(spot[0]), float(spot[1])))
+        return True
 
     def _hazard_near(self, reach):
         px, py = self.player_xy
@@ -397,9 +558,56 @@ class Engine:
             self.objective = None
             return
         self.danger.append((xy[0], xy[1], self._now + self.cfg.danger_seconds))
+        self.last_death = (xy[0], xy[1], self._now)
         self.objective = None
 
+    def postpone(self, xy, seconds=240.0):
+        """Not now: leave this ground alone for a while and do something else (too much there
+        at the moment, or a patrol passing through)."""
+        if not self.cfg.keep_at_it:
+            self.danger.append((xy[0], xy[1], self._now + seconds))
+        self.objective = None
+
+    def record_wipe(self, xy):
+        """The whole party died here and woke at a shrine. Whatever stands there is more than
+        the party can take as it found it: leave it until everything else is done (fewer
+        patrols left to join in, and any morale items used by then), and keep paths to other
+        places off that ground."""
+        for w in self.wipes:
+            if math.hypot(w[0] - xy[0], w[1] - xy[1]) < 1200.0:
+                w[2] += 1
+                return w[2]
+        self.wipes.append([xy[0], xy[1], 1])
+        return 1
+
+    def in_wipe_zone(self, pos):
+        r2 = self.cfg.danger_radius ** 2
+        return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 for x, y, _n in self.wipes)
+
+    def _zone_penalty(self):
+        """Path cost on ground where the party died: paths to somewhere else go round it when a
+        detour of a few times the distance exists. (Before this, only the choice of objective
+        avoided such ground; the walk to an objective beyond it went straight through.)"""
+        if self.cfg.keep_at_it:
+            return {}
+        live = tuple((x, y) for x, y, until in self.danger if until > self._now)
+        key = (live, tuple((w[0], w[1]) for w in self.wipes))
+        if self._zone_pen[0] != key:
+            pen = {}
+            for x, y in live:
+                for i in self.nav.nodes_within(x, y, self.cfg.danger_radius):
+                    pen[i] = self.cfg.danger_path_factor
+            for x, y, _n in self.wipes:
+                for i in self.nav.nodes_within(x, y, self.cfg.danger_radius):
+                    pen[i] = self.cfg.wipe_path_factor
+            self._zone_pen = (key, pen)
+        return self._zone_pen[1]
+
     def _dangerous(self, pos):
+        if self.cfg.keep_at_it:
+            return False
+        if self.in_wipe_zone(pos):
+            return True
         r2 = self.cfg.danger_radius ** 2
         return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 for x, y, until in self.danger if until > self._now)
 
@@ -704,10 +912,34 @@ class Engine:
             nav.forbidden = hard
 
     def _replan_without(self, obj, _depth=[0]):
+        if _depth[0] == 0:
+            self._chain = []
+        had = obj.key in self.mem.blocked
         self.mem.blocked[obj.key] = self.cfg.max_failures
+        if not had:
+            self._chain.append(obj.key)
         self.objective = None
-        if _depth[0] >= 20:
-            return None
+        if _depth[0] >= 6:
+            # Six things in a row with no way to them: the trouble is the ground the leader is
+            # standing on (a patch the map does not join to the rest), not the six things. Give
+            # up on none of them; step back onto known ground and plan again from there.
+            for k in self._chain:
+                self.mem.blocked.pop(k, None)
+            self._chain = []
+            self.cut_off = getattr(self, "cut_off", 0) + 1
+            px, py = self.player_xy
+            fence = getattr(self.nav, "forbidden", None)
+            here = self.player_node
+            fenced = bool(fence and here is not None and fence[here])
+            self.note = ("no way found from where the leader stands (%s); stepping back onto known ground"
+                         % ("inside an exit's keep-clear ring" if fenced else "ground not joined to the rest"))
+            ok = self.rm.reachable if not fence else [r and not f for r, f in zip(self.rm.reachable, fence)]
+            i = self.nav.nearest_node(px, py, allowed=ok)
+            if i is None:
+                return (px, py, 900.0)
+            x, y = self.nav.nodes[i]
+            self.route_ahead = [(x, y)]
+            return (x, y, 900.0)
         _depth[0] += 1
         try:
             return self._plain_step()
@@ -766,6 +998,14 @@ class Engine:
                         if e.alive and not e.lost and math.hypot(e.xy[0] - tx, e.xy[1] - ty) <= 2200.0)
             if crowd >= 12:
                 radius = min(radius, 1000.0)
+            if self.in_wipe_zone(obj.pos):
+                radius = min(radius, 900.0)      # the party died to this before: take as little of it at a time as possible
+        self.walled = self.walled_off() if obj.kind != "goto" else set()
+        if self.walled:
+            # do not reach through a wall: clear only as far as the nearest enemy on the other side
+            px, py = self.player_xy
+            nearest = min(math.hypot(self.mem.enemies[i].xy[0] - px, self.mem.enemies[i].xy[1] - py) for i in self.walled)
+            radius = max(500.0, min(radius, nearest - 150.0))
         goal = self.nav.nearest_node(obj.pos[0], obj.pos[1], allowed=self.rm.reachable)
         here = self.player_node
         if here is None:                 # we are off the known ground for a moment: no judgement on the objective
@@ -787,9 +1027,13 @@ class Engine:
             route, left = self.nav.path(here, goal, pen), self.cfg.step_length
         if self._hazard_near(left + 600.0):
             left = min(left, 450.0)      # short steps near a trap, so the walk keeps to the path round it
+        elif self._snag_near(1500.0):
+            left = min(left, 600.0)      # and near scenery we were caught on: the game's own walk between two
+                                         # far points cuts the corner we are trying to go round
         self.route_ahead = [self.nav.nodes[i] for i in route]
         if not route:
             return self._no_path_step(obj, radius, here, goal, pen)
+        short = left < self.cfg.step_length
         k = 0
         while k + 1 < len(route) and left > 0:
             (ax, ay), (bx, by) = self.nav.nodes[route[k]], self.nav.nodes[route[k + 1]]
@@ -806,6 +1050,9 @@ class Engine:
             (ax, ay), (bx, by) = self.nav.nodes[route[k]], self.nav.nodes[route[k + 1]]
             extra -= math.hypot(ax - bx, ay - by)
             k += 1
+        if short and obj.kind != "goto":
+            k = self._straighten(route, k)
+        k = self._level_cap(route, k)
         if obj.kind == "cluster":
             # Do not walk into the middle of a group (that drags in its neighbours):
             # stop at the last point on the path that is still `standoff` away from it.
@@ -827,22 +1074,36 @@ class Engine:
         x, y = self.nav.nodes[route[k]]      # an objective inside a no-go zone is approached, not entered
         return x, y, radius
 
-    def escape_point(self, player_xy, away_from):
+    def escape_point(self, player_xy, away_from, goal=None):
         """Somewhere close by to step to when pinned against something: walkable ground 300-800
-        away, as far from the obstacle as that allows. None if there is no such ground."""
+        away. With `goal` (where the walk was heading): a step ROUND the obstacle, the reachable
+        spot nearest the goal that keeps clear of the thing we hit and can be walked to in a
+        straight line. Backing straight off and walking at it again was the turn-round-and-return
+        the party kept doing at every rock. Without a goal, or with no way round: as far from
+        the obstacle as possible. None if there is no such ground."""
         px, py = player_xy
         ax, ay = away_from if away_from is not None else player_xy
-        best, best_d = None, -1.0
+        back, back_d, side, side_d = None, -1.0, None, math.inf
+        here_to_goal = math.hypot(goal[0] - px, goal[1] - py) if goal is not None else 0.0
         for i in self.nav.nodes_within(px, py, 800.0):
             if not self.rm.reachable[i]:
                 continue
             x, y = self.nav.nodes[i]
-            if math.hypot(x - px, y - py) < 300.0 or self.nav.in_no_go(x, y):
+            from_us = math.hypot(x - px, y - py)
+            if from_us < 300.0 or self.nav.in_no_go(x, y):
                 continue
             d = math.hypot(x - ax, y - ay)
-            if d > best_d:
-                best, best_d = (x, y), d
-        return best
+            if d > back_d:
+                back, back_d = (x, y), d
+            if goal is not None and d >= 380.0 and from_us <= 600.0:
+                to_goal = math.hypot(x - goal[0], y - goal[1])
+                # not through the obstacle: the straight line to the spot must pass clear of it
+                t = max(0.0, min(1.0, ((ax - px) * (x - px) + (ay - py) * (y - py)) / (from_us * from_us)))
+                if (to_goal < side_d and to_goal < here_to_goal + 200.0
+                        and math.hypot(px + (x - px) * t - ax, py + (y - py) * t - ay) >= 260.0
+                        and self.nav.line_clear((px, py), (x, y))):
+                    side, side_d = (x, y), to_goal
+        return side or back
 
     def add_wall(self, player_xy, target, detour=True):
         """The party was pinned here while walking at `target`: something the ground data does
@@ -910,5 +1171,7 @@ class Engine:
             "route_regions": len(self.hint_regions), "searching_off_route": bool(getattr(self, "searching_off_route", False)),
             "carto_skipped_far": len(self.carto_skipped_far),
             "danger_zones": sum(1 for d in self.danger if d[2] > self._now),
+            "wipe_zones": len(self.wipes), "wipes": sum(w[2] for w in self.wipes),
+            "patrols": len(self.mem.patrollers()),
             "note": self.note,
         }

@@ -43,6 +43,15 @@ class FightMixin:
                                    player=[round(px), round(py)])
 
     # ---- heroes first ----
+    def _alone(self):
+        """Every other member of the party is dead. Nobody is left to raise them and the leader
+        cannot: the only way the party comes back is the shrine, which needs him down too.
+        Hiding at the back (resting, retreating, trying to pull) just leaves the run standing
+        still for good, which is what happened the first time this came up."""
+        cond = self.__dict__.get("_cond") or {}
+        size = self.__dict__.get("_party_size") or 8
+        return size > 1 and cond.get("dead_allies", 0) >= size - 1
+
     def _unflag(self, why=""):
         """Take the hero flag down if we put one up. Called from every way out, so the heroes
         are never left standing at a flag."""
@@ -149,6 +158,11 @@ class FightMixin:
                 s.log.event("fall_back", stage="done", player=[round(px), round(py)],
                             reached=math.hypot(tx - px, ty - py) < 200.0)
                 st["to"] = None
+                self._leader_fights(True)
+                try:
+                    game.unflag_heroes(())
+                except Exception:
+                    pass
                 return False
             if now - st["moved"] >= 0.7:
                 st["moved"] = now
@@ -157,6 +171,12 @@ class FightMixin:
         if now - st["check"] < 1.0:
             return False
         st["check"] = now
+        if self._alone():
+            if not st.get("alone"):
+                st["alone"] = True
+                s.log.event("last_standing", player=[round(px), round(py)])
+            return False                                      # no retreats: go down with the rest and regroup at the shrine
+        st["alone"] = False
         live = [e for e in eng.mem.enemies.values() if e.alive and e.in_range and not e.lost]
         near = [e for e in live if math.hypot(e.xy[0] - px, e.xy[1] - py) <= 1600.0]
         if not near:
@@ -166,10 +186,22 @@ class FightMixin:
 
         def back_off(reason, distance, seconds):
             spot = tactics.fallback_point(eng.mem.route, (px, py), [e.xy for e in live], distance, clear=900.0)
+            if spot is None:
+                # no clean spot that far back along the trail: any walked ground further from them will do
+                spot = tactics.retreat_point(eng.mem.route, (px, py), [e.xy for e in live], lo=600.0, hi=max(900.0, distance))
             if spot is None or eng.nav.in_no_go(*spot) or eng.in_hazard(*spot):
                 return False
             self._unflag(reason)
             self._drop_child()
+            # the leader must walk, not cast: stopping to use a skill is what kept him standing
+            # where he had just been raised (five retreats out of five went nowhere)
+            self._leader_fights(False)
+            # and the heroes come too: the leader used to run back on his own while they stayed
+            # in the fight he was leaving, and lost it without him
+            try:
+                game.flag_all_heroes(spot[0], spot[1])
+            except Exception:
+                pass
             st.update(to=spot, until=now + seconds, moved=0.0)
             s.log.event("fall_back", stage="start", reason=reason, enemies=len(near), player=[round(px), round(py)],
                         to=[round(spot[0]), round(spot[1])])
@@ -205,18 +237,28 @@ class FightMixin:
                 d = game.enemy_details(e.id)
                 if d is None:
                     continue
+                if e.id in eng.walled:
+                    continue                 # the far side of a wall: not a target from here
+                # Only call what is already in the fight. An enemy standing at its post a way
+                # off is not: calling it sends the heroes at it and wakes up its whole group.
+                gap = math.hypot(e.xy[0] - px, e.xy[1] - py)
+                coming = (math.hypot(e.vel[0], e.vel[1]) >= 40.0
+                          and e.vel[0] * (px - e.xy[0]) + e.vel[1] * (py - e.xy[1]) > 0.0)
+                if gap > 900.0 and not coming and d[0] >= 0.999:
+                    continue
                 prof = 0
                 if e.boss and area:
                     name = game.agent_name(e.id).lower()
                     prof = next((b.profession for b in area if name and (b.boss.lower() in name or name in b.boss.lower())), 0)
-                infos.append({"id": e.id, "xy": e.xy, "hp": d[0], "level": d[1], "caster": d[2], "boss": e.boss, "prof": prof})
+                infos.append({"id": e.id, "xy": e.xy, "hp": d[0], "level": d[1], "caster": d[2], "boss": e.boss, "prof": prof,
+                              "role": tactics.role_of(game.enemy_model(e.id))})
             target = tactics.pick_target(infos, (px, py), st["called"])
             if target and (target != st["called"] or now - st["called_at"] > 8.0):
                 try:
                     if game.call_target(target):
                         if target != st["called"]:
                             t = next(i for i in infos if i["id"] == target)
-                            s.log.event("call_target", agent=target, boss=t["boss"], caster=t["caster"], level=t["level"],
+                            s.log.event("call_target", agent=target, boss=t["boss"], caster=t["caster"], level=t["level"], role=t["role"],
                                         hp=round(t["hp"], 2), enemies=len(near))
                         st["called"], st["called_at"] = target, now
                 except Exception as e:

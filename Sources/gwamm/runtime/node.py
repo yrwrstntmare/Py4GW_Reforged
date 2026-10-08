@@ -11,14 +11,14 @@ from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Sources.ApoSource.ApoBottingLib import wrappers as BT
 
 from ..core import elites, tactics
-from ..core.engine import DONE
+from ..core.engine import DONE, FAILED
 from . import game
 
 REPLAN_S = 1.0
 STEP_TIMEOUT_S = 240.0       # one walking step, fights included
 STUCK_GIVE_UP_S = 600.0     # pinned within 600 units for this long, nothing dying: the area cannot be finished
 STALL_S = 45.0               # no movement and no kill for this long: give the step up
-WALK_STALL_S = 12.0          # the same with no enemy anywhere near: we are caught on something, not fighting
+WALK_STALL_S = 5.0          # the same with no enemy anywhere near: we are caught on something, not fighting
 STALL_RADIUS = 350.0         # "no movement" = still inside this circle (rocking back and forth on a tree counts as none)
 
 
@@ -26,6 +26,7 @@ from .guard import guarded_tick
 from .node_blessing import BlessingMixin
 from .node_capture import CaptureMixin, e_prof
 from .node_fight import FightMixin
+from .node_pull import PullMixin
 
 _RETIRED = []                 # (time, behaviour tree) kept alive for a while after being abandoned
 RETIRE_SECONDS = 20.0
@@ -38,7 +39,7 @@ def retire(tree):
         _RETIRED.pop(0)
 
 
-class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
+class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
     def __init__(self, session, name="AdaptiveVanquish", target_map_id=None, transit=None, arrive_map=None):
         super().__init__(name=name, node_type="AdaptiveVanquish", node_category="action")
         self.session = session
@@ -63,6 +64,10 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
         super().reset()
         self._unflag("reset")
         self._drop_child()
+        try:
+            self._leader_fights(True)
+        except Exception:
+            pass
 
     def _drop_child(self):
         # A walk that has just started has asked Py4GW's path planner for a route; the answer is
@@ -102,7 +107,7 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
 
     _stuck_since, _stuck_xy = 0.0, None
 
-    _escape, _escape_until = None, 0.0
+    _escape, _escape_until, _escape_secs, _escape_radius = None, 0.0, 6.0, 900.0
 
     def _pinned(self, eng, s, now, walking=False):
         """A step stalled. If the party keeps stalling in the same spot, something the ground data
@@ -119,8 +124,10 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
             return                           # standing at the step's end, not caught on the way to it
         if (walking or self._stuck_n >= 2) and self._target is not None:
             spot = eng.add_wall((px, py), self._target, detour=self._stuck_n >= 2)
+            if walking and eng.add_snag(spot):
+                s.save_snags()               # scenery does not move: remember it for every later run here
             away = spot or (eng.walls[-1] if eng.walls else None)
-            self._escape = eng.escape_point((px, py), away)
+            self._escape = eng.escape_point((px, py), away, goal=self._target if walking else None)
             s.log.event("wall", player=[round(px), round(py)], target=list(self._target),
                         spot=None if spot is None else [round(spot[0]), round(spot[1])], walls=len(eng.walls),
                         walking=walking, times_here=self._stuck_n,
@@ -163,7 +170,13 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
         if game.party_defeated():
             self._drop_child()
             s.result = "party defeated"
-            s.log.event("finished", result=s.result)
+            learnt = False
+            try:
+                from . import pcons as _pc
+                learnt = _pc.note_defeat(s.map_id)
+            except Exception:
+                pass
+            s.log.event("finished", result=s.result, no_restart_learnt=learnt)
             return S.FAILURE
         s.perceive()
         eng, now = s.engine, time.time()
@@ -179,6 +192,10 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                     s.log.event("boss", agent=e.id, name=name, profession=game.agent_primary(e.id),
                                 pos=[round(e.xy[0]), round(e.xy[1])], mine=list(game.player_professions()),
                                 signets=game.capture_signets())
+        seen = eng.__dict__.pop("wipe_seen", None)
+        if seen is not None:
+            s.log.event("wipe", at=[round(seen[0]), round(seen[1])], times_here=seen[2], zones=len(eng.wipes),
+                        morale=game.my_morale(), party_low=game.party_low_morale())
         s.log.observe(eng, {"combat_flag": bool(self.blackboard.get("COMBAT_ACTIVE", False)),
                             "killed": game.foes_killed(), "running": True})
         if self.transit is None and not game.player_dead_safe():
@@ -202,12 +219,14 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                 self._party_size = 8
         if cond is not None and cond["player_dead"]:
             self._unflag("leader died")
+            self._pull_reset("leader died")
             if not self._was_dead:
                 self._was_dead = True
                 px, py = eng.player_xy
                 foes_near = sum(1 for e in eng.mem.enemies.values()
                                 if e.alive and not e.lost and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1800.0)
                 hazard = foes_near == 0
+                self._death_xy = (px, py) if not hazard else None
                 eng.record_death(eng.player_xy, hazard=hazard)
                 if hazard:
                     try:
@@ -217,7 +236,8 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                     s.save_hazards()
                     s.log.event("hazard", player=[round(px), round(py)], known=len(eng.hazards), gadgets_near=near[:30])
                 s.log.event("death", player=list(eng.player_xy), key=self._key, deaths=eng.deaths, foes_near=foes_near,
-                            enemies_in_view=sum(1 for e in eng.mem.enemies.values() if e.alive and e.in_range))
+                            enemies_in_view=sum(1 for e in eng.mem.enemies.values() if e.alive and e.in_range),
+                            consumables=s.pcons.state(eng) if s.cfg.pcons_on else "off")
             self._drop_child()
             return S.RUNNING
         if self._was_dead:
@@ -228,6 +248,7 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                       for e in eng.mem.enemies.values())
             # at a shrine (nothing near): let things settle. Raised mid-fight: no standing about.
             self._hold_until = now if hot else now + 3.0
+            self._recover_until = now + 14.0 if hot else 0.0
             s.log.event("revived", player=[round(eng.player_xy[0]), round(eng.player_xy[1])])
         if now < self.__dict__.get("_hold_until", 0.0):
             return S.RUNNING
@@ -235,6 +256,9 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
         if s.cfg.capture_elites and self.transit is None and self._capture_tick(eng, now):
             return S.RUNNING
 
+        # --- before the fight: bring the nearest group back to the party ---
+        if self._pull_tick(eng, now):
+            return S.RUNNING
         # --- before the fight: heroes in first ---
         if self._lead_tick(eng, now):
             return S.RUNNING
@@ -281,6 +305,8 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                    "party health" if cond["ally_hp"] < min(0.95, cfg.rest_ally_hp + 0.05 * eng.caution()) else "")
             if why and eng.in_hazard(px, py):
                 why = ""                     # never stand and rest under a trap: move on first
+            if why and self._alone():
+                why = ""                     # nobody left to raise anyone: waiting changes nothing
             if why and not threatened:
                 if self._rest_since is None:
                     self._rest_since = now
@@ -294,6 +320,19 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                 s.log.event("rested", seconds=round(now - self._rest_since, 1), reason=s.resting, ended=why or "ready",
                             hp=round(cond["hp"], 2), energy=round(cond["energy"], 2), dead=cond["dead_allies"])
                 self._rest_since, s.resting = None, ""
+
+        # Just raised in the middle of a fight, at a sliver of health: once clear of the enemy, stay
+        # clear until health is back (or they come to us). Walking straight back in killed the
+        # leader again one second after his retreat ended.
+        if now < self.__dict__.get("_recover_until", 0.0):
+            px_, py_ = eng.player_xy
+            gap = min((math.hypot(e.xy[0] - px_, e.xy[1] - py_) for e in eng.mem.enemies.values()
+                       if e.alive and e.in_range), default=None)
+            if game.my_health() >= 0.6 or gap is None:
+                self._recover_until = 0.0
+            elif gap > 450.0:
+                self._drop_child()
+                return S.RUNNING
 
         if self._child is None or now - self._last_plan >= REPLAN_S:
             self._last_plan = now
@@ -315,6 +354,8 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
                                 stand_cells=len(eng.carto.stand) if eng.carto else 0)
                     if left:
                         return S.RUNNING
+                if eng.mode not in (DONE, FAILED):
+                    return S.RUNNING          # no step this moment, but the search is not over
                 if eng.mode == DONE:
                     s.result = "arrived" if self.transit else "complete"
                     s.log.event("finished", result=s.result, status=eng.status())
@@ -327,8 +368,9 @@ class AdaptiveNode(FightMixin, BlessingMixin, CaptureMixin, BehaviorTree.Node):
             key = eng.objective.key
             if self._escape is not None:
                 # just marked an obstacle: first a short step clear of it, then back to the plan
-                step, key = (self._escape[0], self._escape[1], 900.0), ("escape", int(now))
-                self._escape, self._escape_until = None, now + 6.0
+                step, key = (self._escape[0], self._escape[1], self._escape_radius), ("escape", int(now))
+                self._escape, self._escape_until = None, now + self._escape_secs
+                self._escape_secs, self._escape_radius = 6.0, 900.0
                 self._drop_child()
                 self._start_step(step, key)
             elif self._child is not None and self._key and self._key[0] == "escape" and now < self._escape_until:
