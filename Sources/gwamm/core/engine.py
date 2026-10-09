@@ -820,8 +820,17 @@ class Engine:
             fogged = {self.rm.node_region[node] for _c, _f, node, _r in self.carto_targets} if self.carto else set()
             self.next_stop = next((r for r in self.tour if mem.region_state(r) != SEARCHED
                                    or (r in getattr(self, "carto_stops", ()) and r in fogged)), None)
+            # The last few: look first where enemies were last seen and then lost sight of (they
+            # walked off or patrol), before combing the rest of the map in order. (The Hidden City:
+            # three left, the whole map searched again from the far end, nine minutes.)
+            lost_at = set()
+            if self.foes_remaining is not None and self.foes_remaining <= cfg.cleanup_threshold:
+                lost_at = {self.rm.region_at(*e.xy) for e in mem.enemies.values() if e.alive and e.lost}
+                lost_at.discard(-1)
             for n, rid in enumerate(pending):
                 value = 2.5 if (n == 0 and self.next_stop in (None, rid)) else cfg.off_tour_value   # follow the tour unless something is much closer
+                if rid in lost_at:
+                    value = 6.0
                 out.append(Objective("region", ("region", rid), mem.unsearched_target(rid), rid, value))
         if cfg.do_cartography and self.carto is not None:
             for cell, footing, node, reveals in self.carto_targets:

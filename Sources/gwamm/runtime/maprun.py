@@ -330,8 +330,23 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         if leg["do"] == "leave_town":
             return BehaviorTree(BehaviorTree.SubtreeNode(name="LeaveTown", subtree_fn=lambda _n: self._leave_town_tree(leg)))
         if leg["do"] == "gate":
-            return BT.MoveAndExitMap([tuple(p) for p in leg["path"]], target_map_id=leg["expect"],
-                                     timeout_ms=600_000 if leg.get("slow") else 60_000, log=True)
+            # Walk the recorded path, then push on through the doorway. Its last point is often
+            # just short of the trigger, and walking "to" it within the usual tolerance left the
+            # party standing in the doorway (Yohlon Haven into Marga Coast). The push keeps going
+            # the way the path was heading, and tries the other sides if that does not work.
+            path = [tuple(p) for p in leg["path"]]
+            if not path:
+                return BT.MoveAndExitMap(path, target_map_id=leg["expect"], timeout_ms=60_000, log=True)
+            last = path[-1]
+            prev = path[-2] if len(path) > 1 else game.player_xy()
+            dx, dy = last[0] - prev[0], last[1] - prev[1]
+            n = math.hypot(dx, dy) or 1.0
+            beyond = [last[0] + dx / n * 400.0, last[1] + dy / n * 400.0] if n > 1.0 else list(last)
+            push = BehaviorTree(CrossNode(self.session, {"xy": list(last), "beyond": beyond, "expect": leg["expect"]},
+                                          here, timeout_s=600.0 if leg.get("slow") else 75.0))
+            if len(path) == 1:
+                return push
+            return BT.Sequence(name="GateWalk", children=[BT.Move(pos=path[:-1], tolerance=150.0), push])
         cross = BehaviorTree(CrossNode(self.session, leg, here))
         if not game.is_explorable():
             return cross                                 # inside an outpost: nothing to fight, just walk out

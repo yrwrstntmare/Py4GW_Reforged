@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.50.18"
+SCRIPT_VERSION = "0.50.19"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
