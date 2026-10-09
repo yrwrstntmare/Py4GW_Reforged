@@ -121,6 +121,7 @@ class BottingTree(
         self.UI = _BottingTreeUI(self)
 
         self.pause_on_combat = pause_on_combat
+        self.shrine_blessing_enabled = True
         self.account_config = BottingTreeAccountConfig.coerce(
             account_config,
             multi_account=multi_account,

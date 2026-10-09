@@ -193,6 +193,11 @@ class BottingTreeTicksMixin:
             bb['PLANNER_OWNER'] = PlannerStatus.OWNER_PLANNER.value
             return BehaviorTree.NodeState.RUNNING
 
+        if bb.get('SHRINE_BLESSING_ACTIVE', False):
+            bb['PLANNER_STATUS'] = 'PAUSED: Shrine blessing'
+            bb['PLANNER_OWNER'] = PlannerStatus.OWNER_PLANNER.value
+            return BehaviorTree.NodeState.RUNNING
+
         if bb.get('COMBAT_ACTIVE', False) and self.pause_on_combat:
             if self._last_planner_gate_state != 'paused_on_combat':
                 self._last_planner_gate_state = 'paused_on_combat'

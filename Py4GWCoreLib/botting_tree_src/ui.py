@@ -658,6 +658,10 @@ class _BottingTreeUI:
             return
 
         self.parent.pause_on_combat = PyImGui.checkbox('Pause Planner On Combat', self.parent.pause_on_combat)
+        self.parent.shrine_blessing_enabled = PyImGui.checkbox(
+            'Collect Shrine Blessings Automatically',
+            self.parent.shrine_blessing_enabled,
+        )
         headless_heroai_enabled = PyImGui.checkbox('Headless HeroAI', self.parent.IsHeadlessHeroAIEnabled())
         if headless_heroai_enabled != self.parent.IsHeadlessHeroAIEnabled():
             self.parent.SetHeadlessHeroAIEnabled(headless_heroai_enabled, reset_runtime=False)

@@ -3214,6 +3214,7 @@ def _configure_eotn_bot(tree: BottingTree) -> None:
         ),
         heroai_state_logging=False,
         enable_party_wipe_recovery=True,
+        enable_shrine_blessing_service=True,
     )
     # headless_heroai_enabled defaults to True on every fresh BottingTree instance, which is every
     # module reload - there is no persisted setting to flip instead. Set the attribute directly rather

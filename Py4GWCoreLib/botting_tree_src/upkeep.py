@@ -81,3 +81,16 @@ class BottingTreeUpkeepMixin:
             self._rebuild_root_tree()
             return
         self.AddServiceTree('PartyWipeRecoveryService', subtree_or_builder)
+
+    def EnsureShrineBlessingService(self) -> None:
+        from .shrine_blessing import build_shrine_blessing_service
+
+        subtree_or_builder = lambda: build_shrine_blessing_service(lambda: bool(self.shrine_blessing_enabled))
+        for index, (service_name, _existing) in enumerate(self._service_steps):
+            if service_name != 'ShrineBlessingService':
+                continue
+            self._service_steps[index] = (service_name, subtree_or_builder)
+            self._service_trees[index] = (service_name, self._coerce_runtime_tree(subtree_or_builder))
+            self._rebuild_root_tree()
+            return
+        self.AddServiceTree('ShrineBlessingService', subtree_or_builder)

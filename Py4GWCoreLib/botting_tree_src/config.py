@@ -285,6 +285,7 @@ class _BottingTreeConfig:
         party_wipe_return_interval_ms: float = 1000.0,
         heroai_state_logging: bool = True,
         heroai_state_log_interval_ms: int = 5000,
+        enable_shrine_blessing_service: bool = False,
     ) -> 'BottingTree':
         upkeep_steps: list[tuple[str, object]] = []
 
@@ -342,6 +343,9 @@ class _BottingTreeConfig:
                 default_step_name=default_step_name,
                 return_interval_ms=party_wipe_return_interval_ms,
             )
+
+        if enable_shrine_blessing_service:
+            self.parent.EnsureShrineBlessingService()
 
         return self.parent
 
