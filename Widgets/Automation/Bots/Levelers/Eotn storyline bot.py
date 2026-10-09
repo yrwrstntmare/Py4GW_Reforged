@@ -52,10 +52,65 @@ initialized = False
 # Generic BT helpers
 # ---------------------------------------------------------------------------
 
+_team_locked = False
+
+
+def _party_account_emails() -> list[str]:
+    """Emails of the multibox accounts (not heroes or henchmen) in the local player's party."""
+    local_email = str(Player.GetAccountEmail() or "").strip()
+    local = GLOBAL_CACHE.ShMem.GetAccountDataFromEmail(local_email)
+    local_party = int(getattr(getattr(local, "AgentPartyData", None), "PartyID", 0) or 0) if local else 0
+    if local_party <= 0:
+        return []
+
+    emails: list[str] = []
+    for account in GLOBAL_CACHE.ShMem.GetAllAccountData():
+        email = str(getattr(account, "AccountEmail", "") or "").strip()
+        if not email or not bool(getattr(account, "IsAccount", False)):
+            continue
+        if int(getattr(getattr(account, "AgentPartyData", None), "PartyID", 0) or 0) == local_party:
+            emails.append(email)
+    return emails
+
+
+def _reset_team_lock() -> None:
+    global _team_locked
+    _team_locked = False
+
+
+def _team_already_present() -> bool:
+    global _team_locked
+    if _team_locked:
+        return True
+    present = int(GLOBAL_CACHE.Party.GetPartySize() or 0) > 1 or len(_party_account_emails()) > 1
+    if present:
+        _team_locked = True
+    return present
+
+
+def _keep_team_or(tree: BehaviorTree) -> BehaviorTree:
+    return BT.Selector(
+        name="Keep Current Team",
+        children=[
+            BehaviorTree(
+                BehaviorTree.ConditionNode(
+                    name="Team Already Present",
+                    condition_fn=lambda: (
+                        BehaviorTree.NodeState.SUCCESS
+                        if _team_already_present()
+                        else BehaviorTree.NodeState.FAILURE
+                    ),
+                )
+            ),
+            tree,
+        ],
+    )
+
+
 def _aggressive(name: str = "Configure Aggressive") -> BehaviorTree:
     return ensure_botting_tree().Config.Aggressive(
         multi_account=True,
-        account_isolation=True,
+        account_isolation=False,
         pause_on_danger=True,
         auto_loot=True,
         resurrection_scroll=True,
@@ -71,6 +126,31 @@ def _pacifist(name: str = "Configure Pacifist") -> BehaviorTree:
         auto_loot=True,
         resurrection_scroll=True,
         reset_hero_ai=False,
+    )
+
+
+def _set_heroai_widget_enabled(enabled: bool, name: str) -> BehaviorTree:
+    """Turn the real HeroAI widget on or off for a stretch of the route.
+
+    _aggressive()/_pacifist() only ever toggled headless HeroAI's enabled flag, and this bot now forces
+    headless off permanently, so neither one touches the real widget's combat behavior at all anymore.
+    That matters for sections like running with a bundle item that drops on skill use (e.g. the
+    Crystalline Key): the widget auto-casting a skill such as Death's Charge makes the character drop it.
+    This disables the widget outright for that stretch rather than relying on a toggle that no longer
+    reaches it. It is a configuration call on our own orchestration (ConfigureWidget), not a change to
+    anything HeroAI itself decides.
+    """
+
+    def _apply(node: BehaviorTree.Node) -> BehaviorTree.NodeState:
+        ensure_botting_tree().ConfigureWidget("HeroAI", enabled, restore_on_stop=True)
+        return BehaviorTree.NodeState.SUCCESS
+
+    return BehaviorTree(
+        BehaviorTree.ActionNode(
+            name=name,
+            action_fn=_apply,
+            aftercast_ms=0,
+        )
     )
 
 
@@ -319,6 +399,12 @@ def InitializeBot() -> BehaviorTree:
     return BT.Sequence(
         name="Initialize EotN Storyline BT",
         children=[
+            BehaviorTree(
+                BehaviorTree.ActionNode(
+                    name="Reset Team Lock",
+                    action_fn=lambda: (_reset_team_lock(), BehaviorTree.NodeState.SUCCESS)[1],
+                )
+            ),
             _aggressive(),
             BT.LogMessage(
                 message="EotN Storyline BottingTree initialized.",
@@ -346,12 +432,12 @@ def UnlockEyeOfTheNorthPool() -> BehaviorTree:
         name="Unlock Eye of the North Resurrection Pool",
         map_id_or_name=675,
         children=[
-            _prepare_standard_party(),
+            _keep_team_or(_prepare_standard_party()),
             BT.MoveAndExitMap(Vec2f(4141, -27703), target_map_id=499),
             BT.Move(Vec2f(3598.97, -22331.73)),
             BT.Wait(10000),
             BT.MoveAndDialog(Vec2f(3537.00, -21937.00),0x839104),
-            BT.VanquishNode(path_to_eotn),
+            BT.Move(path_to_eotn),
 
             BT.MoveAndExitMap(Vec2f(-5198.0, 5595.0), target_map_id=646),
             BT.MoveAndDialog(Vec2f(-6572.70, 6588.83),0x800001),
@@ -390,17 +476,17 @@ def TravelToGunnarsHold() -> BehaviorTree:
         name="Run to Gunnar's Hold",
         map_id_or_name="Eye of the North outpost",
         children=[
-            _prepare_standard_party_olias(),
+            _keep_team_or(_prepare_standard_party_olias()),
             _aggressive(),
             BT.MoveAndExitMap
                 (Vec2f(1522.0, 464.0),target_map_id=499),
             BT.MoveAndDialog(Vec2f(2825.0, -481.0), 0x832801),
-            BT.VanquishNode([
+            BT.Move([
                 (2548.84, 7266.08),
                 (1233.76, 13803.42),
                 (978.88, 21837.26),
                 (-4031.0, 27872.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=548),
             BT.Move(Vec2f(14546.0, -6043.0)),
             BT.MoveAndExitMap(Vec2f(15578.0, -6548.0), target_map_id=644, log=True),
@@ -476,6 +562,83 @@ def _skill_state_condition(
             if available
             else BehaviorTree.NodeState.FAILURE
         )
+
+    return BehaviorTree(
+        BehaviorTree.ConditionNode(
+            name=name,
+            condition_fn=_check,
+        )
+    )
+
+
+def _reset_party_quest_when_mixed(quest_id: int, name: str) -> BehaviorTree:
+    from Py4GWCoreLib.Quest import Quest
+
+    def _party_members_and_holders() -> tuple[str, list[str], list[str]]:
+        local_email = str(Player.GetAccountEmail() or "").strip()
+        local = GLOBAL_CACHE.ShMem.GetAccountDataFromEmail(local_email)
+        local_party = int(getattr(getattr(local, "AgentPartyData", None), "PartyID", 0) or 0) if local else 0
+        members: list[str] = []
+        holders: list[str] = []
+        if local_party <= 0:
+            return local_email, members, holders
+        for account in GLOBAL_CACHE.ShMem.GetAllAccountData():
+            email = str(getattr(account, "AccountEmail", "") or "").strip()
+            if not email or not bool(getattr(account, "IsAccount", False)):
+                continue
+            if int(getattr(getattr(account, "AgentPartyData", None), "PartyID", 0) or 0) != local_party:
+                continue
+            members.append(email)
+            if any(int(q.QuestID) == quest_id and not bool(q.IsCompleted) for q in account.QuestLog.Quests):
+                holders.append(email)
+        return local_email, members, holders
+
+    def _reset_if_mixed() -> BehaviorTree.NodeState:
+        local_email, members, holders = _party_members_and_holders()
+        if len(members) < 2 or not holders or len(holders) == len(members):
+            return BehaviorTree.NodeState.SUCCESS
+        ConsoleLog(name, f"Quest {quest_id} held by {len(holders)} of {len(members)} accounts; abandoning for everyone.", PySystem.Console.MessageType.Info)
+        Quest.AbandonQuest(int(quest_id))
+        for email in members:
+            if email != local_email:
+                GLOBAL_CACHE.ShMem.SendMessage(
+                    local_email,
+                    email,
+                    SharedCommandType.AbandonQuest,
+                    (float(quest_id), 0.0, 0.0, 0.0),
+                )
+        return BehaviorTree.NodeState.SUCCESS
+
+    return BehaviorTree(
+        BehaviorTree.ActionNode(
+            name=name,
+            action_fn=_reset_if_mixed,
+        )
+    )
+
+
+def _holds_open_quest(quest_id: int, name: str) -> BehaviorTree:
+    from Py4GWCoreLib.Quest import Quest
+
+    def _check() -> BehaviorTree.NodeState:
+        held = int(quest_id) in (Quest.GetQuestLogIds() or []) and not Quest.IsQuestCompleted(int(quest_id))
+        return BehaviorTree.NodeState.SUCCESS if held else BehaviorTree.NodeState.FAILURE
+
+    return BehaviorTree(
+        BehaviorTree.ConditionNode(
+            name=name,
+            condition_fn=_check,
+        )
+    )
+
+
+def _quest_already_handled(quest_id: int, name: str) -> BehaviorTree:
+    """True if the quest is already held or already completed, so an accept dialog can be skipped."""
+    from Py4GWCoreLib.Quest import Quest
+
+    def _check() -> BehaviorTree.NodeState:
+        handled = int(quest_id) in (Quest.GetQuestLogIds() or []) or bool(Quest.IsQuestCompleted(int(quest_id)))
+        return BehaviorTree.NodeState.SUCCESS if handled else BehaviorTree.NodeState.FAILURE
 
     return BehaviorTree(
         BehaviorTree.ConditionNode(
@@ -592,11 +755,7 @@ def _run_norn_tournament_round(log: bool = False) -> BehaviorTree:
             BT.Wait(2000),
             BT.CastSkillID(skill_id = Painful_Bond_ID),
             _aggressive(),
-            BT.VanquishNode(
-                Tournament_Path,
-                pause_on_combat=True,
-                log=True,
-            ),
+            BT.Move(Tournament_Path, pause_on_combat=True, log=True),
             _pacifist()
         ],
     )
@@ -1284,10 +1443,10 @@ def TravelToSifhalla() -> BehaviorTree:
         name="Run to Sifhalla",
         map_id_or_name=644,
         children=[
-            _prepare_standard_party_xandra(),
+            _keep_team_or(_prepare_standard_party_xandra()),
             _aggressive(),
             BT.MoveAndExitMap(Vec2f(15193, -6387), target_map_name="Norrhart Domains"),
-            BT.VanquishNode([
+            BT.Move([
                 (13337.167968, -3869.252929),
                 (9826.771484, 416.337768),
                 (6321.207031, 2398.933349),
@@ -1301,9 +1460,9 @@ def TravelToSifhalla() -> BehaviorTree:
                 (-22717.630859, 8757.812500),
                 (-25531.134765, 10925.241210),
                 (-26333.171875, 11242.023437),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_name="Drakkar Lake"),
-            BT.VanquishNode([
+            BT.Move([
                 (14399.201171, -16963.455078),
                 (12510.431640, -13414.477539),
                 (12011.655273, -9633.283203),
@@ -1315,7 +1474,7 @@ def TravelToSifhalla() -> BehaviorTree:
                 (13846.647460, 15850.121093),
                 (13595.982421, 18950.578125),
                 (13567.612304, 19432.314453),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_name="Sifhalla"),
         ],
     )
@@ -1326,7 +1485,7 @@ def CompleteTrackingTheNornbear() -> BehaviorTree:
         name="Tracking the Nornbear",
         map_id_or_name="Sifhalla",
         children=[
-            _prepare_standard_party_xandra(),
+            _keep_team_or(_prepare_standard_party_xandra()),
             _aggressive(),
             BT.MoveAndDialog(Vec2f(14353.0, 23905.0), 0x84),
             BT.WaitForMapLoad(map_id=678),
@@ -1344,7 +1503,7 @@ def CompleteCurseOfTheNornbear() -> BehaviorTree:
         name="Curse of the Nornbear",
         map_id_or_name="Sifhalla",
         children=[
-            _prepare_standard_party_xandra(),
+            _keep_team_or(_prepare_standard_party_xandra()),
             _aggressive(),
             BT.MoveAndDialog(Vec2f(14353.0, 23905.0), 0x86),
             BT.WaitForMapLoad(map_id=653),
@@ -1373,9 +1532,9 @@ def BloodWashesBlood() -> BehaviorTree:
         map_id_or_name="Sifhalla",
         children=[
             _aggressive(),
-            BT.VanquishNode([(16163.0, 22852.0), (16717.0, 22789.0)]),
+            BT.Move([(16163.0, 22852.0), (16717.0, 22789.0)], avoid_obstacles=False),
             BT.WaitForMapLoad(map_name="Jaga Moraine"),
-            BT.VanquishNode([
+            BT.Move([
                 (-11949.0, -23710.0),
                 (-8929.0, -21112.0),
                 (-6111.0, -14675.0),
@@ -1390,18 +1549,18 @@ def BloodWashesBlood() -> BehaviorTree:
                 (3151.0, 1355.0),
                 (3726.0, 4064.0),
                 (4621.0, 5918.0),
-            ]),
+            ], avoid_obstacles=False),
             _pacifist(),
             BT.MoveAndDialog(Vec2f(4621.0, 5918.0), 0x832001),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (3014.0, 3308.0),
                 (-567.0, -1090.0),
                 (5147.0, -5920.0),
                 (10490.0, -9516.0),
                 (11885.0, -16663.0),
                 (9771.0, -21332.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.Wait(80_000),
             BT.Move(Vec2f(9221.0, -21462.0)),
             _pacifist(),
@@ -1409,7 +1568,7 @@ def BloodWashesBlood() -> BehaviorTree:
             BT.MoveAndDialog(Vec2f(9688.0, -21012.0), 0x84),
             BT.MoveAndExitMap(Vec2f(16045.0, -20642.0),target_map_name="Blood Washes Blood"),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (419.0, -3059.0),
                 (-2083.0, 1061.0),
                 (1742.0, 4963.0),
@@ -1425,23 +1584,23 @@ def BloodWashesBlood() -> BehaviorTree:
                 (795.0, 13120.0),
                 (1519.0, 13251.0),
                 (940.0, 14144.0),
-            ]),
+            ], avoid_obstacles=False),
             _pacifist(),
             BT.MoveAndInteract(Vec2f(942.0, 14172.0), log=True),
             BT.MoveAndInteract(Vec2f(942.0, 14172.0), log=True),
             _select_and_equip_reward_skill(8),
             _use_bear_skill_4(),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (2360.0, 13448.0),
                 (9167.0, 11874.0),
                 (11309.0, 11588.0),
                 (11886.0, 10714.0),
                 (13453.0, 8619.0),
                 (15097.0, 5363.0),
-            ]),
+            ], avoid_obstacles=False),
             _use_bear_skill_4(),
-            BT.VanquishNode([
+            BT.Move([
                 (16024.0, 3473.0),
                 (16766.0, 5052.0),
                 (18332.0, 3893.0),
@@ -1451,7 +1610,7 @@ def BloodWashesBlood() -> BehaviorTree:
                 (17388.0, -205.0),
                 (15749.0, 167.0),
                 (15724.0, -2018.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.WaitForMapLoad(map_name="Gunnar's Hold"),
         ],
@@ -1463,19 +1622,18 @@ def TravelToOlafstead() -> BehaviorTree:
         name="Run to Olafstead",
         map_id_or_name="Sifhalla",
         children=[
-            _prepare_standard_party_xandra(),
             _aggressive(),
             BT.MoveAndExitMap(Vec2f(13663.0, 18683.0), target_map_name="Drakkar Lake"),
-            BT.VanquishNode([
+            BT.Move([
                 (13856.0, 5241.0),
                 (9243.0, -3148.0),
                 (10291.0, -14402.0),
                 (7425.0, -19995.0),
                 (4769.0, -23840.0),
                 (6651.0, -26797.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_name="Varajar Fells"),
-            BT.VanquishNode([
+            BT.Move([
                 (8582.0, 11620.0),
                 (5853.0, 10407.0),
                 (1972.0, 12954.0),
@@ -1491,8 +1649,8 @@ def TravelToOlafstead() -> BehaviorTree:
                 (-3074.0, -55.0),
                 (-1777.0, 1319.0),
                 (-670.0, 1382.0),
-            ]),
-            BT.WaitForMapLoad(map_name="Olafstead"),
+            ], avoid_obstacles=False),
+            BT.MoveAndExitMap(Vec2f(-3021.0, -4113.0), target_map_name="Olafstead"),
         ],
     )
 
@@ -1502,11 +1660,18 @@ def CompleteShrineOfRavenSpirit() -> BehaviorTree:
         name="Shrine of the Raven Spirit",
         map_id_or_name="Olafstead",
         children=[
-            _prepare_standard_party_xandra(),
-            BT.MoveAndDialog(Vec2f(132.0, -684.0), 0x832E01),
+            _keep_team_or(_prepare_standard_party_xandra()),
+            _reset_party_quest_when_mixed(814, "Reset Vision Of The Raven Spirit When Party Is Mixed"),
+            BT.Selector(
+                name="Accept Vision Of The Raven Spirit If Needed",
+                children=[
+                    _holds_open_quest(814, "Already Holds Vision Of The Raven Spirit"),
+                    BT.MoveAndDialog(Vec2f(132.0, -684.0), 0x832E01, multi_account=True),
+                ],
+            ),
             _aggressive(),
             BT.MoveAndExitMap(Vec2f(-1392.0, 1205.0), target_map_id=553),
-            BT.VanquishNode([
+            BT.Move([
                 (-2252.0, 831.0),
                 (-2887.0, -2894.0),
                 (-3211.0, -3843.0),
@@ -1519,11 +1684,11 @@ def CompleteShrineOfRavenSpirit() -> BehaviorTree:
                 (-14355.0, 7040.0),
                 (-14909.0, 7880.0),
                 (-15520.0, 8680.0),
-            ]),
-            BT.MoveAndDialog(Vec2f(-15696.0, 8732.0), 0x85),
+            ], avoid_obstacles=False),
+            BT.MoveAndDialog(Vec2f(-15696.0, 8732.0), 0x85, multi_account=True),
             BT.WaitForClearEnemiesInArea(-15696.0, 8732.0, radius=Range.Spirit.value, stable_clear_ms=180000),
             BT.Travel(target_map_name="Olafstead"),
-            BT.MoveAndDialog(Vec2f(132.0, -684.0), 0x832E07),
+            BT.MoveAndDialog(Vec2f(132.0, -684.0), 0x832E07, multi_account=True),
             BT.Wait(2000),
             
         ],
@@ -1532,14 +1697,14 @@ def CompleteShrineOfRavenSpirit() -> BehaviorTree:
 
 def CompleteAGateTooFar() -> BehaviorTree:
     return BT.Sequence(
-        name="A Gate Too Far",
+        name="A Gate Too Far Level 1A",
         map_id_or_name="Olafstead",
         children=[
-            _prepare_standard_party_xandra(),
+            _keep_team_or(_prepare_standard_party_xandra()),
             BT.MoveAndDialog(Vec2f(132.0, -684.0), 0x86),
             BT.WaitForMapToChange(map_id=655, timeout_ms=5_000),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (-8731,-5078),
                 (-8020,-3123),
                 (-6013,-3073),
@@ -1547,13 +1712,13 @@ def CompleteAGateTooFar() -> BehaviorTree:
                 (-4282,-1773),
                 (-4536,737),
                 (-6193,1490),
-            ],move_tolerance=800),
-            BT.VanquishNode([
+            ], tolerance=800, avoid_obstacles=False),
+            BT.Move([
     (-6243,6484),
     (-7508,7340),
     (-8324,4864),
     (-5239,3585),
-],log=True),
+], log=True, avoid_obstacles=False),
             BT.WaitForClearEnemiesInArea(
                             -6243,6484,
                             radius=Range.Spirit.value,
@@ -1564,9 +1729,32 @@ def CompleteAGateTooFar() -> BehaviorTree:
                             center_tolerance=750.0,
                             log=True,
                         ),            
-            BT.VanquishNode([(-18697.0, 9416.0), (-20211.0, 9897.0)]),
+        ],
+    )
+
+
+def CompleteAGateTooFarLevel1B() -> BehaviorTree:
+    return BT.Sequence(
+        name="A Gate Too Far Level 1B",
+        children=[
+            BT.Move([
+                (-6278.53, 6122.15),
+                (-6094.21, 4341.61),
+                (-6115.33, 3194.38),
+                (-6081.45, 2339.60),
+                (-18697.0, 9416.0),
+                (-20211.0, 9897.0),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=656),
             BT.Wait(2_000),
+        ],
+    )
+
+
+def CompleteAGateTooFarLevel2() -> BehaviorTree:
+    return BT.Sequence(
+        name="A Gate Too Far Level 2",
+        children=[
             BT.Move(Vec2f(17054.0, 6568.0)),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Move(Vec2f(13357.0, 11594.0)),
@@ -1578,6 +1766,14 @@ def CompleteAGateTooFar() -> BehaviorTree:
             BT.Move(Vec2f(3249.0, 17858.0)),
             BT.WaitForMapLoad(map_id=657),
             BT.Wait(2_000),
+        ],
+    )
+
+
+def CompleteAGateTooFarLevel3() -> BehaviorTree:
+    return BT.Sequence(
+        name="A Gate Too Far Level 3",
+        children=[
             BT.Move(Vec2f(6360.0, 16486.0)),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Move(Vec2f(5233.0, 12570.0)),
@@ -1606,12 +1802,12 @@ def AdvanceToLongeyeEdge() -> BehaviorTree:
         map_id_or_name=644,
         children=[
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (15886.204101, -6687.815917),
                 (15183.199218, -6381.958984),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=548),
-            BT.VanquishNode([
+            BT.Move([
                 (14233.820312, -3638.702636),
                 (14944.690429, 1197.740966),
                 (14855.548828, 4450.144531),
@@ -1621,9 +1817,9 @@ def AdvanceToLongeyeEdge() -> BehaviorTree:
                 (19933.869140, 15609.059570),
                 (16294.676757, 16369.736328),
                 (16392.476562, 16768.855468),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=482),
-            BT.VanquishNode([
+            BT.Move([
                 (-11232.550781, -16722.859375),
                 (-7655.780273, -13250.316406),
                 (-6672.132324, -13080.853515),
@@ -1637,7 +1833,7 @@ def AdvanceToLongeyeEdge() -> BehaviorTree:
                 (17305.523437, -17686.404296),
                 (19048.208984, -18813.695312),
                 (19634.173828, -19118.777343),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=650),
         ],
     )
@@ -1651,35 +1847,35 @@ def SearchForTheEbonVanguard() -> BehaviorTree:
             BT.MoveAndDialog(Vec2f(-25160.0, 13505.0), 0x831801),
             _aggressive(),
             BT.MoveAndExitMap(Vec2f(-21502.0,12458.0),target_map_name="Grothmar Wardowns"),
-            BT.VanquishNode([(-14000.0, 4297.0), (-9580.0, -2860.0)]),
+            BT.Move([(-14000.0, 4297.0), (-9580.0, -2860.0)], avoid_obstacles=False),
             _pacifist(),
             BT.MoveAndDialog(Vec2f(-9580.0, -2860.0), 0x831807),
             BT.AutoDialog(0x84),
             BT.AutoDialog(0x84),
             BT.WaitForMapLoad(map_id=665),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (5221.0, -3019.0),
                 (18715.0, -3896.0),
                 (20010.0, -66.0),
                 (17938.0, 2493.0),
                 (19705.0, 3742.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=649),
             _pacifist(),
             BT.MoveAndDialog(Vec2f(19106.0, 413.0), 0x838C01),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (11484.0, 1898.0),
                 (11388.0, 4143.0),
                 (23634.0, 15333.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.MoveAndExitMap(Vec2f(25604.0, 15412.0), target_map_id=647),
-            BT.VanquishNode([
+            BT.Move([
                 (-13181.0, 3067.0),
                 (-14576.0, 10999.0),
                 (-15193.0, 13347.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.MoveAndInteractWithGadget(Vec2f(-15369.0, 13087.0)),
             BT.Move(Vec2f(-17533.0, 14473.0)),
             BT.Move(Vec2f(-16740.0, 17124.0)),
@@ -1690,17 +1886,16 @@ def SearchForTheEbonVanguard() -> BehaviorTree:
     )
 
 
-def WarbandOfBrothers() -> BehaviorTree:
-    """Complete all three levels; the legacy level-3 indentation is fixed."""
+def WarbandLevel1() -> BehaviorTree:
     return BT.Sequence(
-        name="Warband of Brothers",
+        name="Warband of Brothers Level 1",
         map_id_or_name=648,
         children=[
             _aggressive(),
             BT.MoveAndDialog(Vec2f(-19094.0, 17945.0), 0x84),
             BT.WaitForMapLoad(map_id=666),
-            BT.AddModelToLootWhitelist(24628),
-            BT.VanquishNode([
+            BT.AddModelToLootWhitelist(25413),
+            BT.Move([
                 (-13404.0, -2958.0),
                 (-7696.0, 4576.0),
                 (-5939.0, 3668.0),
@@ -1710,11 +1905,11 @@ def WarbandOfBrothers() -> BehaviorTree:
                 (-9905.0, 5280.0),
                 (-13153.0, 3346.0),
                 (-4600.0, 6494.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.LootItems(distance=Range.Spirit.value),
-            BT.MoveAndInteractWithGadget(Vec2f(-4043.76, 6405.57), log=True),
+            BT.MoveAndInteractWithGadget(Vec2f(-4043.76, 6405.57), log=True, pause_on_combat=False),
             BT.Wait(2_000),
-            BT.VanquishNode([
+            BT.Move([
                 (-1959.15, 7955.19),
                 (1490.38, 8409.88),
                 (3217.90, 8404.31),
@@ -1722,10 +1917,18 @@ def WarbandOfBrothers() -> BehaviorTree:
                 (-16482.0, 1716.68),
                 (-18616.02, 806.14),
                 (-19704.0, 318.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=667),
-            BT.AddModelToLootWhitelist(24628),
-            BT.VanquishNode([
+        ],
+    )
+
+
+def WarbandLevel2() -> BehaviorTree:
+    return BT.Sequence(
+        name="Warband of Brothers Level 2",
+        children=[
+            BT.AddModelToLootWhitelist(25413),
+            BT.Move([
                 (-3290.88, 15187.92),
                 (-1760.07, 12088.74),
                 (-475.83, 11932.78),
@@ -1733,10 +1936,10 @@ def WarbandOfBrothers() -> BehaviorTree:
                 (-2061.81, 12930.91),
                 (-2407.16, 14068.22),
                 (-2030.78, 12776.65),
-            ]),
+            ], avoid_obstacles=False),
             BT.LootItems(distance=Range.Spirit.value),
-            BT.MoveAndInteractWithGadget(Vec2f(-2254.0, 11176.0), log=True),
-            BT.VanquishNode([
+            BT.MoveAndInteractWithGadget(Vec2f(-2254.0, 11176.0), log=True, pause_on_combat=False),
+            BT.Move([
                 (-2404.72, 9076.48),
                 (-1563.08, 11763.31),
                 (6634.50, 17973.61),
@@ -1744,20 +1947,28 @@ def WarbandOfBrothers() -> BehaviorTree:
                 (13162.54, 9219.06),
                 (15923.27, 8823.71),
                 (16782.0, 8642.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=668),
-            BT.AddModelToLootWhitelist(24628),
-            BT.VanquishNode([
+        ],
+    )
+
+
+def WarbandLevel3() -> BehaviorTree:
+    return BT.Sequence(
+        name="Warband of Brothers Level 3",
+        children=[
+            BT.AddModelToLootWhitelist(25413),
+            BT.Move([
                 (17337.79, -5963.91),
                 (16669.06, -4763.91),
                 (16089.83, -3724.50),
                 (17007.08, -5518.76),
                 (17159.0, -6461.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.LootItems(distance=Range.Spirit.value),
-            BT.MoveAndInteractWithGadget(Vec2f(17159.0, -6461.0), log=True),
+            BT.MoveAndInteractWithGadget(Vec2f(17159.0, -6461.0), log=True, pause_on_combat=False),
             BT.Wait(2_000),
-            BT.VanquishNode([
+            BT.Move([
                 (17808.17, -9149.82),
                 (18827.79, -10402.15),
                 (18742.40, -12129.31),
@@ -1765,11 +1976,11 @@ def WarbandOfBrothers() -> BehaviorTree:
                 (18334.16, -13903.64),
                 (18704.73, -12773.99),
                 (18284.53, -14134.07),
-            ]),
+            ], avoid_obstacles=False),
             BT.LootItems(distance=Range.Spirit.value),
-            BT.MoveAndInteractWithGadget(Vec2f(18147.0, -14974.0), log=True),
+            BT.MoveAndInteractWithGadget(Vec2f(18147.0, -14974.0), log=True, pause_on_combat=False),
             BT.Wait(2_000),
-            BT.VanquishNode([
+            BT.Move([
                 (14379.01, -15352.70),
                 (10392.54, -14173.80),
                 (9714.57, -12360.55),
@@ -1777,19 +1988,72 @@ def WarbandOfBrothers() -> BehaviorTree:
                 (8425.21, -9845.09),
                 (8900.77, -10740.29),
                 (9908.98, -12902.71),
-            ]),
+            ], avoid_obstacles=False),
             BT.LootItems(distance=Range.Spirit.value),
-            BT.MoveAndInteractWithGadget(Vec2f(10034.0, -14899.0), log=True),
+            BT.MoveAndInteractWithGadget(Vec2f(10034.0, -14899.0), log=True, pause_on_combat=False),
             BT.Wait(2_000),
-            BT.VanquishNode([
+            BT.Move([
                 (7685.12, -16387.24),
                 (3930.38, -13150.31),
                 (1072.90, -8136.26),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.WaitForMapLoad(map_id=648),
         ],
     )
+
+
+DALADA_SEER_POS = Vec2f(-2492.0, 6139.0)
+DALADA_DEVOURER_START = Vec2f(-2011.0, 6239.0)
+DALADA_SIEGE_ROUTE = (
+    Vec2f(5630.0, 7140.0),
+    Vec2f(9502.0, 6188.0),
+    Vec2f(11888.0, 6807.0),
+)
+DALADA_GRON_ROUTE = (
+    Vec2f(10101.0, 2244.0),
+    Vec2f(9351.0, -914.0),
+    Vec2f(6833.0, -2766.0),
+    Vec2f(1876.0, -2776.0),
+    Vec2f(-9657.0, -337.0),
+)
+
+
+def _dalada_quest_steps() -> BehaviorTree:
+    steps: list[BehaviorTree | BehaviorTree.Node] = [
+        BT.MoveAndDialog(DALADA_SEER_POS, 0x838D04, multi_account=True),
+        BT.MoveAndDialog(
+            DALADA_DEVOURER_START,
+            0x84,
+            target_distance=Range.Earshot.value,
+            multi_account=True,
+        ),
+    ]
+    for point in DALADA_SIEGE_ROUTE:
+        steps.append(BT.Move(point))
+        steps.append(BT.Wait(2_500))
+    steps.extend([
+        BT.MoveAndDialog(
+            DALADA_SIEGE_ROUTE[-1],
+            0x85,
+            target_distance=Range.Earshot.value,
+            multi_account=True,
+        ),
+        BT.WaitUntilOutOfCombat(timeout_ms=120_000),
+    ])
+    for point in DALADA_GRON_ROUTE[:-1]:
+        steps.append(BT.Move(point))
+        steps.append(BT.Wait(2_500))
+    steps.extend([
+        BT.MoveAndDialog(DALADA_GRON_ROUTE[-1], 0x838D04, multi_account=True),
+        BT.Move([
+            (-9360.0, -298.0),
+            (-6856.0, -7620.0),
+            (-7908.02, -7825.38),
+        ], avoid_obstacles=False),
+        BT.WaitUntilOutOfCombat(timeout_ms=120_000),
+    ])
+    return BT.Sequence(name="Dalada Uplands Quest Steps", children=steps)
 
 
 def WhatMustBeDone() -> BehaviorTree:
@@ -1798,15 +2062,16 @@ def WhatMustBeDone() -> BehaviorTree:
         map_id_or_name=648,
         children=[
             _aggressive(),
-            BT.MoveAndDialog(Vec2f(-14185.0, 17040.0), 0x838D01),
+            _reset_party_quest_when_mixed(909, "Reset What Must Be Done When Party Is Mixed"),
+            BT.Selector(
+                name="Accept What Must Be Done If Needed",
+                children=[
+                    _holds_open_quest(909, "Already Holds What Must Be Done"),
+                    BT.MoveAndDialog(Vec2f(-14185.0, 17040.0), 0x838D01, multi_account=True),
+                ],
+            ),
             BT.MoveAndExitMap(Vec2f(-15479.0, 13484.0), target_map_id=647),
-            BT.VanquishNode([
-                (-12085.0, 8447.0),
-                (-9360.0, -298.0),
-                (-6856.0, -7620.0),
-                (-7908.02, -7825.38),
-            ]),
-            BT.WaitUntilOutOfCombat(timeout_ms=120_000),
+            _dalada_quest_steps(),
             BT.Travel(target_map_id=648),
             BT.MoveAndDialog(Vec2f(-14185.0, 17040.0), 0x84),
             BT.WaitForMapLoad(map_id=674),
@@ -1826,19 +2091,19 @@ def AssaultOnTheStrongHold() -> BehaviorTree:
             BT.MoveAndExitMap(Vec2f(-15479.0, 13484.0), target_map_id=647),
             BT.MoveAndDialog(Vec2f(-13849.0, 11217.0), 0x84),
             BT.WaitForMapLoad(map_id=669),
-            BT.VanquishNode([(5203.0, 12344.0), (5843.0, 9145.0)]),
+            BT.Move([(5203.0, 12344.0), (5843.0, 9145.0)], avoid_obstacles=False),
             BT.MoveAndDialog(Vec2f(5843.0, 9145.0), 0x84),
             BT.MoveAndDialog(Vec2f(5203.0, 12344.0), 0x84),
             BT.Move(Vec2f(936.0, 10709.0)),
             BT.Wait(30_000),
-            BT.VanquishNode([
+            BT.Move([
                 (-1671.0, 11103.0),
                 (-4202.0, 11045.0),
                 (-6271.0, 12087.0),
                 (-6896.0, 13899.0),
                 (-6393.0, 9770.0),
                 (-6895.0, 8102.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=649),
             BT.MoveAndDialog(Vec2f(-21069.0, 12353.0), 0x831907),
         ],
@@ -1851,7 +2116,7 @@ def UnlockBattleHonorStandSkill() -> BehaviorTree:
         name="Unlock Battle Honor Stand Skill",
         children=[
             BT.MoveAndDialog(Vec2f(-21141.81, 12378.68), 0x836001),
-            BT.VanquishNode([
+            BT.Move([
                 (-21593.0, 12517.0),
                 (-20064.0, 11212.0),
                 (-18659.0, 9768.0),
@@ -1881,9 +2146,9 @@ def UnlockBattleHonorStandSkill() -> BehaviorTree:
                 (20765.0, -12412.0),
                 (22538.0, -13411.0),
                 (23410.0, -13901.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=651),
-            BT.VanquishNode([
+            BT.Move([
                 (-17861.0, 16317.0),
                 (-16404.0, 14900.0),
                 (-16459.0, 12851.0),
@@ -1913,7 +2178,7 @@ def UnlockBattleHonorStandSkill() -> BehaviorTree:
                 (8415.0, -8062.0),
                 (10082.0, -9228.0),
                 (11715.0, -8045.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Travel(target_map_id=650),
             BT.Move(Vec2f(-21902.0, 12807.0)),
@@ -1928,28 +2193,180 @@ def UnlockBattleHonorStandSkill() -> BehaviorTree:
 # ---------------------------------------------------------------------------
 
 
+# A route whose goal is a map the character has already unlocked is skipped, the same way
+# EnsureMOXUnlocked skips its route. Unlocked means the character has been there.
+def _map_is_unlocked(map_id: int, name: str) -> BehaviorTree:
+    def _check() -> BehaviorTree.NodeState:
+        return BehaviorTree.NodeState.SUCCESS if bool(Map.IsMapUnlocked(map_id)) else BehaviorTree.NodeState.FAILURE
+
+    return BehaviorTree(
+        BehaviorTree.ConditionNode(
+            name=name,
+            condition_fn=_check,
+        )
+    )
+
+
+def _skip_when_map_unlocked(map_id: int, label: str, route: BehaviorTree) -> BehaviorTree:
+    return BT.Selector(
+        name=f"{label} Unless Already Unlocked",
+        children=[
+            BT.Sequence(
+                name=f"{label} Already Unlocked",
+                children=[
+                    _map_is_unlocked(map_id, name=f"{label} Map Unlocked"),
+                    BT.LogMessage(
+                        message=f"{label} is already unlocked; skipping its route.",
+                        module_name=MODULE_NAME,
+                    ),
+                ],
+            ),
+            route,
+        ],
+    )
+
+
+# Combat and the blessing detour can both walk the character away from the path Move already committed
+# to; Move itself does not recompute after that, it just keeps aiming at the same old waypoint, which is
+# why a fight or a blessing stop is often followed by it standing still and sidestepping. Wrapping the
+# exit in a Selector of a few attempts fixes this without touching Move or HeroAI: a Selector only tries
+# its next child once the first one fully fails, and that next child is a brand-new MoveAndExitMap, so it
+# starts a fresh autopath from wherever the character actually is instead of the stale one.
+def _move_and_exit_with_retry(pos: Vec2f, target_map_id: int, attempts: int = 2, log: bool = True) -> BehaviorTree:
+    return BT.Selector(
+        name="Move And Exit Map (Retry)",
+        children=[BT.MoveAndExitMap(pos, target_map_id=target_map_id, log=log) for _ in range(attempts)],
+    )
+
+
+# Route into Vlox's Falls for a character that has not unlocked it. Each leg is the recorded route from
+# json/modular/routes/eotn/olafstead_to_umbral_grotto.json and umbral_grotto_to_vlox.json. Each step starts
+# where the previous one ends, so the bot can be restarted from any leg. Route points are walked with
+# Move, which paths around walls on the navmesh; each portal is taken with MoveAndExitMap.
+def TravelToVarajarFells() -> BehaviorTree:
+    return BT.Sequence(
+        name="Olafstead To Varajar Fells",
+        map_id_or_name=645,
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-1452.0, 1178.0), target_map_id=553),
+        ],
+    )
+
+
+def VarajarFellsToVerdantCascades() -> BehaviorTree:
+    return BT.Sequence(
+        name="Varajar Fells To Verdant Cascades",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-25980.0, -13109.0), target_map_id=566),
+        ],
+    )
+
+
+# The first recorded point is already behind the character when this step starts in Verdant Cascades,
+# so it is left out.
+def VerdantCascadesToUmbralGrotto() -> BehaviorTree:
+    route = BT.Sequence(
+        name="Verdant Cascades To Umbral Grotto",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-22985.0, 6893.0), target_map_id=639),
+        ],
+    )
+    return _skip_when_map_unlocked(639, "Verdant Cascades To Umbral Grotto", route)
+
+
+# Split at the map boundary (604), not just the outpost (639): a step that walks through a map
+# transition cannot be safely restarted once the character is past it, since the planner always
+# re-runs a step from its first child, and the earlier points mean nothing in the new map's
+# coordinate space. This caused a real failure: a restart after the Umbral -> Vloxen portal walked
+# the character toward Umbral Grotto's coordinates while she was already standing in Vloxen level 1.
+def UmbralGrottoToVloxenLevel1() -> BehaviorTree:
+    return BT.Sequence(
+        name="Umbral Grotto To Vloxen Level 1",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-26044.0, 10600.0), target_map_id=604),
+        ],
+    )
+
+
+def VloxenLevel1ToVloxsFalls() -> BehaviorTree:
+    route = BT.Sequence(
+        name="Vloxen Level 1 To Vlox's Falls",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-19922.0, -11963.0), target_map_id=624),
+        ],
+    )
+    return _skip_when_map_unlocked(624, "Vloxen Level 1 To Vlox's Falls", route)
+
+
+# Recorded route from json/modular/routes/eotn/vlox_to_gadds.json: Vlox's Falls, through Arbor Bay and
+# Shards of Oor, to Gadd's Encampment. It does not go through Vloxen Excavations. Split at every map
+# boundary for the same reason as the Umbral/Vloxen split: a step spanning a map transition cannot be
+# safely restarted once the character is past it.
+def VloxsFallsToArborBay() -> BehaviorTree:
+    return BT.Sequence(
+        name="Vlox's Falls To Arbor Bay",
+        map_id_or_name=624,
+        children=[
+            _aggressive(),
+            _reset_party_quest_when_mixed(819, "Reset Finding Gadd When Party Is Mixed"),
+            BT.Selector(
+                name="Accept Finding Gadd",
+                children=[
+                    _quest_already_handled(819, "Already Has Finding Gadd"),
+                    BT.MoveAndDialog(Vec2f(16304.0, 15742.0), 0x833301, multi_account=True),
+                ],
+            ),
+            _move_and_exit_with_retry(Vec2f(15471.0, 12385.0), target_map_id=485),
+        ],
+    )
+
+
+def ArborBayToShardsOfOor() -> BehaviorTree:
+    return BT.Sequence(
+        name="Arbor Bay To Shards Of Oor",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(8944.0, -20527.0), target_map_id=581),
+        ],
+    )
+
+
+def ShardsOfOorToGaddsEncampment() -> BehaviorTree:
+    route = BT.Sequence(
+        name="Shards Of Oor To Gadd's Encampment",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(14106.0, 12184.0), target_map_id=638),
+        ],
+    )
+    return _skip_when_map_unlocked(638, "Shards Of Oor To Gadd's Encampment", route)
+
+
 def FindingGadd() -> BehaviorTree:
     return BT.Sequence(
         name="Finding Gadd",
-        map_id_or_name=624,
+        map_id_or_name=638,
         children=[
-            BT.MoveAndDialog(Vec2f(16363.0, 15909.0), 0x833301),
-            BT.Travel(target_map_id=638),
             _aggressive(),
             BT.Move(Vec2f(-8755.0, -23240.0)),
             BT.MoveAndDialog(Vec2f(-8295.0, -23572.0), 0x833304),
-            BT.VanquishNode([
+            BT.Move([
                 (-8755.0, -23240.0),
                 (-9888.17, -22106.70),
-            ]),
+            ], avoid_obstacles=False),
             BT.MoveAndExitMap(Vec2f(-9690.0, -19524.0), target_map_id=558),
-            BT.VanquishNode([
+            BT.Move([
                 (-4466.15, -21025.91),
                 (-6967.77, -19810.06),
                 (11669.0, -23829.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.MoveAndDialog(Vec2f(11881.0, -23802.0), 0x833304),
-            BT.VanquishNode([(8017.92, -20124.24), (11184.85, -14188.88)]),
+            BT.Move([(8017.92, -20124.24), (11184.85, -14188.88)], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Wait(5_000),
             BT.Move(Vec2f(-5740.47, -13723.29)),
@@ -1960,10 +2377,10 @@ def FindingGadd() -> BehaviorTree:
             BT.Wait(5_000),
             BT.Move(Vec2f(11758.78, -24063.51)),
             BT.Wait(20_000),
-            BT.VanquishNode([
+            BT.Move([
                 (Vec2f(12236.58, -24474.01)),
                 (Vec2f(11675.35, -23909.45)),
-            ]),
+            ], avoid_obstacles=False),
             BT.AutoDialog(0x833304),
             BT.Wait(10_000),
             BT.Move(Vec2f(11795.0, -24125.0)),
@@ -1972,67 +2389,169 @@ def FindingGadd() -> BehaviorTree:
     )
 
 
-def FindingTheBloodstone() -> BehaviorTree:
+# Split at every map/mission boundary, same reason as the Vlox's Falls and Gadd's splits: a step that
+# spans a transition cannot be safely restarted once the character is past it. Each level below assumes
+# the character is already standing in it, since the mission instance cannot be reached by outpost travel.
+def GaddsEncampmentToFindingTheBloodstoneL1() -> BehaviorTree:
     return BT.Sequence(
-        name="Finding the Bloodstone",
+        name="Gadd's Encampment To Finding The Bloodstone L1",
         map_id_or_name=638,
         children=[
             _aggressive(),
             BT.Move(Vec2f(-9888.17, -22106.70)),
-            BT.MoveAndExitMap(Vec2f(-9690.0, -19524.0), target_map_id=558),
-            BT.VanquishNode([(-6967.77, -19810.06), (11669.0, -23829.0)]),
+            _move_and_exit_with_retry(Vec2f(-9690.0, -19524.0), target_map_id=558),
+            BT.Move([(-6967.77, -19810.06), (11669.0, -23829.0)], avoid_obstacles=False),
             BT.MoveAndDialog(Vec2f(11795.0, -24125.0), 0x833307),
             BT.AutoDialog(0x84),
             BT.WaitForMapLoad(map_id=661),
-            BT.VanquishNode([
+        ],
+    )
+
+
+def FindingTheBloodstoneLevel1() -> BehaviorTree:
+    return BT.Sequence(
+        name="Finding The Bloodstone Level 1",
+        children=[
+            _aggressive(),
+            BT.Move([
                 (12437.0, 16557.0),
                 (12588.0, 14755.0),
                 (15387.0, 6941.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Wait(10_000),
-            BT.VanquishNode([
+            BT.Move([
                 (16165.77, 10441.95),
                 (17149.38, 13434.60),
                 (18529.0, 15977.0),
                 (18170.14, 15771.52),
-            ]),
+            ], avoid_obstacles=False),
             BT.Wait(30_000),
-            BT.MoveAndExitMap(Vec2f(19212.0, 16155.0), target_map_id=662),
-            BT.VanquishNode([
+            _move_and_exit_with_retry(Vec2f(19212.0, 16155.0), target_map_id=662),
+        ],
+    )
+
+
+def FindingTheBloodstoneLevel2() -> BehaviorTree:
+    return BT.Sequence(
+        name="Finding The Bloodstone Level 2",
+        children=[
+            _aggressive(),
+            BT.Move([
                 (-611.51, 5115.83),
                 (3574.70, 3567.62),
                 (4827.10, 1968.97),
                 (11548.76, -2795.90),
                 (14596.0, -7708.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Wait(10_000),
             BT.Move(Vec2f(16743.0, -10170.0)),
             BT.Wait(30_000),
-            BT.MoveAndExitMap(Vec2f(18450.0, -10273.0), target_map_id=663),
-            BT.VanquishNode([
+            _move_and_exit_with_retry(Vec2f(18450.0, -10273.0), target_map_id=663),
+        ],
+    )
+
+
+def FindingTheBloodstoneLevel3() -> BehaviorTree:
+    return BT.Sequence(
+        name="Finding The Bloodstone Level 3",
+        children=[
+            _aggressive(),
+            BT.Move([
                 (-7249.0, -16397.0),
                 (-10466.0, -16166.0),
                 (-15377.0, -16565.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=638),
         ],
     )
 
 
-def LabSpace() -> BehaviorTree:
+# Quest 819 (Finding Gadd) drops out of the quest log once turned in, but Quest.IsQuestCompleted(819)
+# does not reliably report True for it afterward either - that combination is almost certainly why the
+# Livia dialog re-fired even though the quest had already progressed. Reaching this point in the
+# execution list already requires Finding Gadd to be done, so this step skips that dialog check entirely
+# instead of trusting an API that does not give a clean signal for this particular quest.
+def GaddsEncampmentToArborBay() -> BehaviorTree:
     return BT.Sequence(
-        name="Lab Space",
+        name="Gadd's Encampment To Arbor Bay",
         map_id_or_name=624,
         children=[
             _aggressive(),
+            _move_and_exit_with_retry(Vec2f(15471.0, 12385.0), target_map_id=485),
+        ],
+    )
+
+
+# Route to Rata Sum for a character that has not unlocked it, following the recorded JSON legs from
+# json/modular/routes/eotn/vlox_to_tarnished.json and tarnished_to_rata.json. It doubles back through
+# Alcazia Tangle (that is how the route was actually recorded, not a mistake). Each step starts where
+# the previous one ends, same reasoning as every other split today.
+def ArborBayToAlcaziaTangle() -> BehaviorTree:
+    return BT.Sequence(
+        name="Arbor Bay To Alcazia Tangle",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-20455.0, -19872.0), target_map_id=572),
+        ],
+    )
+
+
+def AlcaziaTangleToTarnishedHaven() -> BehaviorTree:
+    route = BT.Sequence(
+        name="Alcazia Tangle To Tarnished Haven",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(19072.0, -10799.0), target_map_id=641),
+        ],
+    )
+    return _skip_when_map_unlocked(641, "Alcazia Tangle To Tarnished Haven", route)
+
+
+def TarnishedHavenToAlcaziaTangle() -> BehaviorTree:
+    return BT.Sequence(
+        name="Tarnished Haven To Alcazia Tangle",
+        map_id_or_name=641,
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(19089.0, -10621.0), target_map_id=572),
+        ],
+    )
+
+
+def AlcaziaTangleToRivenEarth() -> BehaviorTree:
+    return BT.Sequence(
+        name="Alcazia Tangle To Riven Earth",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-3987.0, 16860.0), target_map_id=501),
+        ],
+    )
+
+
+def RivenEarthToRataSum() -> BehaviorTree:
+    route = BT.Sequence(
+        name="Riven Earth To Rata Sum",
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(-26256.0, -4119.0), target_map_id=640),
+        ],
+    )
+    return _skip_when_map_unlocked(640, "Riven Earth To Rata Sum", route)
+
+
+def LabSpace() -> BehaviorTree:
+    return BT.Sequence(
+        name="Lab Space",
+        map_id_or_name=640,
+        children=[
+            _aggressive(),
             #BT.MoveAndDialog(Vec2f(16202.0, 16092.0)),
-            BT.Travel(target_map_id=640),
            # BT.MoveAndDialog(Vec2f(16024.0, 18468.0)),
             BT.MoveAndExitMap(Vec2f(-6062.0, -2688.0), target_map_name="Magus Stones"),
             #BT.MoveAndDialog(Vec2f(10228.0, 11488.0)),
-            BT.VanquishNode([
+            BT.Move([
                 (8329.03, 9954.58),
                 (7258.69, 10987.36),
                 (4812.16, 11197.93),
@@ -2041,7 +2560,7 @@ def LabSpace() -> BehaviorTree:
                 (-4305.25, 13044.76),
                 (-11493.07, 16584.55),
                 (-17671.37, 14695.37),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.AddModelToLootWhitelist(24628),
             BT.LootItems(distance=Range.Spirit.value),
@@ -2058,50 +2577,62 @@ def LabSpace() -> BehaviorTree:
             BT.AutoDialog(0x84),
             BT.WaitForMapLoad(map_name="Magus Stones"),
             BT.Move(Vec2f(-18608.72, 16541.34)),
-            #BT.MoveAndDialog(Vec2f(-18794.0, 16287.0)),
+            BT.MoveAndDialog(Vec2f(-18794.0, 16287.0), 0x86),
+            BT.MoveAndDialog(Vec2f(-18794.0, 16287.0), 0x84),
             BT.Move(Vec2f(-20599.0, 14444.0)),
             BT.WaitForMapLoad(map_id=658),
         ],
     )
 
 
-def TheElusiveGolemancer() -> BehaviorTree:
+# Split at every map boundary, same reasoning as every other split today: a step spanning a mission
+# transition cannot be safely restarted once the character is past it. None of these three levels are
+# reachable by outpost travel anyway, so none carry a map_id_or_name prefix.
+def TheElusiveGolemancerLevel1() -> BehaviorTree:
     return BT.Sequence(
-        name="The Elusive Golemancer",
+        name="The Elusive Golemancer Level 1",
         children=[
             BT.WaitForMapLoad(map_id=658),
             _aggressive(),
-            #BT.MoveAndDialog(Vec2f(-14542.0, 12237.0)),
+            BT.MoveAndDialog(Vec2f(-14542.0, 12237.0), 0x81),
             BT.Move(Vec2f(-17204.16, 8545.91)),
             BT.MoveAndInteractWithGadget(Vec2f(-17601.0, 8150.0), log=True),
             BT.Wait(20_000),
-            BT.VanquishNode([
+            BT.Move([
                 (-15960.14, 3309.37),
                 (-13369.91, -965.44),
-            ]),
+            ], avoid_obstacles=False),
             BT.MoveAndInteractWithGadget(Vec2f(-11737.0, -3710.0), log=True),
-            BT.VanquishNode([
+            BT.Move([
                 (-15108.84, -2793.48),
                 (-16518.94, -662.78),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
-            BT.VanquishNode([
+            BT.Move([
                 (-16898.24, -612.0),
                 (-17391.0, -528.0),
                 (-17597.36, 15027.91),
                 (18755.0, -19827.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=659),
+        ],
+    )
+
+
+def TheElusiveGolemancerLevel2() -> BehaviorTree:
+    return BT.Sequence(
+        name="The Elusive Golemancer Level 2",
+        children=[
             _aggressive(),
             BT.MoveAndInteractWithGadget(Vec2f(15979.0, -17531.0), log=True),
             _pacifist(),
-            BT.VanquishNode([
+            BT.Move([
                 (18031.51, -13929.63),
                 (17886.86, -13218.39),
-            ]),
+            ], avoid_obstacles=False),
             BT.MoveAndInteractWithGadget(Vec2f(15551.0, -13705.0), log=True),
             BT.Wait(3_000),
-            BT.VanquishNode([
+            BT.Move([
                 (15551.0, -13705.0),
                 (9928.16, -10998.24),
                 (5953.36, -9815.89),
@@ -2109,16 +2640,17 @@ def TheElusiveGolemancer() -> BehaviorTree:
                 (3035.53, -9450.54),
                 (3485.59, -11380.60),
                 (-229.0, -12033.0),
-            ]),
+            ], avoid_obstacles=False),
             _aggressive(),
-            BT.AutoDialog(0x84),
+            BT.MoveAndInteractByModelID(6880, log=True),
             #BT.MoveAndDialog(Vec2f(-2639.0, -15247.0)),
             #BT.MoveAndDialog(Vec2f(3833.0, -16855.0)),
-            BT.VanquishNode([(3042.09, -16940.08), (2763.47, -17007.67)]),
+            BT.Move([(3042.09, -16940.08), (2763.47, -17007.67)], avoid_obstacles=False),
             BT.Wait(10_000),
             BT.Move(Vec2f(3348.06, -16214.14)),
             BT.Wait(10_000),
             _pacifist(),
+            _set_heroai_widget_enabled(False, "Disable HeroAI Widget For Key Carry"),
             BT.Move(Vec2f(5107.97, -17710.35)),
             BT.FlagAllHeroes(5413.07, -19400.44),
             BT.PickupGroundItemByModelID(
@@ -2128,41 +2660,128 @@ def TheElusiveGolemancer() -> BehaviorTree:
                 log=True,
             ),
             BT.MoveAndInteractWithGadget(Vec2f(5356.0, -19374.0), log=True),
-            _pixel_stack(),
-            BT.Wait(10_000),
-            BT.DropBundle(log=True),
-            BT.PickupGroundItemByModelID(
-                22782,
-                max_distance=5_000.0,
-                timeout_ms=30_000,
-                log=True,
-            ),
-            BT.Wait(1_000),
-            BT.MoveAndInteractWithGadget(Vec2f(5356.0, -19374.0), log=True),
-            _pixel_stack(),
-            BT.Wait(10_000),
-            BT.DropBundle(log=True),
-            BT.PickupGroundItemByModelID(
-                22782,
-                max_distance=5_000.0,
-                timeout_ms=30_000,
-                log=True,
-            ),
-            BT.Wait(1_000),
-            BT.MoveAndInteractWithGadget(Vec2f(5356.0, -19374.0), log=True),
-            _pixel_stack(),
-            BT.Wait(10_000),
-            BT.DropBundle(log=True),
-            BT.VanquishNode([(6882.36, -20769.41), (6566.0, -21425.0)]),
-            BT.WaitForMapLoad(map_id=660),
+            _set_heroai_widget_enabled(True, "Re-enable HeroAI Widget After Key Drop Off"),
             _aggressive(),
-            BT.VanquishNode([
+            _pixel_stack(),
+            BT.Wait(10_000),
+            BT.DropBundle(log=True),
+            _pacifist(),
+            _set_heroai_widget_enabled(False, "Disable HeroAI Widget For Key Carry"),
+            BT.PickupGroundItemByModelID(
+                22782,
+                max_distance=5_000.0,
+                timeout_ms=30_000,
+                log=True,
+            ),
+            BT.Wait(1_000),
+            BT.MoveAndInteractWithGadget(Vec2f(5356.0, -19374.0), log=True),
+            _set_heroai_widget_enabled(True, "Re-enable HeroAI Widget After Key Drop Off"),
+            _aggressive(),
+            _pixel_stack(),
+            BT.Wait(10_000),
+            BT.DropBundle(log=True),
+            _pacifist(),
+            _set_heroai_widget_enabled(False, "Disable HeroAI Widget For Key Carry"),
+            BT.PickupGroundItemByModelID(
+                22782,
+                max_distance=5_000.0,
+                timeout_ms=30_000,
+                log=True,
+            ),
+            BT.Wait(1_000),
+            BT.MoveAndInteractWithGadget(Vec2f(5356.0, -19374.0), log=True),
+            _set_heroai_widget_enabled(True, "Re-enable HeroAI Widget After Key Drop Off"),
+            _aggressive(),
+            _pixel_stack(),
+            BT.Wait(10_000),
+            BT.DropBundle(log=True),
+            BT.Move([(6882.36, -20769.41), (6566.0, -21425.0)], avoid_obstacles=False),
+            BT.WaitForMapLoad(map_id=660),
+        ],
+    )
+
+
+def TheElusiveGolemancerLevel3() -> BehaviorTree:
+    return BT.Sequence(
+        name="The Elusive Golemancer Level 3",
+        children=[
+            _aggressive(),
+            BT.Move([
                 (-12164.0, 10409.53),
                 (-12584.28, 13570.28),
                 (-15062.15, 16139.62),
                 (-18265.0, 13647.0),
-            ]),
+            ], avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=640),
+        ],
+    )
+
+
+# "A Little Help" (quest 820): recruits Renk, the last krewe member for The Knowledgeable Asura. Route
+# recorded in json/modular/quests/eotn/a_little_help.json. One step per map, same reasoning as every
+# other split today. Renk is visited twice: once in Riven Earth, once in Alcazia Tangle.
+def VloxsFallsToPlaxx() -> BehaviorTree:
+    route = BT.Sequence(
+        name="Vlox's Falls To Plaxx",
+        map_id_or_name=624,
+        children=[
+            _aggressive(),
+            BT.MoveAndDialog(Vec2f(16569.0, 15999.0), 0x833401, multi_account=True),
+        ],
+    )
+    return BT.Selector(
+        name="Accept A Little Help",
+        children=[
+            _quest_already_handled(820, "Already Has A Little Help"),
+            route,
+        ],
+    )
+
+
+def RataSumToRivenEarth() -> BehaviorTree:
+    return BT.Sequence(
+        name="Rata Sum To Riven Earth",
+        map_id_or_name=640,
+        children=[
+            _aggressive(),
+            _move_and_exit_with_retry(Vec2f(20051.0, 16797.0), target_map_id=501),
+        ],
+    )
+
+
+def RivenEarthToAlcaziaTangleViaRenk() -> BehaviorTree:
+    return BT.Sequence(
+        name="Riven Earth To Alcazia Tangle Via Renk",
+        children=[
+            _aggressive(),
+            BT.MoveAndDialog(Vec2f(-24231.0, -5562.0), 0x84, multi_account=True),
+            BT.MoveAndDialog(Vec2f(17413.0, -9350.0), 0x833404, multi_account=True),
+            _move_and_exit_with_retry(Vec2f(-8569.0, -13698.0), target_map_id=572),
+        ],
+    )
+
+
+def AlcaziaTangleToRataSumViaRenk() -> BehaviorTree:
+    return BT.Sequence(
+        name="Alcazia Tangle To Rata Sum Via Renk",
+        children=[
+            _aggressive(),
+            BT.MoveAndDialog(Vec2f(-5387.0, 16137.0), 0x84, multi_account=True),
+            BT.MoveAndDialog(Vec2f(-23997.0, -10397.0), 0x833404, multi_account=True),
+            # Recorded as a map travel at this point, not a walk-to-exit like every other transition
+            # today. Unverified: if Rata Sum is not reachable this way from here, this is the step
+            # that needs a real exit point found and reported back.
+            BT.Travel(target_map_id=640),
+        ],
+    )
+
+
+def RataSumTurnInALittleHelp() -> BehaviorTree:
+    return BT.Sequence(
+        name="Rata Sum Turn In A Little Help",
+        children=[
+            _aggressive(),
+            BT.MoveAndDialog(Vec2f(16093.0, 15293.0), 0x833407, multi_account=True),
         ],
     )
 
@@ -2360,45 +2979,45 @@ def ToKamadanForOlias(log: bool = True) -> BehaviorTree:
         name="Sunspears In Cantha - Reach Kamadan",
         children=[
             BT.Travel(target_map_id=KAINENG_CENTER_MAP_ID, log=log),
-            _prepare_standard_party_olias(),
-            BT.VanquishNode([
+            _keep_team_or(_prepare_standard_party_olias()),
+            BT.Move([
                 (3049.35, -2020.75),
                 (2739.30, -3710.67),
                 (-648.30, -3493.72),
                 (-1661.91, -636.09),
-            ], log=log),
+            ], log=log, avoid_obstacles=False),
             BT.MoveAndDialog(Vec2f(-1131.99, 818.35), 0x82D401, log=log),
             BT.MoveAndExitMap(Vec2f(-2439.0, 1732.0), target_map_id=290, log=log),
-            BT.VanquishNode([
+            BT.Move([
                 (-2995.68, 2077.20),
                 (-6938.10, 4286.61),
                 (-6064.40, 5300.26),
                 (-2396.20, 5260.67),
                 (-5031.77, 6001.52),
                 (-5899.57, 7240.19),
-            ], log=log),
+            ], log=log, avoid_obstacles=False),
             BT.TargetAgentByModelIDAndSendDialog(4914, 0x82D404, log=log),
             BT.Wait(500),
             BT.SendDialog(0x87, log=log),
             BT.WaitForMapLoad(map_id=400),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (-1712.16, -700.23),
                 (-907.97, -2862.29),
                 (742.42, -4167.73),
-                (1352.94, -3694.75)]),
+                (1352.94, -3694.75)], avoid_obstacles=False),
             BT.Wait(5000),
-            BT.VanquishNode([    
-                (1786, -1448)]),
+            BT.Move([    
+                (1786, -1448)], avoid_obstacles=False),
             BT.Wait(5000),
-            BT.VanquishNode([
+            BT.Move([
                 (2651.48, -3750.63),
                 (3355.63, -2151.82),
-                (4347, -1682),]),
+                (4347, -1682),], avoid_obstacles=False),
             BT.Wait(5000),
-            BT.VanquishNode([    
+            BT.Move([    
                 (279, 811)
-            ], pause_on_combat=True, log=log),
+            ], pause_on_combat=True, log=log, avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=290, timeout_ms=60000),
             BT.TargetAgentByModelIDAndSendDialog(4914, 0x84, log=log),
             BT.SendDialog(0x85),
@@ -2431,24 +3050,22 @@ def ToLionsArch() -> BehaviorTree:
         children=[
             BT.Travel(KAINENG_CENTER_MAP_ID),
 
-            BT.VanquishNode([
+            BT.Move([
                     (3049.35, -2020.75),
                     (2739.30, -3710.67),
                     (-648.30, -3493.72),
                     (-1661.91, -636.09),
-                ]),
+                ], avoid_obstacles=False),
 
             BT.MoveAndDialog(Vec2f(-1006.97,-817.63),0x81DF01),
             BT.MoveAndExitMap((-2439,1732),target_map_id=290),
-            BT.VanquishNode(
-                [
+            BT.Move([
                     (-2995.68, 2077.20),
                     (-6938.10, 4286.61),
                     (-6064.40, 5300.26),
                     (-2396.20, 5260.67),
                     (-5031.77, 6001.52),
-                ],
-            ),
+                ], avoid_obstacles=False),
             BT.MoveAndDialog(Vec2f(-5626.17, 7017.33),0x81DF04),
             BT.MoveAndDialog(Vec2f(-4661.13, 7479.86),0x84),
             BT.WaitForMapLoad(map_name="Lion's Gate"),
@@ -2465,19 +3082,19 @@ def CompleteOliasUnlock(log: bool = True) -> BehaviorTree:
         children=[
             ToLionsArch(),
             BT.LeaveParty(),
-            _prepare_standard_party2(),
+            _keep_team_or(_prepare_standard_party2()),
             BT.MoveAndDialog(Vec2f(-1137.00, 2501.00), 0x84, log=log),
             BT.WaitForMapLoad(map_id=471),
             BT.Wait(3_000),
             BT.MoveAndDialog(Vec2f(5117.00, 10515.00), 0x830E04, log=log),
             _aggressive(),
-            BT.VanquishNode([
+            BT.Move([
                 (8518.10, 9309.66),
                 (8067.40, 5703.23),
                 (5657.20, 4485.55),
                 (4461.65, -710.88),
                 (10750.0, 2100.0),
-            ], pause_on_combat=True, log=log),
+            ], pause_on_combat=True, log=log, avoid_obstacles=False),
             BT.WaitForMapLoad(map_id=55, timeout_ms=120000),
             BT.LeaveParty(),
             BT.Travel(target_map_id=449, log=log),
@@ -2531,8 +3148,8 @@ def get_execution_steps() -> list[tuple[str, Callable[[], BehaviorTree]]]:
         ("Initialize Bot", InitializeBot),
         ("UnlockEyeOfTheNorthPool",UnlockEyeOfTheNorthPool),
         ("Obtain Story Book", ObtainStoryBook),
-        ("Ensure MOX Unlocked", EnsureMOXUnlocked),
-        ("Ensure Olias Unlocked", EnsureOliasUnlocked),
+        ("Ensure MOX Unlocked", lambda: _keep_team_or(EnsureMOXUnlocked())),
+        ("Ensure Olias Unlocked", lambda: _keep_team_or(EnsureOliasUnlocked())),
         ("Travel To Gunnar's Hold", TravelToGunnarsHold),
         ("Talk To Gunnar", Unlock_Xandra),
         ("Optional Xandra Tournament", CompleteOptionalXandraTournament),
@@ -2544,17 +3161,66 @@ def get_execution_steps() -> list[tuple[str, Callable[[], BehaviorTree]]]:
         ("Blood Washes Blood", BloodWashesBlood),
         ("Travel To Olafstead", TravelToOlafstead),
         ("Shrine Of The Raven Spirit", CompleteShrineOfRavenSpirit),
-        ("A Gate Too Far", CompleteAGateTooFar),
+        ("A Gate Too Far Level 1A", CompleteAGateTooFar),
+        ("A Gate Too Far Level 1B", CompleteAGateTooFarLevel1B),
+        ("A Gate Too Far Level 2", CompleteAGateTooFarLevel2),
+        ("A Gate Too Far Level 3", CompleteAGateTooFarLevel3),
         ("Advance To Longeye's Edge", AdvanceToLongeyeEdge),
         ("Search For The Ebon Vanguard", SearchForTheEbonVanguard),
-        ("Warband Of Brothers", WarbandOfBrothers),
+        ("Warband Of Brothers L1", WarbandLevel1),
+        ("Warband Of Brothers L2", WarbandLevel2),
+        ("Warband Of Brothers L3", WarbandLevel3),
         ("What Must Be Done", WhatMustBeDone),
         ("Assault On The Stronghold", AssaultOnTheStrongHold),
+        ("Olafstead To Varajar Fells", TravelToVarajarFells),
+        ("Varajar Fells To Verdant Cascades", VarajarFellsToVerdantCascades),
+        ("Verdant Cascades To Umbral Grotto", VerdantCascadesToUmbralGrotto),
+        ("Umbral Grotto To Vloxen Level 1", UmbralGrottoToVloxenLevel1),
+        ("Vloxen Level 1 To Vlox's Falls", VloxenLevel1ToVloxsFalls),
+        ("Vlox's Falls To Arbor Bay", VloxsFallsToArborBay),
+        ("Arbor Bay To Shards Of Oor", ArborBayToShardsOfOor),
+        ("Shards Of Oor To Gadd's Encampment", ShardsOfOorToGaddsEncampment),
         ("Finding Gadd", FindingGadd),
-        ("Finding The Bloodstone", FindingTheBloodstone)
-        #("Lab Space", LabSpace),
-        #("The Elusive Golemancer", TheElusiveGolemancer),
+        ("Gadd's Encampment To Finding The Bloodstone L1", GaddsEncampmentToFindingTheBloodstoneL1),
+        ("Finding The Bloodstone Level 1", FindingTheBloodstoneLevel1),
+        ("Finding The Bloodstone Level 2", FindingTheBloodstoneLevel2),
+        ("Finding The Bloodstone Level 3", FindingTheBloodstoneLevel3),
+        ("Gadd's Encampment To Arbor Bay", GaddsEncampmentToArborBay),
+        ("Arbor Bay To Alcazia Tangle", ArborBayToAlcaziaTangle),
+        ("Alcazia Tangle To Tarnished Haven", AlcaziaTangleToTarnishedHaven),
+        ("Tarnished Haven To Alcazia Tangle", TarnishedHavenToAlcaziaTangle),
+        ("Alcazia Tangle To Riven Earth", AlcaziaTangleToRivenEarth),
+        ("Riven Earth To Rata Sum", RivenEarthToRataSum),
+        ("Lab Space", LabSpace),
+        ("The Elusive Golemancer Level 1", TheElusiveGolemancerLevel1),
+        ("The Elusive Golemancer Level 2", TheElusiveGolemancerLevel2),
+        ("The Elusive Golemancer Level 3", TheElusiveGolemancerLevel3),
+        ("Vlox's Falls To Plaxx", VloxsFallsToPlaxx),
+        ("Rata Sum To Riven Earth", RataSumToRivenEarth),
+        ("Riven Earth To Alcazia Tangle Via Renk", RivenEarthToAlcaziaTangleViaRenk),
+        ("Alcazia Tangle To Rata Sum Via Renk", AlcaziaTangleToRataSumViaRenk),
+        ("Rata Sum Turn In A Little Help", RataSumTurnInALittleHelp),
     ]
+
+
+def _configure_eotn_bot(tree: BottingTree) -> None:
+    tree.Config.ConfigureUpkeep(
+        looting_enabled=True,
+        resurrection_scroll=True,
+        auto_inventory_handler_enabled=True,
+        consumable_upkeeps=tuple(
+            int(model_id)
+            for model_id in CONSUMABLE_UPKEEPS
+        ),
+        heroai_state_logging=False,
+        enable_party_wipe_recovery=True,
+    )
+    # headless_heroai_enabled defaults to True on every fresh BottingTree instance, which is every
+    # module reload - there is no persisted setting to flip instead. Set the attribute directly rather
+    # than calling SetHeadlessHeroAIEnabled() here, since that method's widget-sync side effect assumes
+    # the tree has already started; at this point it has not, and calling it now would send other
+    # accounts a premature DisableWidget. Start() already does the correct sync once it actually starts.
+    tree.headless_heroai_enabled = False
 
 
 def ensure_botting_tree() -> BottingTree:
@@ -2567,18 +3233,8 @@ def ensure_botting_tree() -> BottingTree:
             routine_name="EotNStorylineSequence",
             repeat=False,
             multi_account=True,
-            isolation_enabled=True,
-            configure_fn=lambda tree: tree.Config.ConfigureUpkeep(
-                looting_enabled=True,
-                resurrection_scroll=True,
-                auto_inventory_handler_enabled=True,
-                consumable_upkeeps=tuple(
-                    int(model_id)
-                    for model_id in CONSUMABLE_UPKEEPS
-                ),
-                heroai_state_logging=False,
-                enable_party_wipe_recovery=True,
-            ),
+            isolation_enabled=False,
+            configure_fn=_configure_eotn_bot,
         )
 
     return botting_tree
