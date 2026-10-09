@@ -36,6 +36,36 @@ class BlessingMixin:
                 seen["error"] = 1
                 self.session.log.event("npc", error=repr(e))
 
+    def _giver_name(self, agent_id):
+        names = self.__dict__.setdefault("_giver_names", {})
+        if agent_id not in names:
+            n = game.agent_name(agent_id)
+            if not n:
+                return ""
+            names[agent_id] = n
+        return names[agent_id]
+
+    def _skip_once(self, agent_id, why, x, y, eng):
+        noted = self.__dict__.setdefault("_bless_skip_noted", set())
+        if (agent_id, why) not in noted:
+            noted.add((agent_id, why))
+            px, py = eng.player_xy
+            self.session.log.event("blessing", stage="skipped", npc=agent_id, name=self._giver_name(agent_id), why=why,
+                                   pos=[round(x), round(y)], dist=round(math.hypot(x - px, y - py)))
+
+    def _blessing_done(self, agent_id, before):
+        """After a giver: note who blessed us, and whether a second blessing stacked."""
+        try:
+            after = game.blessing_effects()
+        except Exception:
+            after = set()
+        name = self._giver_name(agent_id)
+        if name:
+            self.__dict__.setdefault("_blessed_by", set()).add(name)
+            if before:                                   # we already had one: did this add to it?
+                self.session.note_blessing_kind(name, "yes" if len(after) > len(before) else "no")
+        return after
+
     def _try_blessing(self, eng, now):
         """Take a blessing or bounty from a giver once it is safe to. A giver with enemies round
         it is remembered and its enemies are fought first (the engine is told to favour them);
@@ -45,12 +75,24 @@ class BlessingMixin:
             self._givers_eng, self._givers, self._bless_clearing, self._bless_tries = eng, {}, set(), {}
         givers = self._givers                                 # agent id -> (x, y, kind)
         try:
-            if game.has_blessing():
-                givers.clear()
-                eng.focus = None
-                return False
             for agent_id, x, y, kind in game.blessing_npcs():
                 givers[agent_id] = (x, y, kind)
+            active = game.blessing_effects()
+            if active:
+                # Already blessed. Another kind of giver may add a second blessing rather than
+                # replace this one (Nightfall's Sunspear and Lightbringer bounties). Whether it
+                # does is learnt per giver name and kept (blessings.json); unknown names are
+                # tried once, names known to replace or to add nothing are walked past.
+                stack = self.session.load_blessing_kinds()
+                mine = set(self.__dict__.get("_blessed_by", ()))
+                keep = {a: g for a, g in givers.items()
+                        if self._giver_name(a) not in mine and stack.get(self._giver_name(a)) != "no"}
+                if not keep:
+                    eng.focus = None
+                    for a, (x, y, _k) in givers.items():
+                        self._skip_once(a, "already blessed (%s)" % ",".join(str(i) for i in sorted(active)), x, y, eng)
+                    return False
+                givers = keep
         except Exception as e:
             if not getattr(self, "_bless_err", False):
                 self._bless_err = True
@@ -62,15 +104,10 @@ class BlessingMixin:
         foes = [e.xy for e in eng.mem.enemies.values() if e.alive and not e.lost]
         clearing = self.__dict__.setdefault("_bless_clearing", set())
         focus = None
-        noted = self.__dict__.setdefault("_bless_skip_noted", set())
-
         def skip(agent_id, why, x, y):
             # say once per giver and reason why it was passed over, so a skipped blessing can
             # always be traced in the log
-            if (agent_id, why) not in noted:
-                noted.add((agent_id, why))
-                self.session.log.event("blessing", stage="skipped", npc=agent_id, why=why, pos=[round(x), round(y)],
-                                       dist=round(math.hypot(x - px, y - py)))
+            self._skip_once(agent_id, why, x, y, eng)
 
         for agent_id, (x, y, kind) in sorted(givers.items(), key=lambda g: (g[1][0] - px) ** 2 + (g[1][1] - py) ** 2):
             # Givers often stand right by an entrance, inside the keep-clear ring round it
@@ -107,6 +144,10 @@ class BlessingMixin:
             self._drop_child()
             self._child = BT.TakeBlessing(pos=(x, y), faction=kind if kind in ("kurzick", "luxon") else None,
                                           blessing_dialog_id=game.BLESSING_DIALOG[kind], multi_account=False, log=True)
+            try:
+                self._bless_before = game.blessing_effects()
+            except Exception:
+                self._bless_before = set()
             self._key, self._target, self._started = ("bless", agent_id), (x, y), now
             self._progress_at, self._progress_xy, self._progress_kills = now, None, -1
             self.session.log.event("blessing", stage="start", npc=agent_id, npc_kind=kind, pos=[round(x), round(y)],

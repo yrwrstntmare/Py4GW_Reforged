@@ -223,6 +223,14 @@ def skill_text(skill_id):
     return _SKILL_TEXT.get(int(skill_id or 0), "")
 
 
+def skill_name(skill_id):
+    try:
+        from Py4GWCoreLib.Skill import Skill
+        return str(Skill.GetName(int(skill_id))).replace("_", " ")
+    except Exception:
+        return str(skill_id)
+
+
 def enemy_casting(agent_id):
     try:
         return int(Agent.GetCastingSkillID(agent_id) or 0)
@@ -318,6 +326,13 @@ def call_target(agent_id):
         Player.CallTarget(agent_id)
         return True
     return False
+
+
+def blessing_effects():
+    """The blessing/bounty effects on the leader right now (skill ids)."""
+    from Py4GWCoreLib.Effect import Effects
+    me = Player.GetAgentID()
+    return {i for i in BLESSING_EFFECTS if Effects.EffectExists(me, i)}
 
 
 def has_blessing():

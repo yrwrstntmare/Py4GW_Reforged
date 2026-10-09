@@ -64,12 +64,19 @@ def _load_roles():
 ROLES = _load_roles()
 
 
+def raises_dead(description):
+    """A resurrection: kill whoever casts it before anything else (Restore Life says "returned
+    to life", not "resurrect")."""
+    d = (description or "").lower()
+    return "resurrect" in d or "returned to life" in d or "return to life" in d
+
+
 def heals_allies(description):
     """A skill that restores or protects someone else on its side (not a self-heal), judged
     from its full description text."""
     import re
     d = (description or "").lower()
-    if "resurrect" in d:
+    if raises_dead(d):
         return True
     helps = re.search(r"\bheals?\b|\bhealed\b|health regeneration|damage (is )?reduc|negates?|prevents?", d)
     others = re.search(r"\ball(y|ies)\b|party", d)
@@ -85,10 +92,12 @@ def supports_allies(description):
     d = (description or "").lower()
     if heals_allies(d):
         return True
-    if re.search(r"\bsteals? (up to )?(\[|\d)", d) or not re.search(r"\b(target (other )?ally|other ally|party members?|all(y|ies))\b", d):
+    if re.search(r"\bsteals? (up to )?(\[|\d)", d) or not re.search(
+            r"\b(target (other )?ally|other ally|party members?|all(y|ies)|adjacent creatures)\b", d):
         return False
     return bool(re.search(r"gains? .{0,80}health|\bblock\b|remove .{0,40}(condition|hex)|conditions? .{0,20}transferred|"
-                          r"damage .{0,20}reduc|cannot be (killed|reduced)", d))
+                          r"damage .{0,20}reduc|cannot be (killed|reduced)|cannot lose more than|"
+                          r"heal yourself and all", d))
 
 
 def learn_role(model, role):
@@ -125,6 +134,10 @@ def threat(e, player_xy):
     the elite), then casters, then the rest; within a class, the one nearest to dying and
     nearest to us, so kills come quickly and the pressure drops."""
     s = 0.0
+    if e.get("casting") == "raise":
+        s += 120.0                   # raising one of theirs right now: stop it before anything else
+    elif e.get("casting") == "support":
+        s += 30.0                    # healing or shielding someone this very moment
     if e.get("prof") in HEALER or e.get("role") == "healer":
         s += 60.0
     elif e.get("prof") in CASTER_PROF or e.get("caster"):

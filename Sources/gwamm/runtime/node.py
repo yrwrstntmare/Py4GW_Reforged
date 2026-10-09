@@ -485,7 +485,9 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             state = self._child.root.tick()
             if state == S.RUNNING and now - self._started < 60.0:
                 return S.RUNNING
-            s.log.event("blessing", stage="done", npc=self._key[1], got=self._has_blessing(),
+            after = self._blessing_done(self._key[1], getattr(self, "_bless_before", set()))
+            s.log.event("blessing", stage="done", npc=self._key[1], name=self._giver_name(self._key[1]),
+                        got=bool(after), effects=sorted(after), before=sorted(getattr(self, "_bless_before", set())),
                         seconds=round(now - self._started, 1), finished=(state != S.RUNNING))
             self._drop_child()
             return S.RUNNING

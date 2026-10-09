@@ -139,6 +139,31 @@ class Session:
         except Exception:
             pass
 
+    def _blessing_kinds_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "blessings.json")
+
+    def load_blessing_kinds(self):
+        """{giver name: "yes" | "no"}: does that giver's blessing add to one we already have?"""
+        if getattr(self, "_bless_kinds", None) is None:
+            try:
+                with open(self._blessing_kinds_path()) as f:
+                    self._bless_kinds = dict(json.load(f))
+            except Exception:
+                self._bless_kinds = {}
+        return self._bless_kinds
+
+    def note_blessing_kind(self, name, stacks):
+        kinds = self.load_blessing_kinds()
+        if kinds.get(name) == stacks:
+            return
+        kinds[name] = stacks
+        try:
+            with open(self._blessing_kinds_path(), "w") as f:
+                json.dump(kinds, f)
+        except Exception:
+            pass
+        self.log.event("blessing", stage="learnt", name=name, stacks=stacks)
+
     def _not_doors_path(self):
         return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "not_doors.json")
 

@@ -273,6 +273,10 @@ class FightMixin:
         if cfg.call_targets:
             area = elites.AREAS.get(s.map_id) or []
             infos = []
+            # Healers stand back and are rarely hurt, so "a way off, not moving, full health"
+            # (the test below for "not in the fight yet") used to leave every backline monk off
+            # the list. One that stands with enemies already fighting us is in the fight.
+            engaged = [e.xy for e in near if math.hypot(e.xy[0] - px, e.xy[1] - py) <= 900.0]
             for e in near:
                 d = game.enemy_details(e.id)
                 if d is None:
@@ -284,20 +288,26 @@ class FightMixin:
                 gap = math.hypot(e.xy[0] - px, e.xy[1] - py)
                 coming = (math.hypot(e.vel[0], e.vel[1]) >= 40.0
                           and e.vel[0] * (px - e.xy[0]) + e.vel[1] * (py - e.xy[1]) > 0.0)
-                if gap > 900.0 and not coming and d[0] >= 0.999:
+                model = game.enemy_model(e.id)
+                cast = game.enemy_casting(e.id)
+                text = game.skill_text(cast) if cast else ""
+                casting = ("raise" if tactics.raises_dead(text) else
+                           "support" if text and tactics.supports_allies(text) else "")
+                backline = (tactics.role_of(model) == "healer" or casting) and any(
+                    math.hypot(e.xy[0] - x, e.xy[1] - y) <= 1200.0 for x, y in engaged)
+                if gap > 900.0 and not coming and d[0] >= 0.999 and not backline:
                     continue
                 prof = 0
                 if e.boss and area:
                     name = game.agent_name(e.id).lower()
                     prof = next((b.profession for b in area if name and (b.boss.lower() in name or name in b.boss.lower())), 0)
-                model = game.enemy_model(e.id)
-                cast = game.enemy_casting(e.id)
-                if cast and tactics.role_of(model) != "healer" and tactics.supports_allies(game.skill_text(cast)):
+                if casting and tactics.role_of(model) != "healer":
                     # seen keeping its side alive: a healer, now and for the rest of the run
                     if tactics.learn_role(model, "healer"):
                         s.note_learned_role(model, "healer", cast)
                 infos.append({"id": e.id, "xy": e.xy, "hp": d[0], "level": d[1], "caster": d[2], "boss": e.boss, "prof": prof,
-                              "role": tactics.role_of(model)})
+                              "role": tactics.role_of(model), "casting": casting,
+                              "skill": game.skill_name(cast) if casting else ""})
             target = tactics.pick_target(infos, (px, py), st["called"])
             if target and (target != st["called"] or now - st["called_at"] > 8.0):
                 try:
@@ -305,7 +315,8 @@ class FightMixin:
                         if target != st["called"]:
                             t = next(i for i in infos if i["id"] == target)
                             s.log.event("call_target", agent=target, boss=t["boss"], caster=t["caster"], level=t["level"], role=t["role"],
-                                        hp=round(t["hp"], 2), enemies=len(near))
+                                        hp=round(t["hp"], 2), enemies=len(near), casting=t["casting"], skill=t["skill"],
+                                        healers_in_fight=sum(1 for i in infos if i["role"] == "healer" or i["casting"]))
                         st["called"], st["called_at"] = target, now
                 except Exception as e:
                     if not st.get("err"):
