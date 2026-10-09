@@ -32,7 +32,7 @@ from .node_fight import FightMixin
 from .node_pull import PullMixin
 
 _RETIRED = []                 # (time, behaviour tree) kept alive for a while after being abandoned
-RETIRE_SECONDS = 20.0
+RETIRE_SECONDS = 90.0         # long past any route request (a wipe's loading screen included)
 
 
 def retire(tree):

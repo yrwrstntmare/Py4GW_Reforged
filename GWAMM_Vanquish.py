@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.50.19"
+SCRIPT_VERSION = "0.50.20"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
@@ -148,6 +148,24 @@ def get_campaign():
     return campaign
 
 
+_slot_trees = {}
+
+
+def _keep_old(slot, tree):
+    """Reforged rebuilds a step after a party wipe. The step's old tree may still have a walk whose
+    route Py4GW is working out on the game's thread; freeing it then crashes the game when the
+    answer is written (Py4GW.dll+0x17d2a2, after wipes, three times). Park the old tree instead."""
+    old = _slot_trees.get(slot)
+    if old is not None and old is not tree:
+        try:
+            from Sources.gwamm.runtime.node import retire
+            retire(old)
+        except Exception:
+            pass
+    _slot_trees[slot] = tree
+    return tree
+
+
 def _steps():
     def prepare():
         return BehaviorTree(BehaviorTree.SequenceNode(
@@ -166,10 +184,10 @@ def _steps():
             try:
                 mid = game.map_id()
                 if game.is_explorable() and session.cfg.do_vanquish and mid not in game.vanquished_ids():
-                    return BehaviorTree(MapRunNode(session, get_campaign(), mid, stay=True))
+                    return _keep_old("single", BehaviorTree(MapRunNode(session, get_campaign(), mid, stay=True)))
             except Exception:
                 pass
-            return BehaviorTree(AdaptiveNode(session))
+            return _keep_old("single", BehaviorTree(AdaptiveNode(session)))
         steps.append(("Adaptive vanquish", single))
     # One slot per queued area. Which area a slot runs is decided when the slot starts, so an
     # outpost unlocked by an earlier area can change what comes next.
@@ -180,7 +198,7 @@ def _steps():
             return BehaviorTree(BehaviorTree.ActionNode(name="Nothing left", action_fn=lambda: BehaviorTree.NodeState.SUCCESS))
         session.log.event("campaign", phase="next_area", slot=slot, map_id=mid, name=game.map_name(mid),
                           hops=c.hops(mid), left=[m for m in c.queue if m != mid])
-        return BehaviorTree(MapRunNode(session, c, mid))
+        return _keep_old(slot, BehaviorTree(MapRunNode(session, c, mid)))
     for slot in range(len(queue)):
         steps.append((f"Area {slot + 1} of {len(queue)}", lambda slot=slot: area(slot)))
     if get_campaign().exit_when_done:
