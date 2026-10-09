@@ -227,6 +227,7 @@ class Session:
                     "version": __version__,
                     "route": [[round(x), round(y)] for x, y in mem.route],
                     "strict": bool(mem.strict), "search_radius": mem.search_radius, "escalation": mem.escalation,
+                    "regions": len(eng.rm.regions),
                     "deaths": eng.deaths, "fresh_starts": eng.fresh_starts,
                     "wipes": [[round(w[0]), round(w[1]), int(w[2])] for w in eng.wipes],
                     "declined": sorted(list(c) for c in (eng.carto.declined if eng.carto else ())),
@@ -261,12 +262,19 @@ class Session:
                                wall_gap=round(wall_gap), clock_gap=round(clock_gap))
                 return
             eng, mem = self.engine, self.engine.mem
-            mem.strict, mem.search_radius, mem.escalation = bool(d.get("strict")), float(d["search_radius"]), int(d.get("escalation", 0))
-            mem._set_need()
+            # A closer search ("searching closer") only makes sense over the same map. If this
+            # version sees the map differently (more of it reachable), start the search plain:
+            # Bahdok Caverns resumed a 593-radius search over 60 regions never visited, and the
+            # party zig-zagged inside each one.
+            if d.get("regions") == len(eng.rm.regions):
+                mem.strict, mem.search_radius, mem.escalation = bool(d.get("strict")), float(d["search_radius"]), int(d.get("escalation", 0))
+                mem._set_need()
             for x, y in d["route"]:
                 mem.visit((float(x), float(y)))
             mem._last_xy = None                       # do not count the jump to where we stand now as walking
-            eng.deaths, eng.fresh_starts = int(d.get("deaths", 0)), int(d.get("fresh_starts", 0))
+            eng.deaths = int(d.get("deaths", 0))
+            if d.get("regions") == len(eng.rm.regions):
+                eng.fresh_starts = int(d.get("fresh_starts", 0))
             eng.wipes = [[float(w[0]), float(w[1]), int(w[2])] for w in d.get("wipes", [])]
             if eng.carto is not None:
                 eng.carto.declined |= {tuple(c) for c in d.get("declined", [])}

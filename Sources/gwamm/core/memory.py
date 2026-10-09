@@ -117,9 +117,15 @@ class InstanceMemory:
         todo = [i for i in region.nodes if not self.node_searched[i]]
         if not todo:
             return region.pos
-        cx = sum(self.nav.nodes[i][0] for i in todo) / len(todo)
-        cy = sum(self.nav.nodes[i][1] for i in todo) / len(todo)
-        return self.nav.nodes[min(todo, key=lambda i: (self.nav.nodes[i][0] - cx) ** 2 + (self.nav.nodes[i][1] - cy) ** 2)]
+        # The nearest unchecked spot to where we are, so the party sweeps the region in one
+        # pass. (It used to aim at the middle of what was left, which moved every time a bit was
+        # checked: with a tight search radius the party zig-zagged across one region for minutes.)
+        if self.route:
+            px, py = self.route[-1]
+        else:
+            px = sum(self.nav.nodes[i][0] for i in todo) / len(todo)
+            py = sum(self.nav.nodes[i][1] for i in todo) / len(todo)
+        return self.nav.nodes[min(todo, key=lambda i: (self.nav.nodes[i][0] - px) ** 2 + (self.nav.nodes[i][1] - py) ** 2)]
 
     def counts(self):
         out = {UNKNOWN: 0, SEEN: 0, SEARCHED: 0}

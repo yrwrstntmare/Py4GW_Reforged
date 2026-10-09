@@ -135,8 +135,10 @@ class Engine:
         self.goto = goto              # crossing an area: just get to this point, fighting what is in the way
         self.nav = NavGraph(traps, links=links)
         self.exits = self._relevant_exits(exits, start_xy)
+        self.walked_through = self._drop_walked_exits(list(guide or hints or ()), start_xy)
         self.nav.forbid(self.exits, self.cfg.exit_avoid_radius)
         self.exit_radius = self.cfg.exit_avoid_radius
+        self.narrowed_exits = self._unfence_cuts(start_xy)
         self.doors = []               # exits known for certain to be doors (game portals, places we arrived at)
         self.edge_pass = False
         self.rm = RegionMap(self.nav, start_xy, self.cfg.search_radius)
@@ -176,6 +178,71 @@ class Engine:
                                      # visit or an earlier one. Taken in small bites, pulls kept small.
         self._zone_pen = (None, None)
         self.deaths = 0
+
+    def _drop_walked_exits(self, route, start_xy, near=300.0, longest=4500.0):
+        """A point the area's known route walks straight past is not a door (Bahdok Caverns'
+        spawn list holds two points mid-corridor that the route passes within 66 and 188):
+        no keep-clear ring round it. Returns the points dropped."""
+        if len(route) < 2 or not self.exits:
+            return []
+
+        def seg_gap(p, a, b):
+            """Closest approach of the walk a->b to p, counted only when it is passing by
+            (a turn of the route right beside a point may well be stopping short of a door)."""
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            L2 = dx * dx + dy * dy or 1.0
+            k = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / L2
+            if not 0.1 < k < 0.9:
+                return math.inf
+            return math.hypot(a[0] + k * dx - p[0], a[1] + k * dy - p[1])
+
+        # not the route's own first and last steps (they begin and end by a real door), and
+        # never the point the party arrived at
+        inner = route[1:-1]
+        legs = [(a, b) for a, b in zip(inner, inner[1:]) if math.hypot(b[0] - a[0], b[1] - a[1]) <= longest]
+        sx, sy = start_xy
+        dropped = [e for e in self.exits if any(seg_gap(e, a, b) <= near for a, b in legs)
+                   and math.hypot(e[0] - sx, e[1] - sy) > 600.0]
+        self.exits = [e for e in self.exits if e not in dropped]
+        return [list(e) for e in dropped]
+
+    def _unfence_cuts(self, start_xy):
+        """A keep-clear ring round a point that might be a door is safe in open ground, but one
+        in a corridor cuts the map in two. Bahdok Caverns: two arrival points mid-corridor left
+        36% of the map reachable instead of 96%, and the party searched the same corner for
+        four hours. Any ring that walls off a real share of the map is narrowed to the doorway
+        itself (the radius used once a vanquish is done). Returns the narrowed points."""
+        nav, start = self.nav, self.nav.nearest_node(*start_xy)
+        if start is None or not self.exits:
+            return []
+        big, small_r = self.cfg.exit_avoid_radius, self.cfg.edge_exit_radius
+
+        def fence(small):
+            nav.no_go, nav.forbidden = [], [False] * len(nav.nodes)
+            for e in self.exits:
+                nav.forbid([e], small_r if e in small else big)
+
+        def count():
+            seen = nav.component(start)
+            return sum(1 for i, s in enumerate(seen) if s and not nav.forbidden[i])
+
+        fence(set(self.exits))
+        full = count()                    # every ring narrowed: what the map really offers
+        fence(set())
+        cur = count()
+        if cur >= 0.95 * full:
+            return []
+        small = set()
+        for e in self.exits:
+            fence(small | {e})
+            c = count()
+            if c >= cur + 0.03 * full:
+                small.add(e)
+                cur = c
+        if cur < 0.9 * full:
+            small = set(self.exits)       # cut by several rings together: narrow them all
+        fence(small)
+        return [list(e) for e in small]
 
     def _relevant_exits(self, exits, start_xy):
         """Keep only exits that touch ground the party can actually walk to, and merge ones that

@@ -16,6 +16,7 @@ from . import game
 
 REPLAN_S = 1.0
 STEP_TIMEOUT_S = 240.0       # one walking step, fights included
+NO_PROGRESS_S = 1800.0      # foes remain and none has died for this long: give the area up
 STUCK_GIVE_UP_S = 600.0     # pinned within 600 units for this long, nothing dying: the area cannot be finished
 STALL_S = 45.0               # no movement and no kill for this long: give the step up
 WALK_STALL_S = 5.0          # the same with no enemy anywhere near: we are caught on something, not fighting
@@ -521,6 +522,19 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             elif gap > 450.0:
                 self._drop_child()
                 return S.RUNNING
+
+        # Watchdog: foes remain but none has died for half an hour. Bahdok Caverns searched the
+        # same corner for nearly four hours (two thirds of the map fenced off by mistake); give
+        # the area up and let the campaign move on instead.
+        if self.transit is None and eng.foes_remaining:
+            seen = self.__dict__.get("_progress_seen")
+            if seen is None or eng.foes_remaining < seen[0]:
+                self._progress_seen = (eng.foes_remaining, now)
+            elif now - seen[1] > NO_PROGRESS_S and not bool(self.blackboard.get("COMBAT_ACTIVE", False)):
+                s.result = ("no progress: %d foes left and none killed for %d minutes (out of reach?)"
+                            % (eng.foes_remaining, NO_PROGRESS_S // 60))
+                s.log.event("finished", result=s.result, status=eng.status())
+                return S.FAILURE
 
         if self._child is None or now - self._last_plan >= REPLAN_S:
             self._last_plan = now
