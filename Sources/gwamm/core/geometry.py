@@ -116,6 +116,21 @@ class NavGraph:
                     return True
         return False
 
+    def stacked(self, x, y, tol=60.0):
+        """Is there walkable ground on more than one level at (x, y)? (A bridge over a path, a
+        ramp over a room.) Getting stuck at such a spot says little about the scenery: the walk
+        was usually aimed at the other level."""
+        planes = set()
+        for ti in self._bands.get(int(y // 512), ()):
+            p, xtl, xtr, yt, xbl, xbr, yb = self.traps[ti]
+            if yb - tol <= y <= yt + tol:
+                f = min(1.0, max(0.0, (y - yb) / ((yt - yb) or 1.0)))
+                if xbl + (xtl - xbl) * f - tol <= x <= xbr + (xtr - xbr) * f + tol:
+                    planes.add(p)
+                    if len(planes) > 1:
+                        return True
+        return False
+
     def nodes_within(self, x, y, radius):
         r2, out = radius * radius, []
         cx0, cx1 = int((x - radius) // _HASH), int((x + radius) // _HASH)
@@ -322,3 +337,19 @@ def loose_links(traps, vert_tol=100.2, horiz_tol=100.6):
                       and max(a[3], a[6]) >= min(b[3], b[6]) and max(b[3], b[6]) >= min(a[3], a[6])):
                     out.add((i, j))
     return sorted(out)
+
+
+def walked_round(point, trail, inner=300.0, outer=900.0):
+    """Has the party stood on every side of `point` (each quarter round it, between `inner` and
+    `outer` away)? A real door sits on the edge of the walkable ground, so one side of it is
+    always out of reach; a point walked round on all four sides is not a door."""
+    px, py = point
+    quarters = set()
+    for x, y in trail:
+        dx, dy = x - px, y - py
+        d = math.hypot(dx, dy)
+        if inner <= d <= outer:
+            quarters.add((dx >= 0, dy >= 0))
+            if len(quarters) == 4:
+                return True
+    return False

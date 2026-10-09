@@ -1,4 +1,5 @@
 """MapRunNode: one queued area from start to finish: travel, set up, walk in, vanquish, leave."""
+import math
 import json
 import os
 import time
@@ -197,13 +198,19 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             ent = entries().get(self.map_id)
         except Exception:
             ent = None
-        if ent and game.map_unlocked(ent["outpost"]):
-            # entered by talking to an NPC in the outpost, not through a gate
-            out.append(("npc", [{"do": "travel", "outpost": ent["outpost"]},
-                                {"do": "npc_entry", "npc": list(ent["npc"]), "dialogs": ent["dialogs"], "expect": self.map_id}]))
+        if ent:
+            talk = {"do": "npc_entry", "npc": list(ent["npc"]), "dialogs": ent["dialogs"], "expect": self.map_id}
+            here = game.map_id() if game.map_ready() else 0
+            if ent.get("via") and here == ent["via"] and game.is_explorable():
+                out.append(("npc", [talk]))          # already standing in the area the NPC is in
+            elif game.map_unlocked(ent["outpost"]):
+                legs = [{"do": "travel", "outpost": ent["outpost"], "hm": True}]
+                if ent.get("via"):               # the NPC is out in a neighbouring area
+                    legs.append({"do": "gate", "path": [list(p) for p in ent["via_path"]], "expect": ent["via"]})
+                out.append(("npc", legs + [talk]))
         e = self.entry
         if e and e["plain"] and game.map_unlocked(e["outpost"]):
-            legs = [{"do": "travel", "outpost": e["outpost"]}]
+            legs = [{"do": "travel", "outpost": e["outpost"], "hm": True}]
             first = e["transit"][0]["map"] if e["transit"] else self.map_id
             legs.append({"do": "gate", "path": e["outpost_path"], "expect": first})
             for i, leg in enumerate(e["transit"]):
@@ -230,6 +237,38 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         self._route_count = len(opts)
         return opts[k][1]
 
+    def _retry_in_hard_mode(self):
+        """Arrived in normal mode and no outpost leads straight in: go round the same way again,
+        hard mode all the way (the only way into an area reached through another one)."""
+        if getattr(self, "_force_hm", False):
+            return False
+        self._force_hm = True
+        legs = self._plan_route() or []
+        if not legs or legs[0]["do"] != "travel":
+            return False
+        self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
+                               note="no outpost leads straight in: going round again in hard mode the whole way")
+        self._legs = legs
+        self._next_leg()
+        return True
+
+    def _log_npcs_near(self, why, radius=2000.0):
+        """Who stands near where a way in failed: a gate that needs a word with someone (the Key
+        of Ahdashim) shows up here by name, so it can be added as an NPC entry."""
+        try:
+            px, py = game.player_xy()
+            near = []
+            for agent_id, model, x, y in game.npcs_in_sight():
+                d = math.hypot(x - px, y - py)
+                if d <= radius:
+                    near.append({"name": game.agent_name(agent_id), "model": model, "pos": [round(x), round(y)],
+                                 "dist": round(d)})
+            near.sort(key=lambda n: n["dist"])
+            self.session.log.event("campaign", map_id=self.map_id, phase="npcs_near", why=why, in_map=game.map_id(),
+                                   player=[round(px), round(py)], npcs=near[:12])
+        except Exception as e:
+            self.session.log.event("campaign", map_id=self.map_id, phase="npcs_near", error=repr(e))
+
     def _switch_route(self, why):
         """This way in failed: start over from the next known way, if there is one."""
         k = getattr(self, "_route_skip", 0) + 1
@@ -250,7 +289,11 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         here = game.map_id()
         if leg["do"] == "travel":
             self._home = leg["outpost"]
-            hm = not self._crosses_other_areas(self._legs)
+            # Hard mode unless the trip walks through other areas (normal mode is safer there) -
+            # but a recorded entry (an NPC, or the vanquish bots' own walk) is the way in: going
+            # through it in normal mode only means arriving in normal mode with no way to switch.
+            hm = (leg.get("hm") or getattr(self, "_force_hm", False)
+                  or not self._crosses_other_areas(self._legs))
             if not hm:
                 self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
                                        note="walking through other areas to get there: normal mode until the last outpost")
@@ -273,7 +316,12 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                     return BehaviorTree.NodeState.FAILURE
                 return BehaviorTree.NodeState.RUNNING
             d = leg["dialogs"]
-            steps = [BT.MoveAndDialog(pos=tuple(leg["npc"]), dialog_id=d[0])]
+            steps = []
+            if game.is_explorable():
+                # the NPC is out in an area: get to it with the engine (pathing, fighting) first
+                steps.append(BehaviorTree(AdaptiveNode(self.session, target_map_id=game.map_id(),
+                                                       transit={"xy": list(leg["npc"])})))
+            steps.append(BT.MoveAndDialog(pos=tuple(leg["npc"]), dialog_id=d[0]))
             for dialog in d[1:]:
                 steps += [BT.Wait(duration_ms=700), BT.SendDialog(dialog_id=dialog)]
             steps.append(BehaviorTree(BehaviorTree.ActionNode(name="Wait for the area", action_fn=arrived)))
@@ -377,6 +425,8 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                     self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
                                            note="arrived in normal mode: opening an outpost to come back in hard mode")
                     return
+                if self._retry_in_hard_mode():
+                    return
                 self._outcome = "reached the area in normal mode, with no outpost to switch to hard mode from"
                 self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode", note=self._outcome)
                 self._finish()
@@ -400,8 +450,9 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         self._leg = leg
         self._leg_tries, self._leg_from = 0, game.map_id()
         tree = self._leg_tree(leg)
-        if (leg["do"] != "travel" and game.map_ready() and not game.is_explorable() and not game.hard_mode()
-                and not self._crosses_other_areas([leg] + self._legs)):
+        want_hm = (getattr(self, "_force_hm", False) or getattr(self, "_route_label", "") in ("npc", "recorded")
+                   or not self._crosses_other_areas([leg] + self._legs))
+        if leg["do"] != "travel" and game.map_ready() and not game.is_explorable() and not game.hard_mode() and want_hm:
             # an outpost on the way, and from here the walk leads straight into the area: back to hard mode
             self.session.log.event("campaign", map_id=self.map_id, phase="hard_mode", in_map=game.map_id())
             tree = BT.Sequence(name="HardModeThenWalk", children=[BT.SetHardMode(hard_mode=True),
@@ -506,6 +557,8 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
 
         if self._phase == "walking":
             expect, here = self._leg.get("expect"), game.map_id()
+            if state != S.SUCCESS and game.map_ready():
+                self._log_npcs_near("walk failed")
             if (state != S.SUCCESS and game.map_ready() and getattr(self, "_leg_tries", 0) >= 1
                     and not game.party_defeated() and not game.is_explorable()
                     and self._switch_route(f"stuck in {game.map_name(here)}")):
@@ -554,6 +607,8 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                 if state == S.SUCCESS and legs and not self._crosses_other_areas(legs[1:]):
                     self._legs = legs
                     self._next_leg()                 # travel (hard mode) and walk straight in
+                    return S.RUNNING
+                if self._retry_in_hard_mode():
                     return S.RUNNING
                 self._outcome = "reached the area in normal mode, with no outpost to switch to hard mode from"
                 self._conclude()

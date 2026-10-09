@@ -62,14 +62,34 @@ class BlessingMixin:
         foes = [e.xy for e in eng.mem.enemies.values() if e.alive and not e.lost]
         clearing = self.__dict__.setdefault("_bless_clearing", set())
         focus = None
+        noted = self.__dict__.setdefault("_bless_skip_noted", set())
+
+        def skip(agent_id, why, x, y):
+            # say once per giver and reason why it was passed over, so a skipped blessing can
+            # always be traced in the log
+            if (agent_id, why) not in noted:
+                noted.add((agent_id, why))
+                self.session.log.event("blessing", stage="skipped", npc=agent_id, why=why, pos=[round(x), round(y)],
+                                       dist=round(math.hypot(x - px, y - py)))
+
         for agent_id, (x, y, kind) in sorted(givers.items(), key=lambda g: (g[1][0] - px) ** 2 + (g[1][1] - py) ** 2):
-            if self._bless_tries.get(agent_id, 0) >= 2 or eng.nav.in_no_go(x, y):
+            # Givers often stand right by an entrance, inside the keep-clear ring round it
+            # (Hidden City of Ahdashim: the Whispers Informant beside the arrival point was
+            # skipped). Walking to someone that close to a door is fine; only one standing
+            # practically on the door itself is passed over.
+            if self._bless_tries.get(agent_id, 0) >= 2:
+                skip(agent_id, "tried twice", x, y)
+                continue
+            if any(math.hypot(x - ex, y - ey) < 300.0 for ex, ey in eng.exits):
+                skip(agent_id, "standing on an exit", x, y)
                 continue
             known = agent_id in clearing                 # seen before and waited on: worth a longer walk back
             if math.hypot(x - px, y - py) > (8000.0 if known else eng.cfg.blessing_reach):
+                skip(agent_id, "too far", x, y)
                 continue
             walk = eng._walk_distance((x, y))
             if walk is None or walk > (8000.0 if known else 1.5 * eng.cfg.blessing_reach):
+                skip(agent_id, "too long a walk", x, y)
                 continue
             if any(math.hypot(fx - x, fy - y) < 1600.0 for fx, fy in foes):
                 if focus is None:

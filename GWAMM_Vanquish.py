@@ -18,13 +18,14 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.50.10"
+SCRIPT_VERSION = "0.50.16"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
 # updated gwamm folder is ignored until Guild Wars is restarted. Drop the old copy first.
 import importlib
 import sys
+import time
 for _name in [n for n in sys.modules if n == "Sources.gwamm" or n.startswith("Sources.gwamm.")]:
     del sys.modules[_name]
 importlib.invalidate_caches()
@@ -937,6 +938,31 @@ def _canvas(eng):
 
 # ---- entry point ----------------------------------------------------------
 
+_slow = {"at": 0.0}
+
+
+def _note_slow_frame(_unused, lv):
+    """Log any frame that held the game up for more than 0.4 s, with where the time went, so a
+    freeze can be traced to its cause (at most one entry every 10 s)."""
+    try:
+        t0, t1, t2, t3 = lv.get("_t0"), lv.get("_t1"), lv.get("_t2"), lv.get("_t3")
+        if t0 is None or t3 is None:
+            return
+        end = time.perf_counter()
+        total = end - t0
+        if total < 0.4 or end - _slow["at"] < 10.0 or session is None:
+            return
+        _slow["at"] = end
+        eng = session.engine
+        session.log.event("slow_frame", seconds=round(total, 2), tree=round((t1 or t0) - t0, 2),
+                          observe=round(t2 - (t1 or t0), 2), window=round(t3 - t2, 2), map=round(end - t3, 2),
+                          phase=getattr(getattr(session, "campaign", None), "phase", None),
+                          mode=None if eng is None else eng.mode,
+                          objective=None if eng is None or eng.objective is None else eng.objective.label())
+    except Exception:
+        pass
+
+
 def main():
     global initialized, ini_key
     if INSTALL_PROBLEM:
@@ -957,7 +983,9 @@ def main():
         world_dump.tick()
         geo_dump.tick()
         try:
+            _t0 = time.perf_counter()
             tree.tick()
+            _t1 = time.perf_counter()
             if not tree.IsStarted():
                 # Observe only: keep the model current and show the plan, without moving.
                 if session.ensure_engine() and game.is_explorable():
@@ -966,6 +994,7 @@ def main():
                     session.log.observe(session.engine, {"running": False})
         except Exception:
             report("tick")
+        _t2 = time.perf_counter()
         try:
             draw_main()
         except Exception:
@@ -975,10 +1004,12 @@ def main():
                 tree.UI.draw_window()
             except Exception:
                 report("reforged window")
+        _t3 = time.perf_counter()
         try:
             draw_map()
         except Exception:
             report("map window")
+        _note_slow_frame(_t0 if "_t0" in dir() else None, locals())
     except Exception as e:
         PySystem.Console.Log(MODULE_NAME, f"main() error: {e!r}", PySystem.Console.MessageType.Error)
 

@@ -201,7 +201,13 @@ class Engine:
         inner = route[1:-1]
         legs = [(a, b) for a, b in zip(inner, inner[1:]) if math.hypot(b[0] - a[0], b[1] - a[1]) <= longest]
         sx, sy = start_xy
-        dropped = [e for e in self.exits if any(seg_gap(e, a, b) <= near for a, b in legs)
+        # Also any point the route stands right on: its bots walk to each point to within a step,
+        # so a working door there would have taken them out of the area (Bahdok Caverns: the
+        # route turns 115 from a "portal" at the top of the ramp to the bridge; its ring cut the
+        # bridge off and the party looped below it).
+        dropped = [e for e in self.exits
+                   if (any(seg_gap(e, a, b) <= near for a, b in legs)
+                       or any(math.hypot(e[0] - x, e[1] - y) <= 250.0 for x, y in inner))
                    and math.hypot(e[0] - sx, e[1] - sy) > 600.0]
         self.exits = [e for e in self.exits if e not in dropped]
         return [list(e) for e in dropped]
@@ -518,7 +524,8 @@ class Engine:
         pen = dict(zones)
         for x, y in self.snags:              # scenery we were caught on before (this run or an earlier one)
             for i in self.nav.nodes_within(x, y, 300.0):
-                pen[i] = 25.0
+                pen[i] = max(pen.get(i, 1.0), 4.0)    # careful here, not "never here" (was 25: Bahdok's
+                                                       # one bridge became a 90,000-unit detour)
         for x, y in walls:                   # ground the party could not walk through (a shut gate)
             for i in self.nav.nodes_within(x, y, 400.0):
                 pen[i] = 1000.0
@@ -1198,6 +1205,19 @@ class Engine:
                 else:
                     pen = self.route_pen
             route, left = self.nav.path(here, goal, pen), self.cfg.step_length
+            if pen and route:
+                # Marks along the way are there to steer, not to send the party round the whole
+                # map: if the marked route is far longer than the plain one, take the plain one.
+                nodes = self.nav.nodes
+                length = lambda r: sum(math.hypot(nodes[a][0] - nodes[b][0], nodes[a][1] - nodes[b][1])
+                                       for a, b in zip(r, r[1:]))
+                gx, gy = nodes[goal]
+                hx, hy = nodes[here]
+                if length(route) > 2.0 * math.hypot(gx - hx, gy - hy) + 3000.0:
+                    plain = self.nav.path(here, goal)
+                    if plain and length(route) > 2.0 * length(plain) + 3000.0:
+                        route = plain
+                        self.plain_routes = getattr(self, "plain_routes", 0) + 1
         if self._hazard_near(left + 600.0):
             left = min(left, 450.0)      # short steps near a trap, so the walk keeps to the path round it
         elif self._snag_near(1500.0):

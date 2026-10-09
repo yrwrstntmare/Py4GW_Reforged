@@ -19,6 +19,20 @@ PERCEIVE_S = 0.25
 CARTO_S = 3.0
 
 
+
+def _thin(route, gap=500.0):
+    """The walked trail with points at least `gap` apart (and the last one). Replaying 15,000
+    trail points on a resume froze the game for seconds; a point every 500 units marks the same
+    ground as searched."""
+    out, last = [], None
+    for x, y in route:
+        if last is None or abs(x - last[0]) + abs(y - last[1]) >= gap:
+            out.append([round(x), round(y)])
+            last = (x, y)
+    if route and (not out or out[-1] != [round(route[-1][0]), round(route[-1][1])]):
+        out.append([round(route[-1][0]), round(route[-1][1])])
+    return out
+
 class Session:
     def __init__(self):
         self.cfg = Config()
@@ -125,6 +139,32 @@ class Session:
         except Exception:
             pass
 
+    def _not_doors_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "not_doors.json")
+
+    def load_not_doors(self):
+        """Points listed as exits that the party has since walked all round without leaving the
+        area: not doors, so no keep-clear ring. Per map, kept between runs."""
+        try:
+            with open(self._not_doors_path()) as f:
+                return {k: [tuple(p) for p in v] for k, v in json.load(f).items()}
+        except Exception:
+            return {}
+
+    def note_not_door(self, xy):
+        try:
+            data = self.load_not_doors()
+            pts = data.setdefault(str(self.map_id), [])
+            if any(math.hypot(xy[0] - x, xy[1] - y) < 250.0 for x, y in pts):
+                return False
+            pts.append((round(xy[0]), round(xy[1])))
+            with open(self._not_doors_path(), "w") as f:
+                json.dump({k: [list(p) for p in v] for k, v in data.items()}, f)
+            self.log.event("not_a_door", at=[round(xy[0]), round(xy[1])], known=len(pts))
+            return True
+        except Exception:
+            return False
+
     def _snag_path(self):
         return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "snags.json")
 
@@ -225,7 +265,7 @@ class Session:
             mem = eng.mem
             data = {"map_id": self.map_id, "wall": time.time(), "uptime_ms": game.instance_uptime_ms(),
                     "version": __version__,
-                    "route": [[round(x), round(y)] for x, y in mem.route],
+                    "route": _thin(mem.route),
                     "strict": bool(mem.strict), "search_radius": mem.search_radius, "escalation": mem.escalation,
                     "regions": len(eng.rm.regions),
                     "deaths": eng.deaths, "fresh_starts": eng.fresh_starts,
@@ -269,7 +309,7 @@ class Session:
             if d.get("regions") == len(eng.rm.regions):
                 mem.strict, mem.search_radius, mem.escalation = bool(d.get("strict")), float(d["search_radius"]), int(d.get("escalation", 0))
                 mem._set_need()
-            for x, y in d["route"]:
+            for x, y in _thin(d["route"]):
                 mem.visit((float(x), float(y)))
             mem._last_xy = None                       # do not count the jump to where we stand now as walking
             eng.deaths = int(d.get("deaths", 0))
@@ -328,11 +368,16 @@ class Session:
             if not traps:
                 self.error = "no pathing geometry for this map"
                 return False
+            _build_t0 = time.perf_counter()
             goto = tuple(self.transit["xy"]) if self.transit else None
             projection = game.read_projection() if (self.cfg.do_cartography and goto is None) else None
             found = self._learned_exits(mid) + game.read_exits()      # remembered arrivals first
             if self.world is not None:
                 found += self.world.exits_of(mid)                     # every door the world map knows
+            not_doors = self.load_not_doors().get(str(mid), [])
+            self.exit_candidates = list(found)
+            if not_doors:
+                found = [e for e in found if not any(math.hypot(e[0] - x, e[1] - y) < 250.0 for x, y in not_doors)]
             if goto is not None:
                 # the door we are heading for must not be fenced off
                 found = [e for e in found if (e[0] - goto[0]) ** 2 + (e[1] - goto[1]) ** 2 > 3000.0 ** 2]
@@ -371,7 +416,7 @@ class Session:
             elif hints:
                 self.route_note += f"; it covers {len(self.engine.hint_regions)} of {len(self.engine.rm.regions)} regions"
             share = sum(self.engine.rm.reachable) / max(1, len(self.engine.nav.nodes))
-            if share < 0.9:
+            if share < 0.75:            # (a second full build is a second or two of frozen game: only when it may matter)
                 # Much of the map looks cut off from where we stand. Join every pair of levels
                 # that touch and keep that if it opens the map up.
                 from ..core.geometry import loose_links
@@ -404,14 +449,16 @@ class Session:
                            carto=None if eng.carto is None else {"anchor": [eng.carto.proj.ax, eng.carto.proj.ay],
                                                                  "stand_cells": len(eng.carto.stand),
                                                                  "coverable": len(eng.carto.coverable)},
-                           hazards=len(eng.hazards), nav_note=self.nav_note, route_note=self.route_note, exits_found=self.exits_found, exit_note=game.exit_note, learned_note=self.learned_note,
+                           hazards=len(eng.hazards), build_seconds=round(time.perf_counter() - _build_t0, 2), nav_note=self.nav_note, route_note=self.route_note, exits_found=self.exits_found, exit_note=game.exit_note, learned_note=self.learned_note,
                            foes=game.foes_remaining(), killed=game.foes_killed(),
                            professions=list(game.player_professions()), signets=game.capture_signets(),
                            config={k: getattr(self.cfg, k) for k in dir(self.cfg) if not k.startswith("_")},
                            elites=[f"{e.name} ({e.boss})" for e in self.targets])
             self.resumed = ""
             if goto is None:
+                _r0 = time.perf_counter()
                 self._try_resume(mid)
+                self.log.event("resume_time", seconds=round(time.perf_counter() - _r0, 2))
                 self._last_resume_save = time.time()
         except Exception as e:
             self.error = f"could not build the map model: {e!r}"

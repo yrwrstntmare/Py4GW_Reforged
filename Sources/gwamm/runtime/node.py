@@ -186,6 +186,47 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             retire(self._child)
         self._child, self._key, self._target = None, None, None
 
+    def _loop_check(self, key, x, y):
+        """Steps that keep going round the same few points: the map has two levels stacked here
+        and our path hops between them on paper while the party stays put (Bahdok Caverns, one
+        foe left: three points, every second, for minutes). First let the game's own pathing
+        walk at the target; if it loops again on the same objective, give that objective up."""
+        now, eng = time.time(), self.session.engine
+        hist = self.__dict__.setdefault("_step_hist", [])
+        try:
+            kills = game.foes_killed()
+        except Exception:
+            kills = 0
+        if bool(self.blackboard.get("COMBAT_ACTIVE", False)):
+            hist.clear()                     # stepping about in a fight is not a loop
+            return
+        hist.append((now, round(x / 150.0), round(y / 150.0), eng.player_xy, kills))
+        while hist and now - hist[0][0] > 60.0:
+            hist.pop(0)
+        if len(hist) < 12 or getattr(self, "_direct", None) is not None:
+            return
+        spots = {(h[1], h[2]) for h in hist}
+        px = sum(h[3][0] for h in hist) / len(hist)
+        py = sum(h[3][1] for h in hist) / len(hist)
+        if (len(spots) > 4 or hist[0][4] != hist[-1][4]
+                or any(math.hypot(h[3][0] - px, h[3][1] - py) > 900.0 for h in hist)):
+            return
+        hist.clear()
+        obj = eng.objective
+        loops = self.__dict__.setdefault("_loops", {})
+        loops[key] = loops.get(key, 0) + 1
+        self.session.log.event("step_loop", key=key, player=[round(px), round(py)], spots=len(spots),
+                               times=loops[key], target=None if obj is None else [round(obj.pos[0]), round(obj.pos[1])])
+        if eng.nav.stacked(px, py) and not any(math.hypot(px - wx, py - wy) < 300.0 for wx, wy in eng.walls):
+            eng.walls.append((px, py))       # a climb the map allows and the game does not: route round it
+            eng.player_node = None
+        if loops[key] == 1 and obj is not None:
+            self._direct = (now + 40.0, (obj.pos[0], obj.pos[1]), key)
+        else:
+            eng.mem.blocked[key] = eng.cfg.max_failures
+            eng.objective = None
+            self.session.log.event("step_loop", key=key, gave_up=True)
+
     def get_children(self):
         return [self._child.root] if self._child is not None else []
 
@@ -196,6 +237,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         self._child = BT.MoveAndKill(pos=(x, y), clear_area_radius=radius, move_tolerance=40.0 if exact else 150.0)
         self._key, self._target, self._started = key, (x, y), time.time()
         self.session.log.event("step_start", key=key, target=[round(x), round(y)], clear_radius=round(radius))
+        self._loop_check(key, x, y)
         # The stall clock restarts only for a different step. Restarting it for the same step
         # again and again hid a loop where each "walk" finished at once without moving.
         same = getattr(self, "_last_step", None) == (key, round(x), round(y))
@@ -229,6 +271,22 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         short = self._target is not None and math.hypot(px - self._target[0], py - self._target[1]) < 400.0
         if short and walking and self._stuck_n < 2:
             return                           # standing at the step's end, not caught on the way to it
+        if (walking or self._stuck_n >= 2) and self._target is not None and eng.nav.stacked(px, py):
+            # Two levels on top of each other here (a bridge): the walk was aimed at the other
+            # level, nothing is in the way. Marking it walled the bridge off for good in Bahdok
+            # Caverns. Let the game's own pathing take us at the objective instead.
+            obj = eng.objective
+            # The map joins the two levels here but the party cannot climb between them: keep
+            # paths off this spot for the rest of the visit (not saved: it is not scenery), so the
+            # planner finds the real way up (Bahdok: the ramp round the west side).
+            if not any(math.hypot(px - wx, py - wy) < 300.0 for wx, wy in eng.walls):
+                eng.walls.append((px, py))
+                eng.player_node = None
+            if obj is not None and getattr(self, "_direct", None) is None:
+                self._direct = (now + 25.0, (obj.pos[0], obj.pos[1]), self._key)
+            s.log.event("wall", player=[round(px), round(py)], target=list(self._target), stacked=True,
+                        times_here=self._stuck_n, direct_walk=obj is not None)
+            return
         if (walking or self._stuck_n >= 2) and self._target is not None:
             spot = eng.add_wall((px, py), self._target, detour=self._stuck_n >= 2)
             if walking and eng.add_snag(spot):
@@ -493,6 +551,40 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 s.log.event("rested", seconds=round(now - self._rest_since, 1), reason=s.resting, ended=why or "ready",
                             hp=round(cond["hp"], 2), energy=round(cond["energy"], 2), dead=cond["dead_allies"])
                 self._rest_since, s.resting = None, ""
+
+        # Learn which listed exits are not doors: the party has walked all round one.
+        if now - self.__dict__.get("_door_judged", 0.0) >= 30.0:
+            self._door_judged = now
+            try:
+                from ..core.geometry import walked_round
+                start = getattr(self, "_entry_xy", None) or eng.player_xy
+                self.__dict__.setdefault("_entry_xy", start)
+                trail = eng.mem.route[-3000:]
+                for ex in getattr(s, "exit_candidates", ()):
+                    if math.hypot(ex[0] - start[0], ex[1] - start[1]) < 1500.0:
+                        continue                 # where we came in: a real door is right there
+                    if walked_round(ex, trail) and s.note_not_door(ex):
+                        pass
+            except Exception as e:
+                if not self.__dict__.get("_door_judge_err"):
+                    self._door_judge_err = True
+                    s.log.event("not_a_door", error=repr(e))
+
+        # Looping between stacked levels: let the game's own pathing walk at the target for a bit.
+        direct = self.__dict__.get("_direct")
+        if direct is not None:
+            until, (tx, ty), dkey = direct
+            px_, py_ = eng.player_xy
+            fighting = bool(self.blackboard.get("COMBAT_ACTIVE", False))
+            if now < until and not fighting and math.hypot(tx - px_, ty - py_) > 600.0:
+                self._drop_child()
+                if now - self.__dict__.get("_direct_move", 0.0) >= 1.5:
+                    self._direct_move = now
+                    game.move_to(tx, ty)
+                return S.RUNNING
+            self._direct = None
+            s.log.event("step_loop", key=dkey, direct_walk="done", gap=round(math.hypot(tx - px_, ty - py_)),
+                        fighting=fighting)
 
         # Backed off from a big crowd: hold here for it. If it does not come, it was not coming
         # for us; leave that ground for later rather than walking back into it.
