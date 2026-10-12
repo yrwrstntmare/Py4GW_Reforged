@@ -564,6 +564,14 @@ def plan_fight(leader_xy, enemies, trail, max_take=9, aggro=1000.0, margin=150.0
     return best
 
 
+def put_off_helps(total, limit, full_limit):
+    """A crowd bigger than the party should take, that cannot be split: is leaving it for later
+    any better? Only when the party is weakened now (death penalty has cut its limit below what
+    it takes at full strength), since the fights in between work that off. At full strength the
+    same crowd is still there when the party comes back, and the walk is extra."""
+    return total > limit and limit < full_limit
+
+
 def take_limit(max_take, morale):
     """How many enemies at once the party should accept, given its morale (100 = no death
     penalty, 40 = the -60% floor). Death penalty cuts health and energy by that fraction, so

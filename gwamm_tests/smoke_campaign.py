@@ -64,7 +64,7 @@ def signets_on(bar):
 def load_bar(t): W['bar'] = t; calls.append(('load bar', (B.decode_template(t) or (0, 0, []))[2].count(3), 'signets in template'))
 game = mod('Sources.gwamm.runtime.game',
     map_ready=lambda: True, map_id=lambda: W['map'], is_explorable=lambda: W['expl'], vanquished_ids=lambda: W['vq'],
-    map_unlocked=lambda m: m in W['unlocked'], map_name=lambda m: f'map{m}', player_professions=lambda: (6, W['sec']),
+    map_unlocked=lambda m: m in W['unlocked'], map_name=lambda m: f'map{m}', map_sort_key=lambda m: f'map{m}', player_professions=lambda: (6, W['sec']),
     skill_learnt=lambda s: False, bar_template=lambda: W['bar'], load_bar_template=load_bar,
     capture_signets=lambda: signets_on(W['bar']), buy_signet=lambda: (W.update(owned=W['owned'] + 1), calls.append(('buy signet',))),
     map_world_pos=lambda m: (m, m, 1), player_xy=lambda: W['xy'], max_party_size=lambda: 8, map_max_party=lambda m: 8, party_count=lambda: 8, shrink_party=lambda: None,

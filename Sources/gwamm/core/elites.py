@@ -11,6 +11,8 @@ ONLY_HERE, COSTLY, FREE = 3.0, 2.0, 1.0
 
 
 class Elite:
+    when = ""        # set for a boss that is only there at times: "during A Show of Force", "Winds of Change"
+
     def __init__(self, skill_id, name, profession, boss, guaranteed=True, scarcity=COSTLY):
         self.skill_id, self.name, self.profession = skill_id, name, profession
         self.boss, self.guaranteed, self.scarcity = boss, guaranteed, scarcity
@@ -151,15 +153,23 @@ def _load_generated():
         return
     for mid, rows in data.items():
         mid = int(mid)
+        if not rows:
+            if mid not in AREAS:
+                NO_ELITES.add(mid)       # on the lists as an area, with no elite boss in it
+            continue
         by_hand = {(e.skill_id, e.boss.lower()): e for e in AREAS.get(mid, [])}
         merged = []
         for r in rows:
             old = by_hand.pop((r["id"], r["boss"].lower()), None)
             merged.append(Elite(r["id"], r["name"], r["prof"], r["boss"],
                                 guaranteed=(old.guaranteed if old else r.get("guaranteed", True))))
+            merged[-1].when = r.get("when", "")
         AREAS[mid] = merged + list(by_hand.values())
 
 
+# Areas the lists cover and give no elite boss for: nothing to capture, as opposed to an area
+# we simply have no list for (AREAS has no entry and it is not in here).
+NO_ELITES = set()
 _load_generated()
 
 
@@ -168,10 +178,11 @@ def _fill_scarcity():
     count = {}
     for area in AREAS.values():
         for e in area:
-            count[e.skill_id] = count.get(e.skill_id, 0) + 1
+            if not e.when:               # a quest-time boss does not make an elite easier to get
+                count[e.skill_id] = count.get(e.skill_id, 0) + 1
     for area in AREAS.values():
         for e in area:
-            e.scarcity = ONLY_HERE if count[e.skill_id] == 1 else COSTLY if count[e.skill_id] == 2 else FREE
+            e.scarcity = ONLY_HERE if count.get(e.skill_id, 0) <= 1 else COSTLY if count[e.skill_id] == 2 else FREE
 
 
 _fill_scarcity()
@@ -199,6 +210,14 @@ def prioritise(primary, secondary, area_elites, learnt, here_map=None, vanquishe
     for e in wanted:
         e.scarcity = rarity(e.skill_id, here_map, vanquished)
     return sorted(wanted, key=lambda e: (-e.score(), 0 if e.profession == primary else 1, e.name))
+
+
+def signets_worth_carrying(ordered, spare=1):
+    """How many signets the wanted elites here (from `prioritise`) justify: one for each boss
+    that is there or may spawn. Bosses that only appear during a quest earn none while there is
+    a dependable target, and `spare` (0 or 1) between them when they are all there is."""
+    sure = sum(1 for e in ordered if not e.when)
+    return sure if sure else min(max(0, spare), 1 if ordered else 0)
 
 
 def should_capture(elite, ordered, captured, signets):

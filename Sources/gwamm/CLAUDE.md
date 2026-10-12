@@ -1,14 +1,28 @@
-# Working on the GWAMM engine
+# GWAMM engine: rules for coding assistants
 
-Read `ARCHITECTURE.md` in this folder first; its "Standing rules" are binding.
+Start with `STATUS.md` (current version, open issues). Read `ARCHITECTURE.md` only when you
+change how modules fit together.
 
-- `core/` must not import Py4GW. Game calls go in `runtime/game.py` only.
-- Verify every Py4GW/Reforged call against the library source in this repository before using it.
-- Run `python gwamm_tests/test_core.py`, `python gwamm_tests/smoke_campaign.py` and `python gwamm_tests/check_names.py` before committing.
-- Bump the version in both `GWAMM_Vanquish.py` and `Sources/gwamm/__init__.py` together.
-- Never stage `gwamm_logs/`. Never edit files outside `GWAMM_Vanquish.py`, `Sources/gwamm/`, `gwamm_tests/`, `gwamm_tools/`.
+## Binding rules
 - No anti-detection, ban-evasion or process-hiding code, ever.
-- Before building a feature, check `Widgets/` for one that already does it or already keeps the data (ARCHITECTURE.md, standing rule 8).
-- Fix the class of problem, not the one area: when a fix is prompted by one map, make it work from
-  data or a general rule (other Reforged bots' data, route evidence, learned files), so other areas
-  with the same problem are covered too. Name the area that prompted it only in comments/logs.
+- `core/` imports the standard library only; every game call lives in `runtime/game.py`.
+- Never invent a Py4GW/Reforged call: grep its signature in this repo first.
+- Check `Widgets/` for a widget/bot that already does it before building (e.g. the Sulfurous
+  Wastes farm bot for junundu handling).
+- Fix the class of problem, not the one area: drive fixes from data or a general rule so other
+  areas are covered too. Name the prompting area only in comments/logs.
+- Deterministic only. Never leave an area mid-vanquish. Don't waste consumables.
+- Edit only `GWAMM_Vanquish.py`, `Sources/gwamm/`, `gwamm_tests/`, `gwamm_tools/`. Never stage `gwamm_logs/`.
+- Log decisions with `log.event(...)`; no personal identifiers (emails, character names) in logs.
+- Version 0.x, bumped together in `GWAMM_Vanquish.py` (SCRIPT_VERSION), `Sources/gwamm/__init__.py`
+  and the first line of `README.txt`.
+
+## Keep context small (big files: engine.py 83K, node.py 49K, game.py 49K, maprun.py 42K)
+- Grep for the symbol, then Read only that line range. Never read a large file whole.
+- Run tests with output piped to `tail -3`; check the exit code rather than reading logs.
+- Run logs (`gwamm_logs/run_*.jsonl`) are large: filter by `event` with a script, never cat them.
+- Reply briefly; don't restate code or diffs in chat.
+
+## Before shipping
+`python gwamm_tests/check_names.py`, `test_core.py`, `smoke_campaign.py`, `sim_transit.py`,
+`sim_combat.py --assert` (all exit 0). A `core/` change needs a test.

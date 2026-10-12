@@ -179,7 +179,7 @@ class Campaign:
             region = (self.travel[mid]["region"] if mid in self.travel
                       else self.EXTRA_REGIONS.get(mid, "Other areas"))
             out.setdefault(region, []).append(mid)
-        return {r: sorted(ids, key=game.map_name) for r, ids in sorted(out.items())}
+        return {r: sorted(ids, key=game.map_sort_key) for r, ids in sorted(out.items())}
 
     def hops(self, mid):
         """How many doors must be walked through to reach an area (0 = straight out of an
@@ -285,7 +285,7 @@ class Campaign:
         except Exception:
             here = None
         left, out = [m for m in ids if pos[m]], []
-        rest = sorted((m for m in ids if not pos[m]), key=game.map_name)
+        rest = sorted((m for m in ids if not pos[m]), key=game.map_sort_key)
         cur = here
         while left:
             def cost(m):

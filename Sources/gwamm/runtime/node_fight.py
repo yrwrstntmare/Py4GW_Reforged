@@ -234,9 +234,10 @@ class FightMixin:
                         to=[round(spot[0]), round(spot[1])], behind_heroes=True)
             return True
 
+        fall_ok = cfg.fall_back and not self._riding()      # wurms stay in it together
         # brought back to life in the middle of it: in behind the heroes, still in their healers'
         # reach. Only with most of the party down is it a real retreat along the trail.
-        if cfg.fall_back and not busy and now - self.__dict__.get("_revived_at", 0.0) < 2.0 and closest < 1300.0:
+        if fall_ok and not busy and now - self.__dict__.get("_revived_at", 0.0) < 2.0 and closest < 1300.0:
             self._revived_at = 0.0
             if tuck("revived among enemies"):
                 return True
@@ -244,7 +245,7 @@ class FightMixin:
                 return True
         # the leader (a caster) has ended up in front, with melee on him: back in behind the heroes
         adjacent = [e for e in near if math.hypot(e.xy[0] - px, e.xy[1] - py) <= 220.0]
-        if (cfg.fall_back and not busy and len(adjacent) >= 2 and not game.leader_melee()
+        if (fall_ok and not busy and len(adjacent) >= 2 and not game.leader_melee()
                 and now - st.get("tucked_at", 0.0) > 10.0 and game.my_health() < 0.85):
             if tuck(f"{len(adjacent)} on the leader"):
                 return True
@@ -260,7 +261,7 @@ class FightMixin:
                 return True
         # too many at once: back up along the ground already cleared, once per cooldown
         # only while the pull is still on its way: once they are on top of us, turning our back costs more
-        if (cfg.fall_back and len(near) >= cfg.crowd_size and closest > 700.0
+        if (fall_ok and len(near) >= cfg.crowd_size and closest > 700.0
                 and now - st["fell_back_at"] > cfg.fall_back_cooldown and not busy):
             st["fell_back_at"] = now                          # counted even if no spot, so we do not retry every second
             if back_off("big pull on its way", cfg.fall_back_distance, 5.0):

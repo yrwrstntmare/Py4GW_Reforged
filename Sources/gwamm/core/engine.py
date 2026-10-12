@@ -51,6 +51,7 @@ class Config:
     crowd_size = 9               # this many enemies around us counts as a big pull
     fall_back_distance = 1000.0
     fall_back_cooldown = 25.0
+    wall_radius = 250.0          # ground kept off round a spot the party was pinned at (was 400: wider than most of what is in the way, and it shut whole passages)
     hazard_radius = 450.0        # ground kept clear of around a spot where something other than enemies killed us
     hazard_factor = 15.0         # (a detour up to this many times longer is accepted to stay out of it)
     take_blessings = True        # walk to a shrine NPC in reach and take its blessing or bounty
@@ -80,6 +81,7 @@ class Config:
     route_hint_radius = 2500.0
     off_route_cost = 1.25        # walking off the known route's lanes counts as this much longer
     use_routes = False           # follow the area's known route when there is one, instead of sweeping every corner
+    route_group_gain = 0.6       # in-order route: a seen group waits for the route only if a later point gets this much closer (fraction of the distance now)
     carto_route_reach = 5000.0   # on a route: fetch a map cell from the route point nearest it, if the walk is within this
     carto_in_tour = True         # plan map-only corners into the visiting order with everything else
     carto_detour = 3000.0        # take a fogged map cell now if it is within this walk
@@ -128,15 +130,29 @@ class Objective:
 
 
 class Engine:
-    def __init__(self, traps, start_xy, config=None, projection=None, exits=(), goto=None, links=(), guide=None, hints=None):
+    def __init__(self, traps, start_xy, config=None, projection=None, exits=(), goto=None, links=(), guide=None, hints=None,
+                 guide_actions=None, portals=()):
         self.cfg = config or Config()
+        # doors the game itself shows as portals: their keep-clear ring may be narrowed to the
+        # doorway but is not taken away unless the ring itself walls off part of the map
+        self.portals = [(float(p[0]), float(p[1])) for p in (portals or ())]
         self.fresh_starts = 0
         self.hazards = []             # (x, y): traps and the like, learnt from deaths with no enemy near
         self.goto = goto              # crossing an area: just get to this point, fighting what is in the way
         self.nav = NavGraph(traps, links=links)
+        # An exit may carry its own ring size as a third value: a portal the game shows, or a
+        # door we came through, gets the full ring; a spawn point that only might sit beside a
+        # door gets a small one (Nightfall maps list many spawns for their missions, and full
+        # rings round all of them walled off parts of nearly every area).
+        self.exit_r = {}
+        for e in exits:
+            if len(e) > 2 and e[2]:
+                self.exit_r[(float(e[0]), float(e[1]))] = float(e[2])
+        exits = [(float(e[0]), float(e[1])) for e in exits]
         self.exits = self._relevant_exits(exits, start_xy)
         self.walked_through = self._drop_walked_exits(list(guide or hints or ()), start_xy)
-        self.nav.forbid(self.exits, self.cfg.exit_avoid_radius)
+        for e in self.exits:
+            self.nav.forbid([e], self.ring(e))
         self.exit_radius = self.cfg.exit_avoid_radius
         self.narrowed_exits = self._unfence_cuts(start_xy)
         self.doors = []               # exits known for certain to be doors (game portals, places we arrived at)
@@ -145,12 +161,21 @@ class Engine:
         self.mem = InstanceMemory(self.rm, self.cfg.search_radius, self.cfg.sight_radius, self.cfg.cluster_radius)
         self.start_region = self._start_region(start_xy)
         self.tour = self.rm.tour(self.start_region)
-        self.guide, self.guide_i, self._guide_near = self._prepare_guide(guide, start_xy), 0, {}
+        # A route with things to do along it (a junundu burrow, a lever) is followed exactly as
+        # written, from its first point, so each action happens where its author did it.
+        self.guide_actions = list(guide_actions or []) if guide else []
+        self.guide_src = None
+        if self.guide_actions:
+            self.guide, self.guide_src = self._prepare_guide_strict(guide)
+            self.guide_i, self._guide_near = 0, {}
+        else:
+            self.guide, self.guide_i, self._guide_near = self._prepare_guide(guide, start_xy), 0, {}
         self._route_src = list(guide or hints or ())
         self.focus = None             # (x, y) of a blessing giver with enemies round it: those are fought first
         self._via, self._via_done, self.approach_detours = {}, set(), 0   # authored approach points per objective
         self._deferred = set()        # map cells with no path while foes remain: retried after the vanquish
         self.walls, self.detours, self._detour = [], 0, False
+        self.soft_walls = set()       # walls that would cut the map if kept off: walked with care instead
         self.hint_regions = self._hint_regions(hints)
         self.route_pen = self._route_lanes(hints) if self.cfg.route_hints else None
         self.tour_rank = {rid: i for i, rid in enumerate(self.tour)}
@@ -178,6 +203,11 @@ class Engine:
                                      # visit or an earlier one. Taken in small bites, pulls kept small.
         self._zone_pen = (None, None)
         self.deaths = 0
+
+    def ring(self, e, radius=None):
+        """Keep-clear radius round exit `e` (its own size, never more than `radius`)."""
+        r = self.exit_r.get((float(e[0]), float(e[1])), self.cfg.exit_avoid_radius)
+        return min(r, radius) if radius is not None else r
 
     def _drop_walked_exits(self, route, start_xy, near=300.0, longest=4500.0):
         """A point the area's known route walks straight past is not a door (Bahdok Caverns'
@@ -214,41 +244,66 @@ class Engine:
 
     def _unfence_cuts(self, start_xy):
         """A keep-clear ring round a point that might be a door is safe in open ground, but one
-        in a corridor cuts the map in two. Bahdok Caverns: two arrival points mid-corridor left
-        36% of the map reachable instead of 96%, and the party searched the same corner for
-        four hours. Any ring that walls off a real share of the map is narrowed to the doorway
-        itself (the radius used once a vanquish is done). Returns the narrowed points."""
+        in a corridor cuts the map in two. A real door sits at the edge of the walkable ground,
+        so its ring never walls off part of the map; a ring that does is round something that
+        only looks like a door (mission portals and spawn points in Nightfall areas, Bahdok
+        Caverns' corridor "portals"). Such a ring is first narrowed to the doorway, and if even
+        that still cuts the map, removed - unless the door is one we really came through.
+        Returns the points changed."""
+        self.removed_exits = []
         nav, start = self.nav, self.nav.nearest_node(*start_xy)
         if start is None or not self.exits:
             return []
-        big, small_r = self.cfg.exit_avoid_radius, self.cfg.edge_exit_radius
+        small_r = self.cfg.edge_exit_radius
+        sure = {e for e in self.exits if self.exit_r.get(e, 0.0) >= self.cfg.exit_avoid_radius}
+        shown = {e for e in self.exits if e not in sure
+                 and any(math.hypot(e[0] - p[0], e[1] - p[1]) <= 100.0 for p in self.portals)}
 
-        def fence(small):
+        def fence(level):                 # level: exit -> "small" | "none"
             nav.no_go, nav.forbidden = [], [False] * len(nav.nodes)
             for e in self.exits:
-                nav.forbid([e], small_r if e in small else big)
+                lv = level.get(e)
+                if lv == "none" and e not in sure:
+                    continue
+                nav.forbid([e], self.ring(e, small_r) if lv else self.ring(e))
 
         def count():
             seen = nav.component(start)
             return sum(1 for i, s in enumerate(seen) if s and not nav.forbidden[i])
 
-        fence(set(self.exits))
-        full = count()                    # every ring narrowed: what the map really offers
-        fence(set())
+        fence({e: "none" for e in self.exits})
+        full = count()                    # no rings at all (bar the sure ones): what the map offers
+        fence({})
         cur = count()
         if cur >= 0.95 * full:
             return []
-        small = set()
+        level = {}
         for e in self.exits:
-            fence(small | {e})
-            c = count()
-            if c >= cur + 0.03 * full:
-                small.add(e)
-                cur = c
+            for lv in ("small", "none"):
+                if lv == "none" and e in sure:
+                    break
+                fence({**level, e: lv})
+                c = count()
+                if c >= cur + 0.03 * full:
+                    level[e], cur = lv, c
+                    break
         if cur < 0.9 * full:
-            small = set(self.exits)       # cut by several rings together: narrow them all
-        fence(small)
-        return [list(e) for e in small]
+            # Still cut up: take the rings off everything that only might be a door. A portal
+            # the game shows keeps its doorway ring unless that very ring is one of the cuts.
+            # (Resplendent Makuun: 15 of 16 rings went, two real doors among them; the party
+            # walked into a doorway and every step from there was refused, 827 times, until
+            # every region was written off and the run ended with 88 foes left.)
+            level = {e: ("small" if e in sure or e in shown else "none") for e in self.exits}
+            fence(level)
+            cur = count()
+            for e in sorted(shown):
+                fence({**level, e: "none"})
+                c = count()
+                if c >= cur + 0.03 * full:
+                    level[e], cur = "none", c
+        fence(level)
+        self.removed_exits = [list(e) for e, lv in level.items() if lv == "none" and e not in sure]
+        return [list(e) for e in level]
 
     def _relevant_exits(self, exits, start_xy):
         """Keep only exits that touch ground the party can actually walk to, and merge ones that
@@ -257,11 +312,15 @@ class Engine:
         start = self.nav.nearest_node(*start_xy)
         if start is None:
             return list(exits)
-        walkable, radius, kept = self.nav.component(start), self.cfg.exit_avoid_radius, []
+        walkable, kept = self.nav.component(start), []
         for x, y in exits:
-            if not any(walkable[i] for i in self.nav.nodes_within(x, y, radius)):
+            radius = self.ring((x, y))
+            if not any(walkable[i] for i in self.nav.nodes_within(x, y, max(radius, 350.0))):
                 continue
-            if any(math.hypot(x - kx, y - ky) < 0.5 * radius for kx, ky in kept):
+            twin = next(((kx, ky) for kx, ky in kept if math.hypot(x - kx, y - ky) < 0.5 * max(radius, self.ring((kx, ky)))), None)
+            if twin is not None:
+                if radius > self.ring(twin):             # the same door twice: keep the bigger ring
+                    self.exit_r[twin] = radius
                 continue
             kept.append((x, y))
         return kept
@@ -280,7 +339,8 @@ class Engine:
             self.exits = [e for e in self.exits
                           if any(math.hypot(e[0] - d[0], e[1] - d[1]) <= 600.0 for d in self.doors)]
         nav.no_go, nav.forbidden = [], [False] * len(nav.nodes)
-        nav.forbid(self.exits, radius)
+        for e in self.exits:
+            nav.forbid([e], self.ring(e, radius))
         self.exit_radius, self.edge_pass = radius, True
         declined = self.carto.declined if self.carto else set()
         proj = self.carto.proj if self.carto else None
@@ -321,6 +381,26 @@ class Engine:
         first = min(range(len(keep)), key=lambda i: (keep[i][0] - start_xy[0]) ** 2 + (keep[i][1] - start_xy[1]) ** 2)
         return keep[first:] + keep[:first]
 
+    def _prepare_guide_strict(self, points):
+        """The route as written: in order, from its start, each point remembering its place in
+        the original list (actions are tied to those places). Only points with no ground at
+        all near them are left out."""
+        if not points or self.goto is not None:
+            return [], None
+        keep, src = [], []
+        for i, (x, y) in enumerate(points):
+            if self.nav.nearest_node(x, y, max_radius=900.0) is None:
+                continue
+            keep.append((float(x), float(y)))
+            src.append(i)
+        return keep, src
+
+    def next_guide_src(self):
+        """Place in the original route of the next point to walk to (past the end: a big number)."""
+        if self.guide_src is None or self.guide_i >= len(self.guide_src):
+            return 10 ** 9
+        return self.guide_src[self.guide_i]
+
     def _hint_regions(self, points):
         """Regions the area's known route passes through or near. Its authors walked where the
         enemies are, so these are searched first; ground the route never goes near is left
@@ -352,6 +432,23 @@ class Engine:
         f = self.cfg.off_route_cost
         return {i: f for i in range(len(self.nav.nodes)) if i not in on} if on else None
 
+    def route_comes_closer(self, pos, near=1500.0):
+        """On an in-order route: will a point still ahead (past the next one) pass clearly
+        nearer to `pos` than the party stands now? Never for something already close: that is
+        a fight, not a choice."""
+        if self.guide_src is None or not self.guiding():
+            return False
+        now_d = math.hypot(pos[0] - self.player_xy[0], pos[1] - self.player_xy[1])
+        if now_d <= near:
+            return False
+        ahead = self.guide[self.guide_i + 1:]
+        if not ahead:
+            return False
+        later = min(math.hypot(pos[0] - x, pos[1] - y) for x, y in ahead)
+        nxt = self.guide[self.guide_i]
+        to_next = math.hypot(pos[0] - nxt[0], pos[1] - nxt[1])
+        return later < self.cfg.route_group_gain * min(now_d, to_next)
+
     def guiding(self):
         return self.guide_i < len(self.guide)
 
@@ -380,8 +477,10 @@ class Engine:
         self.clusters = self.mem.clusters()
         while self.guide_i < len(self.guide):       # tick off route points as we reach (or give up on) them
             gx, gy = self.guide[self.guide_i]
-            if (math.hypot(gx - player_xy[0], gy - player_xy[1]) < 500.0
-                    or self.mem.blocked.get(("guide", self.guide_i), 0) >= self.cfg.max_failures):
+            reached = math.hypot(gx - player_xy[0], gy - player_xy[1]) < 500.0
+            if reached or self.mem.blocked.get(("guide", self.guide_i), 0) >= self.cfg.max_failures:
+                if not reached:
+                    self.guide_given_up = getattr(self, "guide_given_up", 0) + 1     # for the log
                 self.guide_i += 1
             else:
                 break
@@ -526,9 +625,13 @@ class Engine:
             for i in self.nav.nodes_within(x, y, 300.0):
                 pen[i] = max(pen.get(i, 1.0), 4.0)    # careful here, not "never here" (was 25: Bahdok's
                                                        # one bridge became a 90,000-unit detour)
+        soft = getattr(self, "soft_walls", ())
         for x, y in walls:                   # ground the party could not walk through (a shut gate)
-            for i in self.nav.nodes_within(x, y, 400.0):
-                pen[i] = 1000.0
+            # ...unless keeping off it would cut part of the map away: then it is the only way
+            # through and we were merely caught on something in it. Walk it with care.
+            cost = 6.0 if (x, y) in soft else 1000.0
+            for i in self.nav.nodes_within(x, y, self.cfg.wall_radius):
+                pen[i] = max(pen.get(i, 1.0), cost)
         for x, y in self.hazards:
             for i in self.nav.nodes_within(x, y, self.cfg.hazard_radius):
                 pen[i] = self.cfg.hazard_factor
@@ -537,7 +640,7 @@ class Engine:
     def _keep_off(self):
         """(x, y, radius) of everything a walked line must not touch: traps, snags, shut gates."""
         return ([(x, y, self.cfg.hazard_radius) for x, y in self.hazards]
-                + [(x, y, 300.0) for x, y in self.snags] + [(x, y, 400.0) for x, y in self.walls])
+                + [(x, y, 300.0) for x, y in self.snags] + [(x, y, self.cfg.wall_radius) for x, y in self.walls])
 
     def _straighten(self, route, k):
         """Near a trap or a snag the steps are kept short so the walk follows the planned path
@@ -718,8 +821,25 @@ class Engine:
         # Map-only targets may lie in danger, but not when the way there runs past ground left
         # for later (Gandara: a carto walk went past two crowds just put off, into 18 of them).
         px, py = self.player_xy
-        carto = [o for o in out if o.kind == "carto" and not self._passes_danger((px, py), o.pos)]
-        safe = [o for o in out if o.kind != "carto" and not self._dangerous(o.pos)] + carto
+        # A route followed in order (it has burrows, levers...) has no "elsewhere": after a death
+        # its next point stays the plan, and the map is only fetched from near the route.
+        # (Sulfurous Wastes: a death by the next point dropped the route; the party then
+        # crossed the area for map cells, past burrows it had not taken yet.)
+        strict = bool(self.guide_actions) and self.guiding()
+        reach = self.cfg.carto_route_reach
+        carto = [o for o in out if o.kind == "carto" and not self._passes_danger((px, py), o.pos)
+                 and not (strict and self._cost(o.pos, o.region) > reach)]
+        safe = [o for o in out if o.kind != "carto"
+                and (not self._dangerous(o.pos) or (strict and o.kind == "guide"))] + carto
+        if strict:
+            # Groups in sight: go for one now unless the route itself will bring us clearly
+            # nearer to it later. Then it waits for that point; otherwise this is as close as
+            # we will ever be, and leaving it means coming back for it.
+            waits = [o for o in safe if o.kind == "cluster" and self.route_comes_closer(o.pos)]
+            self.route_waiting = len(waits)
+            self.route_waits = [[round(o.pos[0]), round(o.pos[1])] for o in waits[:6]]     # for the log
+            if waits:
+                safe = [o for o in safe if o not in waits]
         if not out:
             return out
         if any(o.kind != "carto" for o in safe) or carto:
@@ -1317,11 +1437,44 @@ class Engine:
         walls = self.walls
         if any(math.hypot(spot[0] - x, spot[1] - y) < 250.0 for x, y in walls):
             return None
+        if self._wall_cuts(player_xy, spot):
+            self.soft_walls.add(spot)
         walls.append(spot)
         self.player_node = None
         if detour:
             self.start_detour()
         return spot
+
+    def _wall_cuts(self, player_xy, spot):
+        """Would keeping off this spot put part of the map out of reach from where the party
+        stands? (More than 3% of what can be reached now.) A thing we got caught on in the only
+        passage is not a wall across it."""
+        nav = self.nav
+        r, soft = self.cfg.wall_radius, self.soft_walls
+        old = set()
+        for x, y in self.walls:
+            if (x, y) not in soft:
+                old.update(nav.nodes_within(x, y, r))
+        new = old | set(nav.nodes_within(spot[0], spot[1], r))
+        # counted from the walkable ground nearest the party that is not itself kept off (a
+        # start inside the kept-off ground would count as a way through it)
+        ok = self.rm.reachable
+        near = [i for i in nav.nodes_within(player_xy[0], player_xy[1], 900.0) if ok[i] and i not in new]
+        if not near:
+            return False
+        start = min(near, key=lambda i: (nav.nodes[i][0] - player_xy[0]) ** 2 + (nav.nodes[i][1] - player_xy[1]) ** 2)
+
+        def reach(shut):
+            seen, stack = {start}, [start]
+            while stack:
+                u = stack.pop()
+                for v, _ in nav.adj[u]:
+                    if v not in seen and v not in shut and (nav.forbidden[u] or not nav.forbidden[v]):
+                        seen.add(v)
+                        stack.append(v)
+            return len(seen)
+
+        return reach(new) < 0.97 * reach(old)
 
     def start_detour(self, points=12):
         """Pinned by something the ground data does not show. If the area has a known route, its
@@ -1340,6 +1493,7 @@ class Engine:
         for k in [k for k in self.mem.blocked if k[0] == "guide"]:
             del self.mem.blocked[k]
         self.guide, self.guide_i, self._guide_near = pts, 0, {}
+        self.guide_src = None           # a stretch of route, not the route with its actions
         self._detour, self.objective = True, None
         self.detours += 1
         return True

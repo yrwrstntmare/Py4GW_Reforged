@@ -659,6 +659,10 @@ def travel_portals():
     return [(p.x, p.y) for p in Map.Pathing.GetTravelPortals()]
 
 
+PORTAL_RING = 700.0
+SPAWN_RING = 350.0
+
+
 def read_exits():
     """Places that lead out of this area (walking into one resets a vanquish).
 
@@ -667,14 +671,17 @@ def read_exits():
     Camp Rankor's portal in Snake Dance was only found this way.
     """
     global exit_note
-    out = [(p.x, p.y) for p in Map.Pathing.GetTravelPortals()]
+    # Returned as (x, y, ring): a portal the game shows gets the full keep-clear ring; a spawn
+    # point gets a small one (it is where a party coming the other way appears, a little inside
+    # the door, and Nightfall maps list spawns for their missions that lead nowhere from here).
+    out = [(p.x, p.y, PORTAL_RING) for p in Map.Pathing.GetTravelPortals()]
     portals = len(out)
     try:
         own = f"{Map.GetMapID():04d}"
         spawns1, spawns2, _spawns3 = Map.Pathing.GetSpawns()
         for s in list(spawns1) + list(spawns2):
             if s.tag and s.tag != own:
-                out.append((s.x, s.y))
+                out.append((s.x, s.y, SPAWN_RING))
         exit_note = (f"{portals} portals, {len(out) - portals} arrival points "
                      f"(spawn lists {len(spawns1)}/{len(spawns2)}, own tag {own})")
     except Exception as e:
@@ -866,6 +873,13 @@ def map_unlocked(map_id):
 
 def map_name(map_id):
     return Map.GetMapName(map_id)
+
+
+def map_sort_key(map_id):
+    """Name to sort area lists by: without a leading "The", so The Sulfurous Wastes is found
+    under S where a player looks for it, not under T with every other "The ..." area."""
+    name = str(map_name(map_id) or "")
+    return (name[4:] if name.lower().startswith("the ") else name).lower()
 
 
 def vanquished_ids():
@@ -1262,3 +1276,257 @@ def find_toolbox_file(hint=""):
                     if mtime > best[1]:
                         best = (path, mtime)
     return best[0]
+
+
+LEAVE_JUNUNDU = 1443          # on slot 8 only while riding a junundu wurm
+
+
+def is_junundu():
+    """Is the leader riding a junundu wurm (Desolation)? Its bar then holds Leave Junundu."""
+    try:
+        return LEAVE_JUNUNDU in [int(s) for s in SkillBar.GetSkillbar()]
+    except Exception:
+        return False
+
+
+def _bar_skill_ids(bar):
+    """Skill ids out of a hero bar as the library hands it over. ASSUMED shape (not yet seen in
+    game): plain numbers, or entries carrying the id as .id.id / .id / ["id"] / .skill_id."""
+    out = []
+    for entry in (bar or ()):
+        for get in (lambda e: int(e), lambda e: int(e.id.id), lambda e: int(e.id),
+                    lambda e: int(e["id"]), lambda e: int(e.skill_id)):
+            try:
+                out.append(get(entry))
+                break
+            except Exception:
+                continue
+    return out
+
+
+JUNUNDU_WAIL = 1865
+
+
+def skill_state(skill_id):
+    """Where a skill sits on the leader's bar and how charged it is, for route steps that use
+    one: {"slot", "adrenaline", "recharge", "need", "charged"} (slot 0 = not on the bar).
+    adrenaline and recharge are as the library gives them (SkillBar.GetSkillData); need is the
+    skill's adrenaline cost (Skill.Data.GetAdrenaline). charged: adrenaline >= need, or None
+    when either is unknown or the skill takes none. ASSUMED: the two are in the same unit."""
+    slot = SkillBar.GetSlotBySkillID(int(skill_id))
+    out = {"slot": slot, "adrenaline": None, "recharge": None, "need": None, "charged": None}
+    try:
+        from Py4GWCoreLib.Skill import Skill
+        out["need"] = int(Skill.Data.GetAdrenaline(int(skill_id)) or 0)
+    except Exception as e:
+        out["need_error"] = repr(e)
+    if slot:
+        try:
+            d = SkillBar.GetSkillData(slot)
+            out["adrenaline"] = getattr(d, "adrenaline_a", None)
+            out["recharge"] = getattr(d, "recharge", None)
+        except Exception as e:
+            out["error"] = repr(e)
+    if out["need"] and out["adrenaline"] is not None:
+        out["charged"] = out["adrenaline"] >= out["need"]
+    return out
+
+
+def nearest_enemy(reach=3000.0):
+    """The nearest living enemy within `reach` of the leader: (agent, distance) or None."""
+    px, py = Player.GetXY()
+    best = None
+    for enemy in AgentArray.GetEnemyArray():
+        try:
+            if Agent.IsAlive(enemy):
+                ex, ey = Agent.GetXY(enemy)
+                d = math.hypot(ex - px, ey - py)
+                if d <= reach and (best is None or d < best[1]):
+                    best = (int(enemy), d)
+        except Exception:
+            continue
+    return None if best is None else (best[0], round(best[1]))
+
+
+def hit_nearest_with(skill_id, reach=2800.0):
+    """Use a skill of the leader's bar on the nearest living enemy within `reach` (to build
+    adrenaline from where we stand: a wurm's Junundu Siege on enemies up on a ledge). Returns
+    (enemy agent, distance), or None when the skill is not on the bar or nothing is in reach."""
+    slot = SkillBar.GetSlotBySkillID(int(skill_id))
+    if not slot:
+        return None
+    px, py = Player.GetXY()
+    best = None
+    for enemy in AgentArray.GetEnemyArray():
+        try:
+            if Agent.IsAlive(enemy):
+                ex, ey = Agent.GetXY(enemy)
+                d = math.hypot(ex - px, ey - py)
+                if d <= reach and (best is None or d < best[1]):
+                    best = (int(enemy), d)
+        except Exception:
+            continue
+    if best is None:
+        return None
+    Player.ChangeTarget(best[0])
+    SkillBar.UseSkill(slot, best[0])
+    return best[0], round(best[1])
+
+
+def use_skill_id(skill_id):
+    """Use a skill of the leader's bar with no target. Returns its slot, 0 if it is not there."""
+    slot = SkillBar.GetSlotBySkillID(int(skill_id))
+    if slot:
+        SkillBar.UseSkill(slot, 0)
+    return slot
+
+
+def heroai_use_slot(slot, on):
+    """Let HeroAI use this bar slot of the leader, or keep its hands off it (a route step is
+    saving the skill's adrenaline). Same switch refresh_combat_builds uses for slot 8."""
+    from Py4GWCoreLib import GLOBAL_CACHE
+    email = str(Player.GetAccountEmail() or "")
+    options = GLOBAL_CACHE.ShMem.GetHeroAIOptionsFromEmail(email) if email else None
+    skills = getattr(options, "Skills", None) if options is not None else None
+    if skills is None or not 1 <= int(slot) <= len(skills):
+        return False
+    skills[int(slot) - 1] = bool(on)
+    GLOBAL_CACHE.ShMem.SetHeroAIOptionsByEmail(email, options)
+    return True
+
+
+def junundu_wail_heal(leader_below=0.75, hero_below=0.65, clear=1500.0, skip=()):
+    """Between fights as wurms: Junundu Wail gives its caster 500 health for each junundu in
+    range, but only with no enemy in earshot (Guild Wars Wiki; in a fight it only raises the
+    dead). Reforged's wurm build uses it for the dead alone, so the hurt stayed hurt. Here every
+    wurm under its mark casts its own, when nothing hostile is within `clear` of the leader.
+    `skip`: casters told to do so too recently ("leader" or a hero's place, 1 = first).
+    Returns who was told to: [("leader" | place, health)], [] if nobody or enemies near.
+    ASSUMED, not yet seen in game: SkillBar.HeroUseSkill takes the hero's own agent as target
+    for a skill that needs none."""
+    me = Player.GetAgentID()
+    px, py = Player.GetXY()
+    for enemy in AgentArray.GetEnemyArray():
+        try:
+            if Agent.IsAlive(enemy):
+                ex, ey = Agent.GetXY(enemy)
+                if (ex - px) ** 2 + (ey - py) ** 2 <= clear * clear:
+                    return []
+        except Exception:
+            continue
+    cast = []
+    slot = SkillBar.GetSlotBySkillID(JUNUNDU_WAIL)
+    hp = Agent.GetHealth(me)
+    if slot and "leader" not in skip and Agent.IsAlive(me) and 0.0 < hp < leader_below:
+        SkillBar.UseSkill(slot, 0)
+        cast.append(("leader", round(hp, 2)))
+    for place, h in enumerate(list(Party.GetHeroes()), start=1):
+        try:
+            agent = int(h.agent_id)
+            if place in skip or not (agent and Agent.IsValid(agent) and Agent.IsAlive(agent)):
+                continue
+            hp = Agent.GetHealth(agent)
+            if not 0.0 < hp < hero_below:
+                continue
+            ids = _bar_skill_ids(SkillBar.GetHeroSkillbar(place))
+            if JUNUNDU_WAIL not in ids:
+                continue
+            SkillBar.HeroUseSkill(agent, ids.index(JUNUNDU_WAIL) + 1, place)
+            cast.append((place, round(hp, 2)))
+        except Exception:
+            continue
+    return cast
+
+
+def hero_bar_sample():
+    """What the library hands over for the first hero's bar, in a few words, for the log: so
+    the assumption in _bar_skill_ids can be checked against a real run."""
+    try:
+        bar = SkillBar.GetHeroSkillbar(1)
+        first = bar[0] if bar else None
+        return {"type": type(bar).__name__, "len": len(bar) if bar is not None else None,
+                "entry": type(first).__name__, "fields": [a for a in dir(first) if not a.startswith("_")][:12],
+                "ids": _bar_skill_ids(bar)}
+    except Exception as e:
+        return {"error": repr(e)}
+
+
+def heroes_on_foot():
+    """[(agent, (x, y))] for each living hero whose bar does not hold Leave Junundu (not a wurm).
+    Empty when no hero bar can be read."""
+    out, readable = [], False
+    try:
+        heroes = list(Party.GetHeroes())
+    except Exception:
+        return []
+    for place, h in enumerate(heroes, start=1):
+        try:
+            agent = int(h.agent_id)
+            if not (agent and Agent.IsValid(agent) and Agent.IsAlive(agent)):
+                continue
+            ids = _bar_skill_ids(SkillBar.GetHeroSkillbar(place))
+            if any(ids):
+                readable = True
+            if LEAVE_JUNUNDU not in ids:
+                out.append((agent, tuple(Agent.GetXY(agent))))
+        except Exception:
+            continue
+    return out if readable else []
+
+
+def heroes_riding():
+    """(riding, living, readable): how many living heroes are junundu wurms too. A wurm's bar
+    holds Leave Junundu, read with SkillBar.GetHeroSkillbar(place in the party, 1 = first).
+    readable is False when no hero bar gave any skill id at all: then the counts mean nothing."""
+    riding = living = 0
+    readable = False
+    try:
+        heroes = list(Party.GetHeroes())
+    except Exception:
+        return 0, 0, False
+    for place, h in enumerate(heroes, start=1):
+        try:
+            agent = int(h.agent_id)
+            if not (agent and Agent.IsValid(agent) and Agent.IsAlive(agent)):
+                continue
+            living += 1
+            ids = _bar_skill_ids(SkillBar.GetHeroSkillbar(place))
+        except Exception:
+            continue
+        if any(ids):
+            readable = True
+        if LEAVE_JUNUNDU in ids:
+            riding += 1
+    return riding, living, readable
+
+
+def refresh_combat_builds(riding):
+    """After mounting or leaving a wurm the skill bar is a different one: make HeroAI pick the
+    build again (Reforged's own Junundu Wurm build drives the wurm's skills), and keep it from
+    ever casting Leave Junundu. The same steps as Reforged's Sulfurous Wastes farm bot."""
+    import gc
+    from Py4GWCoreLib.BuildMgr import BuildRegistry
+    from Py4GWCoreLib.Builds.Any.HeroAI import HeroAI_Build
+    BuildRegistry.ClearCache()
+    for obj in gc.get_objects():
+        try:
+            if isinstance(obj, HeroAI_Build):
+                reg = getattr(obj, "_build_registry", None)
+                if reg is not None:
+                    reg._cached_runtime_builds = None
+                    reg._cached_match_only_builds = None
+                    reg._cached_runtime_matchable_builds = None
+                    reg._cached_match_only_matchable_builds = None
+                obj.ClearBuildContract()
+        except Exception:
+            continue
+    try:
+        from Py4GWCoreLib import GLOBAL_CACHE
+        email = str(Player.GetAccountEmail() or "")
+        options = GLOBAL_CACHE.ShMem.GetHeroAIOptionsFromEmail(email) if email else None
+        skills = getattr(options, "Skills", None) if options is not None else None
+        if skills is not None and len(skills) > 7:
+            skills[7] = not riding           # slot 8: Leave Junundu while riding, your own skill otherwise
+            GLOBAL_CACHE.ShMem.SetHeroAIOptionsByEmail(email, options)
+    except Exception:
+        pass

@@ -253,7 +253,8 @@ class PullMixin:
             force = False
             if now - self._dither[1] > 45.0:
                 self._dither = (key, now)
-                if not (easy or everything <= limit + 3 or cfg.keep_at_it):
+                if not (easy or everything <= limit + 3 or cfg.keep_at_it
+                        or not tactics.put_off_helps(everything, limit, cfg.pull_max_take)):
                     eng.postpone(plan["target_xy"], 480.0)
                     s.log.event("pull", stage="postponed", total=plan["total"], waited=45)
                     st.update(phase=None, cool=now + 5.0)
@@ -277,14 +278,19 @@ class PullMixin:
                 # next one is taken on.
                 recent = [t for t in self.__dict__.setdefault("_avoided_at", []) if now - t < 300.0]
                 self._avoided_at = recent
-                if plan["total"] <= limit + 2 or len(recent) >= 2:
-                    s.log.event("pull", stage="taking_it_on", total=plan["total"], limit=limit, put_off_lately=len(recent))
+                # And at full strength nothing gets better by leaving: it is taken on now, pulled
+                # back to the camp like any other, instead of walked away from and back to.
+                later_helps = tactics.put_off_helps(plan["total"], limit, cfg.pull_max_take)
+                if plan["total"] <= limit + 2 or len(recent) >= 2 or not later_helps:
+                    s.log.event("pull", stage="taking_it_on", total=plan["total"], limit=limit, put_off_lately=len(recent),
+                                later_helps=later_helps)
                     go, force = True, True
                 elif not cfg.keep_at_it:
                     self._avoided_at.append(now)
                     # one crowd, more than the party should take, and it cannot be split
                     eng.postpone(plan["target_xy"], 480.0)
-                    s.log.event("pull", stage="avoided", total=plan["total"], limit=limit)
+                    s.log.event("pull", stage="avoided", total=plan["total"], limit=limit, full_limit=cfg.pull_max_take,
+                                put_off_lately=len(recent), at=[round(plan["target_xy"][0]), round(plan["target_xy"][1])])
                     st.update(phase=None, cool=now + 5.0)
                     return False
                 else:

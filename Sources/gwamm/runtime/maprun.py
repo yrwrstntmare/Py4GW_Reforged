@@ -13,6 +13,7 @@ from ..core import elites
 from . import game
 
 from .node import AdaptiveNode, CrossNode
+from .cross import gate_spot
 from .maprun_setup import SetupMixin
 
 MAX_STARTS = 4           # times one area may be started over (after wipes that end in town) per run
@@ -342,7 +343,16 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             dx, dy = last[0] - prev[0], last[1] - prev[1]
             n = math.hypot(dx, dy) or 1.0
             beyond = [last[0] + dx / n * 400.0, last[1] + dy / n * 400.0] if n > 1.0 else list(last)
-            push = BehaviorTree(CrossNode(self.session, {"xy": list(last), "beyond": beyond, "expect": leg["expect"]},
+            cross_leg = {"xy": list(last), "beyond": beyond, "expect": leg["expect"], "start": list(path[0])}
+            # Been through this door before: walk at the spot that took us, the way we were
+            # heading then, instead of where the recorded path says the door is.
+            spot = gate_spot(here, leg["expect"])
+            if spot is not None:
+                sx, sy, hx, hy = spot
+                cross_leg.update(xy=[sx - hx * 250.0, sy - hy * 250.0], beyond=[sx + hx * 400.0, sy + hy * 400.0], learnt=True)
+                self.session.log.event("campaign", map_id=self.map_id, phase="gate_spot", in_map=here,
+                                       at=[round(sx), round(sy)], heading=[round(hx, 2), round(hy, 2)], recorded=list(last))
+            push = BehaviorTree(CrossNode(self.session, cross_leg,
                                           here, timeout_s=600.0 if leg.get("slow") else 75.0))
             if len(path) == 1:
                 return push

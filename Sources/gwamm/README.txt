@@ -1,4 +1,4 @@
-GWAMM Vanquish 0.50.20
+GWAMM Vanquish 0.50.41
 
 INSTALL
   1. Copy the folder  Sources/gwamm  into your Py4GW Reforged  Sources  folder.
@@ -56,3 +56,10 @@ VERSIONS
   0.3    area exits avoided
   0.2    sight-based search radius
   0.1    first build
+
+ROUTES WITH THINGS TO DO ON THE WAY (junundu burrows, levers)
+When an area's known route has steps along it (a burrow to enter, an NPC, a dialog), the
+bot walks that route in order from its first point and does each step where the route's
+author did. After a burrow it makes HeroAI pick Reforged's Junundu Wurm build and blocks
+Leave Junundu; if the party falls off or dies while the route still rides, it goes back to
+the last burrow. Log event to look for: route_action.

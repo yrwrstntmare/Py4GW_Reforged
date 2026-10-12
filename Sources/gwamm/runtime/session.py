@@ -298,6 +298,11 @@ class Session:
                     "declined": sorted(list(c) for c in (eng.carto.declined if eng.carto else ())),
                     "carto_given_up": eng.carto_given_up,
                     "captured": sorted(self.captured), "captures": self.captures[-10:],
+                    # how far along the known route, by the point itself (the list may differ
+                    # in the version that picks this up), and the ground crossed as a wurm
+                    "guide_i": eng.guide_i, "guide_done": bool(eng.guide) and not eng.guiding(),
+                    "guide_next": list(eng.guide[eng.guide_i]) if eng.guiding() else None,
+                    "ridden": sorted(getattr(getattr(self, "ride_ground", None), "ridden", ())),
                     # enemies seen and still to be dealt with: far ones are not in the game's list
                     # after a reload, so without this a group left for later would be forgotten
                     "enemies": [[e.id, round(e.xy[0]), round(e.xy[1]), bool(e.boss)]
@@ -345,6 +350,24 @@ class Session:
                 eng.carto.declined |= {tuple(c) for c in d.get("declined", [])}
                 eng.carto_given_up = int(d.get("carto_given_up", 0))
             self.captured |= {int(c) for c in d.get("captured", [])}
+            # The known route goes on from where it was, not from its first point. (Sulfurous
+            # Wastes, reloaded at point 71 of 74: it set off for point 0 across the sulfur on
+            # foot and the party died.)
+            was = eng.guide_i
+            if eng.guide:
+                nxt = d.get("guide_next")
+                if d.get("guide_done"):
+                    eng.guide_i = len(eng.guide)
+                elif nxt:
+                    same = [i for i, p in enumerate(eng.guide) if abs(p[0] - nxt[0]) < 1.0 and abs(p[1] - nxt[1]) < 1.0]
+                    if same:
+                        eng.guide_i = min(same, key=lambda i: abs(i - int(d.get("guide_i", i))))
+                elif eng.guide_actions:
+                    # saved by a version that did not note the place: the point nearest to us
+                    px, py = eng.player_xy
+                    eng.guide_i = min(range(len(eng.guide)), key=lambda i: ((eng.guide[i][0] - px) ** 2 + (eng.guide[i][1] - py) ** 2, -i))
+            self._resume_route = eng.guide_i != was
+            self._resume_ridden = [tuple(c) for c in d.get("ridden", [])]
             from ..core.memory import Enemy
             known = 0
             for eid, x, y, boss in d.get("enemies", []):
@@ -355,7 +378,8 @@ class Session:
             counts = mem.counts()
             self.log.event("resume", used=True, minutes_ago=round(wall_gap / 60.0, 1), trail_points=len(d["route"]),
                            enemies_remembered=known, deaths=eng.deaths, regions=len(eng.rm.regions), searched=str(counts)[:120],
-                           saved_by=d.get("version"))
+                           saved_by=d.get("version"), route_point=eng.guide_i, route_points=len(eng.guide),
+                           ridden_cells=len(self._resume_ridden))
             self.resumed = f"picked up this run from {round(wall_gap / 60.0, 1)} min ago ({len(d['route'])} trail points, {known} enemies remembered)"
         except Exception as e:
             self.log.event("resume", used=False, error=repr(e))
@@ -396,9 +420,21 @@ class Session:
             _build_t0 = time.perf_counter()
             goto = tuple(self.transit["xy"]) if self.transit else None
             projection = game.read_projection() if (self.cfg.do_cartography and goto is None) else None
-            found = self._learned_exits(mid) + game.read_exits()      # remembered arrivals first
+            # remembered arrivals (doors we really came through) first, with the full ring; then
+            # what the game lists (portals full, spawn points small); then the world map's doors
+            # (a door we came through gets the full ring and is never narrowed: see Engine._unfence_cuts)
+            found = [(p[0], p[1], self.cfg.exit_avoid_radius) for p in self._learned_exits(mid)] + game.read_exits()
             if self.world is not None:
-                found += self.world.exits_of(mid)                     # every door the world map knows
+                doors = list(self.world.exits_of(mid))
+                if doors:
+                    # The world map knows where this area's doors are. A portal the game shows
+                    # far from all of them is decoration or a mission's (Nightfall areas are full of
+                    # both): a small ring, like a spawn point, not a full one.
+                    found = [(e[0], e[1], game.SPAWN_RING)
+                             if len(e) > 2 and e[2] == game.PORTAL_RING
+                             and not any(math.hypot(e[0] - x, e[1] - y) < 1500.0 for x, y in doors) else e
+                             for e in found]
+                found += [(p[0], p[1], game.PORTAL_RING) for p in doors]
             not_doors = self.load_not_doors().get(str(mid), [])
             self.exit_candidates = list(found)
             if not_doors:
@@ -412,7 +448,7 @@ class Session:
                 links, self.nav_note = [], f"level links unreadable: {e!r}"
             else:
                 self.nav_note = f"{len(links)} level links"
-            guide, hints, self.route_note = None, None, ""
+            guide, hints, actions, self.route_note = None, None, None, ""
             if goto is None and (self.cfg.use_routes or self.cfg.route_hints) and self.cfg.do_vanquish:
                 try:
                     if self._routes is None:
@@ -423,11 +459,18 @@ class Session:
                     if r:
                         hints = [tuple(p) for p in r["points"]] if self.cfg.route_hints else None
                         guide = [tuple(p) for p in r["points"]] if self.cfg.use_routes else None
+                        actions = r.get("actions") or None
+                        if actions:
+                            # things to do along the way (junundu burrows): this route must be
+                            # walked as written, whatever the route setting says
+                            guide = [tuple(p) for p in r["points"]]
                         self.route_note = (f"known route '{r['name']}' ({len(r['points'])} points): "
                                            + ("followed point by point" if guide else "used as a guide to where to search"))
                 except Exception as e:
                     self.route_note = f"route unreadable: {e!r}"
-            self.engine = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=links, guide=guide, hints=hints)
+            self.engine = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=links, guide=guide, hints=hints,
+                                 portals=game.read_travel_portals(),
+                                 guide_actions=actions)
             self.pcons.reset()
             try:                                     # enemy types the Enemy Tracker widget knows and we do not
                 from ..core import tactics
@@ -446,7 +489,9 @@ class Session:
                 # that touch and keep that if it opens the map up.
                 from ..core.geometry import loose_links
                 extra = links + loose_links(traps)
-                wider = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=extra, guide=guide, hints=hints)
+                wider = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=extra, guide=guide, hints=hints,
+                               portals=game.read_travel_portals(),
+                               guide_actions=actions)
                 share2 = sum(wider.rm.reachable) / max(1, len(wider.nav.nodes))
                 self.nav_note += f"; only {share:.0%} reachable, {share2:.0%} after joining touching levels"
                 if share2 > share + 0.05:
@@ -474,7 +519,9 @@ class Session:
                            carto=None if eng.carto is None else {"anchor": [eng.carto.proj.ax, eng.carto.proj.ay],
                                                                  "stand_cells": len(eng.carto.stand),
                                                                  "coverable": len(eng.carto.coverable)},
-                           hazards=len(eng.hazards), build_seconds=round(time.perf_counter() - _build_t0, 2), nav_note=self.nav_note, route_note=self.route_note, exits_found=self.exits_found, exit_note=game.exit_note, learned_note=self.learned_note,
+                           hazards=len(eng.hazards), rings_narrowed=getattr(eng, "narrowed_exits", []),
+                           rings_removed=getattr(eng, "removed_exits", []), rings_route_dropped=getattr(eng, "walked_through", []),
+                           build_seconds=round(time.perf_counter() - _build_t0, 2), nav_note=self.nav_note, route_note=self.route_note, exits_found=self.exits_found, exit_note=game.exit_note, learned_note=self.learned_note,
                            foes=game.foes_remaining(), killed=game.foes_killed(),
                            professions=list(game.player_professions()), signets=game.capture_signets(),
                            config={k: getattr(self.cfg, k) for k in dir(self.cfg) if not k.startswith("_")},
@@ -482,6 +529,7 @@ class Session:
             self.resumed = ""
             if goto is None:
                 _r0 = time.perf_counter()
+                self.ride_ground, self._resume_route, self._resume_ridden = None, False, []   # per visit
                 self._try_resume(mid)
                 self.log.event("resume_time", seconds=round(time.perf_counter() - _r0, 2))
                 self._last_resume_save = time.time()

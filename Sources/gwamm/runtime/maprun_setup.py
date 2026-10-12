@@ -26,10 +26,12 @@ class SetupMixin:
             return 0
         area = elites.AREAS.get(self.map_id)
         if area is None:
-            return min(c.max_signets, c.nodata_signets)
+            # none on the lists for this area: nothing to carry one for. No list at all: a spare.
+            return 0 if self.map_id in elites.NO_ELITES else min(c.max_signets, c.nodata_signets)
         primary, secondary = game.player_professions()
         learnt = {e.skill_id for e in area if game.skill_learnt(e.skill_id)}
-        return min(c.max_signets, len(elites.prioritise(primary, secondary, area, learnt, self.map_id)))
+        ordered = elites.prioritise(primary, secondary, area, learnt, self.map_id)
+        return min(c.max_signets, elites.signets_worth_carrying(ordered, c.nodata_signets))
 
     def _bar_for(self, want):
         c = self.campaign

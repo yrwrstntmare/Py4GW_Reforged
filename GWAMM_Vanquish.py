@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.50.20"
+SCRIPT_VERSION = "0.50.41"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
@@ -183,7 +183,14 @@ def _steps():
         def single():
             try:
                 mid = game.map_id()
-                if game.is_explorable() and session.cfg.do_vanquish and mid not in game.vanquished_ids():
+                if not game.is_explorable():
+                    # In a town or outpost with nothing queued: there is nothing to vanquish or
+                    # map here, so stop instead of walking round the town for map cells.
+                    session.log.event("campaign", phase="nothing_here", map_id=mid,
+                                      note="in an outpost with no area queued: queue an area or walk into one")
+                    return BehaviorTree(BehaviorTree.ActionNode(
+                        name="Nothing queued", action_fn=lambda: BehaviorTree.NodeState.SUCCESS))
+                if session.cfg.do_vanquish and mid not in game.vanquished_ids():
                     return _keep_old("single", BehaviorTree(MapRunNode(session, get_campaign(), mid, stay=True)))
             except Exception:
                 pass
@@ -309,10 +316,14 @@ def draw_status():
             why = {3.0: "only here", 2.0: "elsewhere only in done areas", 1.0: "also in an area still to do"}
             for i, e in enumerate(session.targets[:5]):
                 PyImGui.text_wrapped(f"{i + 1}. {e.name} from {e.boss} ({why.get(e.scarcity, '')}"
-                                     f"{'' if e.guaranteed else '; may not spawn'})")
+                                     f"{'' if e.guaranteed else '; only ' + e.when if e.when else '; may not spawn'})")
             PyImGui.text(f"Signets on your bar: {have}. It goes for the top {have}.")
         elif session.elite_plan is not None:
             PyImGui.text("None you still need.")
+        elif session.map_id in elites.NO_ELITES:
+            PyImGui.text_wrapped("No elite bosses in this area (per the wiki's capture lists), so no signet is carried.")
+        elif elites.AREAS.get(session.map_id):
+            PyImGui.text("None here for your professions.")
         else:
             PyImGui.text_wrapped("No boss list for this area; any boss of your professions is tried.")
 
@@ -684,8 +695,8 @@ def draw_campaign():
         res = c.results.get(mid)
         hops = c.hops(mid) if not why else None
         note = why or (f"walk through {hops} area{'s' if hops != 1 else ''} to get there" if hops else "")
-        if res:
-            note = (note + "; " if note else "") + f"last: {res['result']} ({res['minutes']} min)"
+        if res and res.get("result"):        # a record may hold only a remembered route, no run yet
+            note = (note + "; " if note else "") + f"last: {res['result']} ({res.get('minutes', '?')} min)"
         if why or running:
             PyImGui.text(("[queued] " if mid in c.queue else "         ") + game.map_name(mid) + (f"  - {note}" if note else ""))
         else:
@@ -696,13 +707,20 @@ def draw_campaign():
                 PyImGui.same_line(0.0, -1.0)
                 PyImGui.text(f"- {note}")
 
+    def safe_row(mid):
+        # one area's bad record must not hide it (or the areas after it) from the list
+        try:
+            row(mid)
+        except Exception as e:
+            PyImGui.text(f"         {game.map_name(mid)}  - list error: {e!r}")
+
     if needle:
         # searching: one flat list of matches across every region
         hits = [m for ids in c.regions().values() for m in ids if needle in game.map_name(m).lower()]
         if not hits:
             PyImGui.text("No area matches that.")
         for mid in hits[:40]:
-            row(mid)
+            safe_row(mid)
         return
     for region, ids in c.regions().items():
         left = sum(1 for m in ids if m not in done)
@@ -712,7 +730,7 @@ def draw_campaign():
             if PyImGui.button(f"Queue all in {region}"):
                 c.queue_all(done, region)
         for mid in ids:
-            row(mid)
+            safe_row(mid)
 
 def draw_active_area():
     """The one line that says which area the current run is for, in large type at the top."""

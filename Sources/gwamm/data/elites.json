@@ -1,5 +1,18 @@
 {
+"13": [],
+"17": [],
+"18": [],
 "26": [
+{
+"id": 365,
+"name": "\"Victory Is Mine!\"",
+"prof": 1,
+"boss": "Jono Yawpyawl",
+"guaranteed": false,
+"source": "location list",
+"when": "location incomplete: page text truncated after this location's first rows",
+"areas": 1
+},
 {
 "id": 317,
 "name": "Battle Rage",
@@ -73,7 +86,38 @@
 "areas": 4
 }
 ],
+"27": [],
 "31": [
+{
+"id": 992,
+"name": "Triple Chop",
+"prof": 1,
+"boss": "Sheng Pai",
+"guaranteed": false,
+"source": "location list",
+"when": "during What Waits in Shadow",
+"areas": 1
+},
+{
+"id": 1199,
+"name": "Glass Arrows",
+"prof": 2,
+"boss": "Jang Wen",
+"guaranteed": false,
+"source": "location list",
+"when": "during What Waits in Shadow",
+"areas": 3
+},
+{
+"id": 830,
+"name": "Ray of Judgment",
+"prof": 3,
+"boss": "Rei Bi",
+"guaranteed": false,
+"source": "location list",
+"when": "during What Waits in Shadow",
+"areas": 0
+},
 {
 "id": 282,
 "name": "Word of Healing",
@@ -93,12 +137,32 @@
 "areas": 1
 },
 {
+"id": 880,
+"name": "Stolen Speed",
+"prof": 5,
+"boss": "Seiran of the Cards",
+"guaranteed": false,
+"source": "location list",
+"when": "during What Waits in Shadow",
+"areas": 1
+},
+{
 "id": 1034,
 "name": "Seeping Wound",
 "prof": 7,
 "boss": "Shreader Sharptongue",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 988,
+"name": "Temple Strike",
+"prof": 7,
+"boss": "Lai, Graceful Blade",
+"guaranteed": false,
+"source": "location list",
+"when": "during What Waits in Shadow",
 "areas": 1
 },
 {
@@ -111,6 +175,83 @@
 "areas": 1
 }
 ],
+"33": [],
+"41": [],
+"42": [],
+"43": [],
+"44": [],
+"45": [],
+"46": [],
+"47": [],
+"48": [
+{
+"id": 125,
+"name": "Wither",
+"prof": 4,
+"boss": "Desnas Hubor",
+"guaranteed": false,
+"source": "location list",
+"when": "during Defend Denravi",
+"areas": 1
+}
+],
+"53": [],
+"54": [],
+"56": [],
+"58": [
+{
+"id": 125,
+"name": "Wither",
+"prof": 4,
+"boss": "Mentanl Arobo",
+"guaranteed": false,
+"source": "location list",
+"when": "during Defend North Kryta Province",
+"areas": 1
+}
+],
+"59": [
+{
+"id": 114,
+"name": "Aura of the Lich",
+"prof": 4,
+"boss": "Cerris",
+"guaranteed": false,
+"source": "profession list",
+"when": "War in Kryta",
+"areas": 0
+}
+],
+"60": [],
+"61": [],
+"62": [
+{
+"id": 941,
+"name": "Blessed Light",
+"prof": 3,
+"boss": "Amalek the Unmerciful",
+"guaranteed": false,
+"source": "profession list",
+"when": "War in Kryta",
+"areas": 1
+}
+],
+"63": [],
+"64": [
+{
+"id": 381,
+"name": "Hundred Blades",
+"prof": 1,
+"boss": "Galrath",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 1
+}
+],
+"87": [],
+"88": [],
+"89": [],
 "90": [
 {
 "id": 318,
@@ -295,6 +436,7 @@
 "areas": 4
 }
 ],
+"92": [],
 "93": [
 {
 "id": 365,
@@ -573,6 +715,16 @@
 "areas": 1
 },
 {
+"id": 125,
+"name": "Wither",
+"prof": 4,
+"boss": "Evirso Sectus",
+"guaranteed": false,
+"source": "location list",
+"when": "during Defend Droknar's Forge",
+"areas": 1
+},
+{
 "id": 47,
 "name": "Ineptitude",
 "prof": 5,
@@ -658,6 +810,16 @@
 "areas": 3
 },
 {
+"id": 86,
+"name": "Grenth's Balance",
+"prof": 4,
+"boss": "Mragga",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Hero's Challenge",
+"areas": 1
+},
+{
 "id": 146,
 "name": "Offering of Blood",
 "prof": 4,
@@ -703,6 +865,90 @@
 "areas": 4
 }
 ],
+"99": [],
+"100": [],
+"101": [],
+"102": [],
+"103": [],
+"104": [],
+"105": [
+{
+"id": 338,
+"name": "Eviscerate",
+"prof": 1,
+"boss": "Phlog the Indomitable",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 2
+},
+{
+"id": 465,
+"name": "Greater Conflagration",
+"prof": 2,
+"boss": "Staggh the Fervid",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 0
+},
+{
+"id": 451,
+"name": "Melandru's Resilience",
+"prof": 2,
+"boss": "Gigas Expii",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 0
+},
+{
+"id": 126,
+"name": "Life Transfer",
+"prof": 4,
+"boss": "Lugg the Malignant",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Titan Source",
+"areas": 2
+},
+{
+"id": 125,
+"name": "Wither",
+"prof": 4,
+"boss": "Ludo Ossidi",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Titan Source",
+"areas": 1
+},
+{
+"id": 79,
+"name": "Energy Drain",
+"prof": 5,
+"boss": "Druul the Untamed",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Titan Source",
+"areas": 5
+},
+{
+"id": 52,
+"name": "Panic",
+"prof": 5,
+"boss": "Mallus Funo",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Titan Source",
+"areas": 0
+}
+],
+"106": [],
+"107": [],
+"108": [],
+"110": [],
+"111": [],
+"112": [],
 "113": [
 {
 "id": 269,
@@ -714,6 +960,19 @@
 "areas": 3
 }
 ],
+"114": [
+{
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Yxthoshth",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Ranger's Path",
+"areas": 8
+}
+],
+"115": [],
 "121": [
 {
 "id": 265,
@@ -1084,6 +1343,7 @@
 "areas": 1
 }
 ],
+"196": [],
 "197": [
 {
 "id": 298,
@@ -1104,12 +1364,32 @@
 "areas": 1
 },
 {
+"id": 880,
+"name": "Stolen Speed",
+"prof": 5,
+"boss": "Rai Zhon the Manipulator",
+"guaranteed": false,
+"source": "location list",
+"when": "Winds of Change",
+"areas": 1
+},
+{
 "id": 185,
 "name": "Mind Burn",
 "prof": 6,
 "boss": "The Afflicted Kam",
 "guaranteed": true,
 "source": "location list",
+"areas": 2
+},
+{
+"id": 185,
+"name": "Mind Burn",
+"prof": 6,
+"boss": "Xi Lin of the Flames",
+"guaranteed": false,
+"source": "location list",
+"when": "Winds of Change",
 "areas": 2
 },
 {
@@ -1157,6 +1437,16 @@
 "boss": "KaySey Stormray",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 817,
+"name": "Discord",
+"prof": 4,
+"boss": "Xiriss Stickleback",
+"guaranteed": false,
+"source": "location list",
+"when": "during Night Raiders quest",
 "areas": 1
 },
 {
@@ -1243,6 +1533,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 317,
+"name": "Battle Rage",
+"prof": 1,
+"boss": "Arrahhsh Mountainclub",
+"guaranteed": false,
+"source": "location list",
+"when": "during Return of the Yeti",
+"areas": 4
 },
 {
 "id": 946,
@@ -1496,6 +1796,16 @@
 "areas": 4
 },
 {
+"id": 354,
+"name": "Earth Shaker",
+"prof": 1,
+"boss": "Monstrous Afflicted Warrior",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 2
+},
+{
 "id": 831,
 "name": "Primal Rage",
 "prof": 1,
@@ -1514,6 +1824,16 @@
 "areas": 3
 },
 {
+"id": 1726,
+"name": "Magebane Shot",
+"prof": 2,
+"boss": "Monstrous Afflicted Ranger",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 1
+},
+{
 "id": 397,
 "name": "Quick Shot",
 "prof": 2,
@@ -1521,6 +1841,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 3
+},
+{
+"id": 830,
+"name": "Ray of Judgment",
+"prof": 3,
+"boss": "Monstrous Afflicted Monk",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 0
 },
 {
 "id": 806,
@@ -1532,6 +1862,16 @@
 "areas": 3
 },
 {
+"id": 142,
+"name": "Lingering Curse",
+"prof": 4,
+"boss": "Monstrous Afflicted Necromancer",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 2
+},
+{
 "id": 113,
 "name": "Tainted Flesh",
 "prof": 4,
@@ -1539,6 +1879,26 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 4
+},
+{
+"id": 39,
+"name": "Energy Surge",
+"prof": 5,
+"boss": "Monstrous Afflicted Mesmer",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 4
+},
+{
+"id": 1367,
+"name": "Blinding Surge",
+"prof": 6,
+"boss": "Monstrous Afflicted Elementalist",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 1
 },
 {
 "id": 937,
@@ -1559,12 +1919,32 @@
 "areas": 3
 },
 {
+"id": 1649,
+"name": "Way of the Assassin",
+"prof": 7,
+"boss": "Monstrous Afflicted Assassin",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
+"areas": 1
+},
+{
 "id": 1240,
 "name": "Soul Twisting",
 "prof": 8,
 "boss": "Ritualist's Construct",
 "guaranteed": true,
 "source": "location list",
+"areas": 2
+},
+{
+"id": 1240,
+"name": "Soul Twisting",
+"prof": 8,
+"boss": "Monstrous Afflicted Ritualist",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Morostav Trail",
 "areas": 2
 }
 ],
@@ -1642,6 +2022,16 @@
 "areas": 2
 },
 {
+"id": 826,
+"name": "Shadow Form",
+"prof": 7,
+"boss": "Elusive Black Moa",
+"guaranteed": false,
+"source": "location list",
+"when": "during Norn Catering",
+"areas": 1
+},
+{
 "id": 790,
 "name": "Vengeful Was Khanhei",
 "prof": 8,
@@ -1707,6 +2097,16 @@
 "areas": 1
 },
 {
+"id": 771,
+"name": "Aura of Displacement",
+"prof": 7,
+"boss": "Maximole",
+"guaranteed": false,
+"source": "location list",
+"when": "during Revolt of the Dredge",
+"areas": 1
+},
+{
 "id": 799,
 "name": "Beguiling Haze",
 "prof": 7,
@@ -1736,6 +2136,16 @@
 "areas": 4
 },
 {
+"id": 354,
+"name": "Earth Shaker",
+"prof": 1,
+"boss": "Monstrous Afflicted Warrior",
+"guaranteed": false,
+"source": "location list",
+"when": "during Cleansing Pongmei Valley",
+"areas": 2
+},
+{
 "id": 461,
 "name": "Spike Trap",
 "prof": 2,
@@ -1760,6 +2170,16 @@
 "boss": "The Afflicted Hakaru",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 1268,
+"name": "Weapon of Quickening",
+"prof": 8,
+"boss": "Uris Tong of Ash",
+"guaranteed": false,
+"source": "location list",
+"when": "Winds of Change",
 "areas": 1
 }
 ],
@@ -1819,6 +2239,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 993,
+"name": "Enraged Smash",
+"prof": 1,
+"boss": "Tuila the Club",
+"guaranteed": false,
+"source": "location list",
+"when": "Winds of Change",
+"areas": 1
 }
 ],
 "233": [
@@ -1830,6 +2260,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 3426,
+"name": "Seven Weapons Stance",
+"prof": 1,
+"boss": "Blade Ancient Syu-Shai",
+"guaranteed": false,
+"source": "location list",
+"when": "requires a party member to be carrying a Proof of Triumph",
+"areas": 0
 },
 {
 "id": 997,
@@ -1877,6 +2317,16 @@
 "areas": 1
 },
 {
+"id": 3428,
+"name": "Shadow Theft",
+"prof": 7,
+"boss": "Blade Ancient Syu-Shai",
+"guaranteed": false,
+"source": "location list",
+"when": "requires a party member to be carrying a Proof of Triumph",
+"areas": 0
+},
+{
 "id": 801,
 "name": "Shroud of Silence",
 "prof": 7,
@@ -1893,8 +2343,22 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 2
+},
+{
+"id": 3429,
+"name": "Weapons of Three Forges",
+"prof": 8,
+"boss": "Blade Ancient Syu-Shai",
+"guaranteed": false,
+"source": "location list",
+"when": "requires a party member to be carrying a Proof of Triumph",
+"areas": 0
 }
 ],
+"235": [],
+"236": [],
+"237": [],
+"238": [],
 "239": [
 {
 "id": 892,
@@ -1906,12 +2370,32 @@
 "areas": 1
 },
 {
+"id": 1123,
+"name": "Life Sheath",
+"prof": 3,
+"boss": "Ganshu the Scribe",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Gangs of Kaineng",
+"areas": 1
+},
+{
 "id": 1129,
 "name": "Word of Censure",
 "prof": 3,
 "boss": "Shen, the Magistrate",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 1129,
+"name": "Word of Censure",
+"prof": 3,
+"boss": "Quufu",
+"guaranteed": false,
+"source": "location list",
+"when": "during Straight to the Top",
 "areas": 1
 },
 {
@@ -1925,6 +2409,16 @@
 }
 ],
 "240": [
+{
+"id": 993,
+"name": "Enraged Smash",
+"prof": 1,
+"boss": "Afflicted Guardsman Chun",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Afflicted Guard",
+"areas": 1
+},
 {
 "id": 992,
 "name": "Triple Chop",
@@ -1942,6 +2436,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 164,
+"name": "Elemental Attunement",
+"prof": 6,
+"boss": "Chung, the Attuned",
+"guaranteed": false,
+"source": "location list",
+"when": "during Eliminate the Am Fah",
+"areas": 2
 },
 {
 "id": 1045,
@@ -2009,6 +2513,8 @@
 "areas": 4
 }
 ],
+"245": [],
+"246": [],
 "247": [
 {
 "id": 907,
@@ -2044,6 +2550,16 @@
 "boss": "Ilidus of the Empty Palm",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 987,
+"name": "Way of the Empty Palm",
+"prof": 7,
+"boss": "Senkai, Lord of the 1,000 Daggers Guild",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Halcyon Job",
 "areas": 1
 }
 ],
@@ -2143,6 +2659,7 @@
 "areas": 1
 }
 ],
+"313": [],
 "369": [
 {
 "id": 355,
@@ -2499,6 +3016,16 @@
 "areas": 1
 },
 {
+"id": 395,
+"name": "Barrage",
+"prof": 2,
+"boss": "Commander Kubeh",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 2
+},
+{
 "id": 820,
 "name": "Depravity",
 "prof": 4,
@@ -2515,6 +3042,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 205,
+"name": "Lightning Surge",
+"prof": 6,
+"boss": "Zephyr Hedger",
+"guaranteed": false,
+"source": "location list",
+"when": "during Koss's Elixir",
+"areas": 3
 },
 {
 "id": 1732,
@@ -2544,6 +3081,7 @@
 "areas": 1
 }
 ],
+"382": [],
 "384": [
 {
 "id": 1696,
@@ -2616,6 +3154,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 1756,
+"name": "Grenth's Grasp",
+"prof": 10,
+"boss": "Lord Yama the Vengeful",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 1
 }
 ],
 "386": [
@@ -2635,6 +3183,16 @@
 "boss": "Chiossen, Soothing Breeze",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 1362,
+"name": "Corrupt Enchantment",
+"prof": 4,
+"boss": "Torment Weaver",
+"guaranteed": false,
+"source": "location list",
+"when": "during Battle of Turai's Procession",
 "areas": 1
 },
 {
@@ -2741,6 +3299,16 @@
 "areas": 1
 },
 {
+"id": 54,
+"name": "Crippling Anguish",
+"prof": 5,
+"boss": "Ripened Mirage Iboga",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 8
+},
+{
 "id": 1771,
 "name": "Song of Restoration",
 "prof": 9,
@@ -2799,6 +3367,16 @@
 "areas": 4
 },
 {
+"id": 273,
+"name": "Spell Breaker",
+"prof": 3,
+"boss": "Preceptor Zunark",
+"guaranteed": false,
+"source": "location list",
+"when": "during To the Rescue",
+"areas": 2
+},
+{
 "id": 1359,
 "name": "Pain of Disenchantment",
 "prof": 4,
@@ -2855,6 +3433,16 @@
 "areas": 1
 },
 {
+"id": 1356,
+"name": "Contagion",
+"prof": 4,
+"boss": "Harrk Facestab",
+"guaranteed": false,
+"source": "location list",
+"when": "during Desperate Measures",
+"areas": 3
+},
+{
 "id": 884,
 "name": "Searing Flames",
 "prof": 6,
@@ -2870,6 +3458,16 @@
 "boss": "Churahm, Spirit Warrior",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 1596,
+"name": "\"Incoming!\"",
+"prof": 9,
+"boss": "Render",
+"guaranteed": false,
+"source": "location list",
+"when": "during Desperate Measures",
 "areas": 1
 }
 ],
@@ -2996,6 +3594,16 @@
 "areas": 8
 },
 {
+"id": 63,
+"name": "Keystone Signet",
+"prof": 5,
+"boss": "Qwytzylkak",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 1
+},
+{
 "id": 1644,
 "name": "Wastrel's Collapse",
 "prof": 7,
@@ -3034,12 +3642,32 @@
 "areas": 4
 },
 {
+"id": 185,
+"name": "Mind Burn",
+"prof": 6,
+"boss": "Fire Lord",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 2
+},
+{
 "id": 1587,
 "name": "Angelic Bond",
 "prof": 9,
 "boss": "Shakor Firespear",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 1517,
+"name": "Vow of Silence",
+"prof": 10,
+"boss": "Water Lord",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
 "areas": 1
 },
 {
@@ -3099,6 +3727,59 @@
 "areas": 2
 }
 ],
+"430": [],
+"432": [
+{
+"id": 1412,
+"name": "\"You're All Alone!\"",
+"prof": 1,
+"boss": "Commander Bahreht",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 1
+},
+{
+"id": 1395,
+"name": "Balthazar's Pendulum",
+"prof": 3,
+"boss": "Captain Shehnahr",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Land of Heroes",
+"areas": 1
+},
+{
+"id": 808,
+"name": "Reaper's Mark",
+"prof": 4,
+"boss": "Midshipman Beraidun",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Land of Heroes",
+"areas": 1
+},
+{
+"id": 1554,
+"name": "Crippling Anthem",
+"prof": 9,
+"boss": "Lieutenant Mahrik",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Land of Heroes",
+"areas": 1
+},
+{
+"id": 1759,
+"name": "Vow of Strength",
+"prof": 10,
+"boss": "Ensign Jahan",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 1
+}
+],
 "437": [
 {
 "id": 1698,
@@ -3108,6 +3789,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 273,
+"name": "Spell Breaker",
+"prof": 3,
+"boss": "Zadukar the Blessed",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Deal's a Deal",
+"areas": 2
 },
 {
 "id": 74,
@@ -3157,6 +3848,16 @@
 "areas": 1
 },
 {
+"id": 3425,
+"name": "Judgment Strike",
+"prof": 3,
+"boss": "Yoannh the Rebuilder",
+"guaranteed": false,
+"source": "location list",
+"when": "requires a party member to be carrying a Proof of Triumph",
+"areas": 0
+},
+{
 "id": 294,
 "name": "Signet of Judgment",
 "prof": 3,
@@ -3164,6 +3865,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 5
+},
+{
+"id": 1362,
+"name": "Corrupt Enchantment",
+"prof": 4,
+"boss": "Rebirther Jirath",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Tasty Morsel",
+"areas": 1
 },
 {
 "id": 79,
@@ -3182,6 +3893,26 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 1
+},
+{
+"id": 3431,
+"name": "Heroic Refrain",
+"prof": 9,
+"boss": "Yoannh the Rebuilder",
+"guaranteed": false,
+"source": "location list",
+"when": "requires a party member to be carrying a Proof of Triumph",
+"areas": 0
+},
+{
+"id": 3430,
+"name": "Vow of Revolution",
+"prof": 10,
+"boss": "Yoannh the Rebuilder",
+"guaranteed": false,
+"source": "location list",
+"when": "requires a party member to be carrying a Proof of Triumph",
+"areas": 0
 }
 ],
 "441": [
@@ -3271,12 +4002,42 @@
 ],
 "444": [
 {
+"id": 1697,
+"name": "Magehunter's Smash",
+"prof": 1,
+"boss": "Dupek the Mighty",
+"guaranteed": false,
+"source": "location list",
+"when": "during quest",
+"areas": 1
+},
+{
+"id": 1362,
+"name": "Corrupt Enchantment",
+"prof": 4,
+"boss": "Hauseh the Defiler",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Show of Force",
+"areas": 1
+},
+{
 "id": 1352,
 "name": "Order of Undeath",
 "prof": 4,
 "boss": "Bohdabi the Destructive",
 "guaranteed": true,
 "source": "location list",
+"areas": 1
+},
+{
+"id": 1664,
+"name": "Invoke Lightning",
+"prof": 6,
+"boss": "Tanmahk the Arcane",
+"guaranteed": false,
+"source": "location list",
+"when": "during A Show of Force",
 "areas": 1
 },
 {
@@ -3383,6 +4144,7 @@
 "areas": 1
 }
 ],
+"481": [],
 "482": [
 {
 "id": 338,
@@ -3412,6 +4174,8 @@
 "areas": 2
 }
 ],
+"483": [],
+"484": [],
 "485": [
 {
 "id": 282,
@@ -3430,9 +4194,39 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 8
+},
+{
+"id": 1749,
+"name": "Weapon of Fury",
+"prof": 8,
+"boss": "Shock of Destruction",
+"guaranteed": false,
+"source": "location list",
+"when": "during O Brave New World",
+"areas": 2
+},
+{
+"id": 1499,
+"name": "Pious Renewal",
+"prof": 10,
+"boss": "Facet of Spirit",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Cipher of Kormir",
+"areas": 1
 }
 ],
 "486": [
+{
+"id": 862,
+"name": "Ravenous Gaze",
+"prof": 4,
+"boss": "Moa'vu'Kaal",
+"guaranteed": false,
+"source": "location list",
+"when": "during Moa'vu'Kaal, Awakened quest",
+"areas": 1
+},
 {
 "id": 939,
 "name": "Icy Shackles",
@@ -3443,6 +4237,7 @@
 "areas": 2
 }
 ],
+"488": [],
 "499": [
 {
 "id": 1465,
@@ -3483,6 +4278,16 @@
 "areas": 2
 },
 {
+"id": 261,
+"name": "Shield of Regeneration",
+"prof": 3,
+"boss": "Facet of Existence",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Cipher of Dwayna",
+"areas": 3
+},
+{
 "id": 937,
 "name": "Shockwave",
 "prof": 6,
@@ -3521,6 +4326,26 @@
 "areas": 2
 },
 {
+"id": 329,
+"name": "Skull Crack",
+"prof": 1,
+"boss": "Chieftain Ulgrimar Gnash",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Big Unfriendly Jotun",
+"areas": 2
+},
+{
+"id": 329,
+"name": "Skull Crack",
+"prof": 1,
+"boss": "Lann Browsmasher",
+"guaranteed": false,
+"source": "location list",
+"when": "during Nornhood",
+"areas": 2
+},
+{
 "id": 393,
 "name": "Crippling Shot",
 "prof": 2,
@@ -3539,6 +4364,16 @@
 "areas": 1
 },
 {
+"id": 1339,
+"name": "Symbols of Inspiration",
+"prof": 5,
+"boss": "Silver Vaettir",
+"guaranteed": false,
+"source": "location list",
+"when": "spawns under specific circumstances",
+"areas": 0
+},
+{
 "id": 1754,
 "name": "Onslaught",
 "prof": 10,
@@ -3549,6 +4384,16 @@
 }
 ],
 "546": [
+{
+"id": 355,
+"name": "Devastating Hammer",
+"prof": 1,
+"boss": "Krak Flamewhip",
+"guaranteed": false,
+"source": "location list",
+"when": "during Krak's Cavalry",
+"areas": 4
+},
 {
 "id": 1355,
 "name": "Jagged Bones",
@@ -3575,6 +4420,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 3
+},
+{
+"id": 937,
+"name": "Shockwave",
+"prof": 6,
+"boss": "Ssissth the Leviathan",
+"guaranteed": false,
+"source": "location list",
+"when": "before completing Prenuptial Disagreement; must have Factions in order to capture the skill from GW:EN",
+"areas": 4
 }
 ],
 "548": [
@@ -3599,6 +4454,66 @@
 ],
 "553": [
 {
+"id": 372,
+"name": "Gladiator's Defense",
+"prof": 1,
+"boss": "Facet of Destruction",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Path to Revelations",
+"areas": 0
+},
+{
+"id": 451,
+"name": "Melandru's Resilience",
+"prof": 2,
+"boss": "Facet of Creation",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Path to Revelations",
+"areas": 0
+},
+{
+"id": 261,
+"name": "Shield of Regeneration",
+"prof": 3,
+"boss": "Facet of Existence",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Path to Revelations",
+"areas": 3
+},
+{
+"id": 86,
+"name": "Grenth's Balance",
+"prof": 4,
+"boss": "Facet of Death",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Path to Revelations",
+"areas": 1
+},
+{
+"id": 126,
+"name": "Life Transfer",
+"prof": 4,
+"boss": "Tanto the Grim",
+"guaranteed": false,
+"source": "location list",
+"when": "during Haunted",
+"areas": 2
+},
+{
+"id": 82,
+"name": "Mantra of Recall",
+"prof": 5,
+"boss": "Facet of Illusions",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Path to Revelations",
+"areas": 1
+},
+{
 "id": 209,
 "name": "Mind Freeze",
 "prof": 6,
@@ -3606,6 +4521,16 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 5
+},
+{
+"id": 1499,
+"name": "Pious Renewal",
+"prof": 10,
+"boss": "Facet of Spirit",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Path to Revelations",
+"areas": 1
 },
 {
 "id": 1767,
@@ -3628,6 +4553,26 @@
 "areas": 3
 },
 {
+"id": 355,
+"name": "Devastating Hammer",
+"prof": 1,
+"boss": "Inscribed Ettin",
+"guaranteed": false,
+"source": "location list",
+"when": "during Finding Gadd",
+"areas": 4
+},
+{
+"id": 86,
+"name": "Grenth's Balance",
+"prof": 4,
+"boss": "Facet of Death",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Cipher of Grenth",
+"areas": 1
+},
+{
 "id": 53,
 "name": "Migraine",
 "prof": 5,
@@ -3647,6 +4592,16 @@
 }
 ],
 "566": [
+{
+"id": 372,
+"name": "Gladiator's Defense",
+"prof": 1,
+"boss": "Facet of Destruction",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Cipher of Balthazar",
+"areas": 0
+},
 {
 "id": 1199,
 "name": "Glass Arrows",
@@ -3720,9 +4675,49 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 8
+},
+{
+"id": 82,
+"name": "Mantra of Recall",
+"prof": 5,
+"boss": "Facet of Illusions",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Cipher of Lyssa",
+"areas": 1
+},
+{
+"id": 1602,
+"name": "Stunning Strike",
+"prof": 9,
+"boss": "Timberland Guardian",
+"guaranteed": false,
+"source": "location list",
+"when": "during Lab Space",
+"areas": 0
 }
 ],
 "572": [
+{
+"id": 354,
+"name": "Earth Shaker",
+"prof": 1,
+"boss": "Alpha Tyrannus",
+"guaranteed": false,
+"source": "location list",
+"when": "during Norn Catering",
+"areas": 2
+},
+{
+"id": 451,
+"name": "Melandru's Resilience",
+"prof": 2,
+"boss": "Facet of Creation",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Cipher of Melandru",
+"areas": 0
+},
 {
 "id": 47,
 "name": "Ineptitude",
@@ -3780,6 +4775,16 @@
 "areas": 3
 },
 {
+"id": 1662,
+"name": "Mind Blast",
+"prof": 6,
+"boss": "Scorch Maulclaw",
+"guaranteed": false,
+"source": "profession list",
+"when": "during The Dawn of Rebellion",
+"areas": 0
+},
+{
 "id": 236,
 "name": "Mist Form",
 "prof": 6,
@@ -3791,12 +4796,42 @@
 ],
 "649": [
 {
+"id": 395,
+"name": "Barrage",
+"prof": 2,
+"boss": "Docu Kindleshot",
+"guaranteed": false,
+"source": "location list",
+"when": "Shares spawn points with Chaelse Flameshielder; the boss that spawns depends on story and quest progression (only one appears)",
+"areas": 2
+},
+{
+"id": 1123,
+"name": "Life Sheath",
+"prof": 3,
+"boss": "Chaelse Flameshielder",
+"guaranteed": false,
+"source": "location list",
+"when": "Shares spawn points with Docu Kindleshot; the boss that spawns depends on story and quest progression (only one appears)",
+"areas": 1
+},
+{
 "id": 836,
 "name": "Ride the Lightning",
 "prof": 6,
 "boss": "Thraexis Thundermaw",
 "guaranteed": true,
 "source": "location list",
+"areas": 2
+},
+{
+"id": 239,
+"name": "Ward Against Harm",
+"prof": 6,
+"boss": "Torch Harrowkeeper",
+"guaranteed": false,
+"source": "profession list",
+"when": "during Be Very, Very Quiet...",
 "areas": 2
 }
 ],
@@ -3820,6 +4855,36 @@
 "areas": 2
 },
 {
+"id": 338,
+"name": "Eviscerate",
+"prof": 1,
+"boss": "Gharaz the Glutton",
+"guaranteed": false,
+"source": "location list",
+"when": "during Forbidden Fruit",
+"areas": 2
+},
+{
+"id": 889,
+"name": "Forceful Blow",
+"prof": 1,
+"boss": "Ignus the Eternal",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Smell of Titan in the Morning",
+"areas": 1
+},
+{
+"id": 3427,
+"name": "\"Together as One!\"",
+"prof": 2,
+"boss": "Fureyst Sharpsight",
+"guaranteed": false,
+"source": "location list",
+"when": "Requires a party member to be carrying a Proof of Triumph",
+"areas": 0
+},
+{
 "id": 126,
 "name": "Life Transfer",
 "prof": 4,
@@ -3829,6 +4894,26 @@
 "areas": 2
 },
 {
+"id": 808,
+"name": "Reaper's Mark",
+"prof": 4,
+"boss": "Rend Ragemauler",
+"guaranteed": false,
+"source": "location list",
+"when": "during The Assassin's Revenge",
+"areas": 1
+},
+{
+"id": 808,
+"name": "Reaper's Mark",
+"prof": 4,
+"boss": "Vyrrgis the Pestilent",
+"guaranteed": false,
+"source": "profession list",
+"when": "during Single Ugly Grawl quest",
+"areas": 1
+},
+{
 "id": 5,
 "name": "Power Block",
 "prof": 5,
@@ -3836,6 +4921,26 @@
 "guaranteed": true,
 "source": "location list",
 "areas": 2
+},
+{
+"id": 3422,
+"name": "Time Ward",
+"prof": 5,
+"boss": "Fureyst Sharpsight",
+"guaranteed": false,
+"source": "location list",
+"when": "Requires a party member to be carrying a Proof of Triumph",
+"areas": 0
+},
+{
+"id": 178,
+"name": "Ether Prodigy",
+"prof": 6,
+"boss": "Straut Flamebourne",
+"guaranteed": false,
+"source": "location list",
+"when": "during Fire and Pain",
+"areas": 0
 },
 {
 "id": 884,
@@ -3864,5 +4969,6 @@
 "source": "location list",
 "areas": 3
 }
-]
+],
+"837": []
 }

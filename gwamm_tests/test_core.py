@@ -55,6 +55,18 @@ def test_elites():
     assert pick == []
     sec, pick = elites.choose(6, area, learnt={226, 236}, signets=2, unlocked={7})
     assert pick == []
+    # quest-time bosses: listed, never counted on, and no signet carried just for them
+    wastes = elites.AREAS[444]
+    maybe = [e for e in wastes if e.when]
+    assert maybe and all(not e.guaranteed for e in maybe) and any(e.guaranteed for e in wastes)
+    order = elites.prioritise(4, 6, wastes, set(), 444)          # necromancer / elementalist
+    assert [e.when for e in order[:2]] == ["", ""] and len(order) == 4
+    assert elites.signets_worth_carrying(order, 1) == 2
+    assert elites.signets_worth_carrying([e for e in order if e.when], 1) == 1
+    assert elites.signets_worth_carrying([e for e in order if e.when], 0) == 0
+    assert elites.signets_worth_carrying([], 1) == 0
+    # areas the lists cover with no elite boss are known as such, not as "no data"
+    assert 33 in elites.NO_ELITES and 33 not in elites.AREAS and not (elites.NO_ELITES & set(elites.AREAS))
     print("elites ok")
 
 
@@ -78,6 +90,164 @@ def test_route_and_trap_together():
     eng.hazards = [eng.nav.nodes[eng.player_node]]
     eng.update(start, [], 50, 0.0)
     assert eng.next_step() is not None
+
+
+def test_route_with_actions_in_order():
+    """A route with things to do along it is walked as written from its first point (not turned
+    to start at the nearest one), and the engine says which original point comes next."""
+    import json
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine
+    traps, start, _b = load()
+    route = [tuple(p) for p in json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                             "Sources", "gwamm", "data", "routes.json")))["91"]["points"]]
+    mid = route[len(route) // 2]
+    eng = Engine(traps, mid, guide=route, guide_actions=[{"at": 3, "do": "wait", "value": 100}])
+    assert eng.guide_src and eng.guide_src == sorted(eng.guide_src)
+    assert eng.next_guide_src() == eng.guide_src[0] and eng.guide_src[0] <= 2
+    plain = Engine(traps, mid, guide=route)
+    assert plain.guide_src is None and plain.next_guide_src() == 10 ** 9
+    eng.guide_i = len(eng.guide)
+    assert eng.next_guide_src() == 10 ** 9
+
+
+def test_route_with_actions_survives_death():
+    """A death by the next point of an in-order route: that point is still the plan, and map
+    cells far from the route are left for after it (the route was dropped for 10 minutes and
+    the party crossed the area for the map). A plain route still works elsewhere meanwhile."""
+    import json
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine, Objective
+    traps, start, _b = load()
+    route = [tuple(p) for p in json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                             "Sources", "gwamm", "data", "routes.json")))["91"]["points"]]
+    for actions, kept in (([{"at": 3, "do": "wait", "value": 100}], True), (None, False)):
+        eng = Engine(traps, route[0], guide=route, guide_actions=actions)
+        eng.update(route[0], [], 50, 0.0)
+        assert eng.guiding()
+        nxt = eng.guide[eng.guide_i]
+        far = max(route, key=lambda p: (p[0] - nxt[0]) ** 2 + (p[1] - nxt[1]) ** 2)
+        cell = Objective("carto", ("carto", (0, 0)), far, eng.rm.region_at(*far), 5.0)   # a map cell across the area
+        assert eng._cost(cell.pos, cell.region) > eng.cfg.carto_route_reach
+        real = eng._all_candidates
+        eng._all_candidates = lambda: real() + [cell]
+        eng.record_death(nxt)
+        eng.update(route[0], [], 50, 1.0)
+        kinds = [o.kind for o in eng._candidates()]
+        assert ("guide" in kinds) == kept and ("carto" in kinds) == (not kept), (actions, kinds)
+
+
+def test_wall_never_shuts_the_only_way():
+    """A spot the party was pinned at is kept off, unless that would cut part of the map away:
+    then it is the only way through and is walked with care instead."""
+    import math
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine
+    traps, start, _b = load()
+    eng = Engine(traps, start)
+    nav = eng.nav
+    reach = [i for i, ok in enumerate(nav.component(nav.nearest_node(*start))) if ok]
+    cuts = {}
+    for i in reach[::max(1, len(reach) // 150)]:
+        x, y = nav.nodes[i]
+        if math.hypot(x - start[0], y - start[1]) > 1500.0:
+            cuts.setdefault(eng._wall_cuts(start, (x, y)), (x, y))
+        if len(cuts) == 2:
+            break
+    assert set(cuts) == {True, False}, "the map must offer a passage and open ground"
+    for cut, (x, y) in cuts.items():
+        eng.player_xy = start
+        spot = eng.add_wall((x - 350.0, y), (x + 100.0, y), detour=False)
+        assert spot is not None
+    pen = eng._hazard_penalty()
+    for (x, y) in eng.walls:
+        at = nav.nearest_node(x, y)
+        assert pen[at] == (6.0 if (x, y) in eng.soft_walls else 1000.0), (pen[at], (x, y) in eng.soft_walls)
+    assert len(eng.walls) == 2 and len(eng.soft_walls) >= 1 and eng.cfg.wall_radius <= 250.0
+
+
+def test_shown_portal_keeps_its_doorway():
+    """When rings round might-be doors cut the map up and are taken off wholesale, a portal the
+    game shows at the edge of the map keeps its doorway ring; unnamed points do not."""
+    import math
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine
+    from Sources.gwamm.core.geometry import NavGraph
+    traps, start, _b = load()
+    nav = NavGraph(traps)
+    s0 = nav.nearest_node(*start)
+    seen = nav.component(s0)
+    reach = [i for i, ok in enumerate(seen) if ok]
+    far = lambda i: (nav.nodes[i][0] - start[0]) ** 2 + (nav.nodes[i][1] - start[1]) ** 2
+    door = nav.nodes[max((i for i in reach if len(nav.adj[i]) <= 2), key=far)]        # a dead end far away
+    spread = [nav.nodes[i] for i in reach[::max(1, len(reach) // 40)] if far(i) > 3000.0 ** 2
+              and math.hypot(nav.nodes[i][0] - door[0], nav.nodes[i][1] - door[1]) > 2500.0]
+    exits = [(door[0], door[1], 700.0)] + [(x, y, 700.0) for x, y in spread]
+    plain = Engine(traps, start, exits=exits)
+    shown = Engine(traps, start, exits=exits, portals=[door])
+    key = [float(door[0]), float(door[1])]
+    assert len(plain.removed_exits) >= len(spread) // 2, "the scene must force rings to be taken off"
+    assert key in plain.removed_exits and key not in shown.removed_exits, (len(plain.removed_exits), len(shown.removed_exits))
+    assert shown.nav.in_no_go(door[0], door[1])
+
+
+def test_route_groups_now_or_later():
+    """In-order route: a group in sight is taken now unless a later route point passes clearly
+    nearer to it; a group the route never gets nearer to is not left to come back for."""
+    import json
+    import math
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine, Objective
+    traps, start, _b = load()
+    route = [tuple(p) for p in json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                                             "Sources", "gwamm", "data", "routes.json")))["91"]["points"]]
+    eng = Engine(traps, route[0], guide=route, guide_actions=[{"at": 3, "do": "wait", "value": 100}])
+    eng.update(route[0], [], 50, 0.0)
+    far = max(eng.guide[eng.guide_i + 2:], key=lambda p: (p[0] - route[0][0]) ** 2 + (p[1] - route[0][1]) ** 2)
+    by_later = (far[0] + 300.0, far[1])                       # stands by a point the route reaches later
+    assert eng.route_comes_closer(by_later)
+    here = (eng.player_xy[0] + 800.0, eng.player_xy[1])       # on top of us: fought, not weighed
+    assert not eng.route_comes_closer(here)
+    nxt = eng.guide[eng.guide_i]
+    off = (2 * eng.player_xy[0] - nxt[0], 2 * eng.player_xy[1] - nxt[1])   # behind us, away from the route
+    if min(math.hypot(off[0] - x, off[1] - y) for x, y in eng.guide) > math.hypot(off[0] - eng.player_xy[0], off[1] - eng.player_xy[1]):
+        assert not eng.route_comes_closer(off)                # the route never gets nearer: now
+    later = Objective("cluster", ("cluster", 901), by_later, eng.rm.region_at(*by_later), 25.0)
+    real = eng._all_candidates
+    eng._all_candidates = lambda: real() + [later]
+    assert later not in eng._candidates() and eng.route_waiting == 1
+    plain = Engine(traps, route[0], guide=route)
+    plain.update(route[0], [], 50, 0.0)
+    assert not plain.route_comes_closer(by_later)             # only on in-order routes
+
+
+def test_ride_ground():
+    """Ground crossed as a wurm needs the wurm; where the game set us down does not; the
+    nearest burrow is the one to walk to, not one across the sulfur."""
+    from Sources.gwamm.core.mounts import RideGround
+    g = RideGround()
+    assert not g.needs_mount((0, 0), (5000, 0))                 # never ridden: nothing is judged
+    g.note((0, 0), False)
+    for x in range(1000, 9001, 350):                            # mounted at 1000, rode east
+        g.note((x, 0), True)
+    assert g.note((9300, 0), False) == "off"                    # set down on rock at 9300
+    assert not g.on_ridden((9300, 0)) and not g.needs_mount((9300, 0), (11000, 0))   # on over the rock: fine
+    assert g.needs_mount((9300, 0), (5000, 0))                  # back the way we came: mount first
+    assert g.nearest_mount((9300, 0), [(1000, 0), (9600, -900)]) == (9600, -900)
+    assert g.nearest_mount((9300, 0), [(1000, 0), (9600, -900), (9000, -1500)]) == (9600, -900)
+    g.note((9600, -900), True)
+    g.note((7000, -900), True)
+    assert g.note((7000, -900), False, alive=False) is None     # lost by dying: still wurm ground
+    assert g.needs_mount((7000, -900))
+
+
+def test_put_off_helps():
+    """A crowd too big to take is only left for later when later is better (death penalty to
+    work off). At full strength it is the same crowd after a longer walk."""
+    from Sources.gwamm.core import tactics as T
+    assert not T.put_off_helps(12, 9, 9)                        # full strength: take it on now
+    assert T.put_off_helps(12, T.take_limit(9, 76.0), 9)        # at -24%: leave it, come back stronger
+    assert not T.put_off_helps(6, 7, 9)                         # within the limit: never a question
 
 
 def test_detour_on_wall():
@@ -584,16 +754,78 @@ def test_supports_allies():
     assert not tactics.learn_role(model, "fighter")          # never downgraded
 
 
+def test_authored_approach():
+    """Into crowded or deadly ground the party comes in from the side the known route does, and
+    not when it is already coming from that side."""
+    import math
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine, Objective
+    traps, start, _b = load()
+    eng = Engine(traps, start)
+    eng.update(start, [], 50, 0.0)
+    nodes = [eng.nav.nodes[i] for i in range(len(eng.nav.nodes)) if eng.rm.reachable[i]]
+    sx, sy = start
+    far = [p for p in nodes if 3000.0 < math.hypot(p[0] - sx, p[1] - sy) < 6000.0]
+    assert far, "test map too small"
+    target = far[0]
+    side = [p for p in nodes if 1400.0 < math.hypot(p[0] - target[0], p[1] - target[1]) < 2500.0
+            and math.hypot(p[0] - sx, p[1] - sy) > math.hypot(target[0] - sx, target[1] - sy)]
+    if not side:
+        return
+    eng._route_src = [side[0], target]
+    eng.hard_spots = [[target[0], target[1], 2]]
+    obj = Objective("cluster", ("cluster", 1), target, None, 1.0)
+    via = eng._approach_via(obj)
+    if via is not None:                          # the way round must not cross the crowd itself
+        assert math.hypot(via[0] - side[0][0], via[1] - side[0][1]) < 1.0
+        eng.player_xy = side[0]
+        assert eng._approach_via(obj) is None, "arrived at the approach point: no more detour"
+    eng._via, eng._via_done = {}, set()
+    eng.hard_spots = []
+    assert eng._approach_via(obj) is None, "ordinary ground: no detour"
+
+
+def test_rest_counts_the_walk():
+    """Energy that the walk to the next fight will refill is not waited for."""
+    from Sources.gwamm.core import tactics
+    assert tactics.on_arrival(0.5, 0.012, 4000.0) >= 0.6         # a walk ahead: no stop
+    assert tactics.on_arrival(0.45, 0.012, 1100.0) < 0.6         # next group right there: rest
+    assert tactics.on_arrival(0.2, 0.012, 99999.0) < 0.6         # far ahead: walk counted only so far
+    assert tactics.on_arrival(0.95, 0.05, 4000.0) == 1.0
+
+
+def test_raisers_and_protectors():
+    """Resurrections (however worded) and protection spells mark their caster as the one to kill."""
+    from Sources.gwamm.core import tactics
+    assert tactics.raises_dead("Spell. Touch the body of a fallen party member. Target party member is returned to life with 65% Health.")
+    assert tactics.supports_allies("Enchantment Spell. For 23 seconds, target ally cannot lose more than 10% max Health due to damage from a single attack.")
+    assert not tactics.supports_allies("Signet. You gain 172 Health. You have -40 armor while using this skill.")
+    base = {"id": 1, "xy": (500.0, 0.0), "hp": 1.0, "level": 24, "caster": True, "boss": False, "prof": 0, "role": ""}
+    raiser = dict(base, id=2, xy=(1400.0, 0.0), casting="raise")
+    boss = dict(base, id=3, boss=True)
+    assert tactics.pick_target([boss, raiser], (0.0, 0.0)) == 2
+
+
 if __name__ == "__main__":
     test_geometry()
     test_cartography()
     test_elites()
     test_full_runs()
     test_route_and_trap_together()
+    test_route_with_actions_in_order()
+    test_route_with_actions_survives_death()
+    test_wall_never_shuts_the_only_way()
+    test_shown_portal_keeps_its_doorway()
+    test_route_groups_now_or_later()
+    test_ride_ground()
+    test_put_off_helps()
     test_detour_on_wall()
     test_step_clear()
     test_wipe_zone()
     test_supports_allies()
+    test_authored_approach()
+    test_rest_counts_the_walk()
+    test_raisers_and_protectors()
     test_no_restart_consumables()
     test_cut_off_gives_up_nothing()
     test_pull_rule()

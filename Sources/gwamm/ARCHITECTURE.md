@@ -31,7 +31,8 @@ no game running. If a planning change needs something from the game, add a funct
 - `memory.py` – `InstanceMemory`: what has been seen this visit (ground covered, enemies,
   groups, objectives that failed).
 - `engine.py` – `Config` (every tunable, with a comment) and `Engine`, the planner:
-  - `Engine(traps, start_xy, config, projection, exits, goto, links, guide, hints)`
+  - `Engine(traps, start_xy, config, projection, exits, goto, links, guide, hints, guide_actions)`
+    (`guide_actions`: steps tied to route points, e.g. a junundu burrow; the route is then walked in order)
   - `update(player_xy, enemies, foes_remaining, now, carto_grid)` – feed it what the game shows
   - `next_step()` – returns `(x, y, clear_radius)` to walk to, or `None` when finished
   - `step_failed()`, `record_death(xy, hazard)`, `add_wall(player_xy, target)` – feedback
@@ -127,7 +128,7 @@ python gwamm_tests/test_core.py        # planner: geometry, cartography, elites,
 python gwamm_tests/smoke_campaign.py   # the campaign flow against a stubbed game
 python gwamm_tests/sim_transit.py      # crossing an area
 python gwamm_tests/check_names.py      # every name each file uses is imported there
-python gwamm_tests/sim_combat.py       # fight simulator: behaviours x situations (groups, patrols, walls)
+python gwamm_tests/sim_combat.py --assert  # fight simulator: behaviours x situations (groups, patrols, walls)
 ```
 
 Run them before every push. A change to `core/` that has no test is not finished.
