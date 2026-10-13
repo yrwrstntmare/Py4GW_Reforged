@@ -13,7 +13,7 @@ from Sources.ApoSource.ApoBottingLib import wrappers as BT
 from ..core import elites, tactics
 from ..core.engine import DONE, FAILED
 from ..core.mounts import RideGround
-from . import game
+from . import game, ride_store
 
 REPLAN_S = 1.0
 STEP_TIMEOUT_S = 240.0       # one walking step, fights included
@@ -158,7 +158,11 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             return
         near = min((math.hypot(e.xy[0] - x, e.xy[1] - y) for e in eng.mem.enemies.values()
                     if e.alive and e.in_range), default=9e9)
-        if (near < 1300.0 or self._child is None or self.__dict__.get("_loot_since")
+        # "trying to walk" = a step was handed out in the last 10 s. (Was: a walk in hand at this
+        # very tick. Steps given up every 5 s left a gap each time, which reset the clock: the
+        # leader stood 1 h 40 min at one spot in map 114 and /stuck was never sent.)
+        walking = self._child is not None or now - (self.__dict__.get("_started") or 0.0) < 10.0
+        if (near < 1300.0 or not walking or self.__dict__.get("_loot_since")
                 or self.blackboard.get("COMBAT_ACTIVE", False)):
             # standing still to fight, to loot or to wait is not being stuck: the clock only
             # counts time spent trying to walk with nothing else going on
@@ -187,6 +191,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             retire(self._child)
         self._child, self._key, self._target = None, None, None
         self._action_fin = None
+        self._skill_step = False
 
     # ---- route actions ----
     def _route_action_tick(self, eng, s, now):
@@ -203,48 +208,666 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         except Exception:
             return False
         ground = self._ride_watch(eng, s, acts, now)
+        if self._riding() and now - self.__dict__.get("_charge_logged", 0.0) >= 10.0:
+            nxt0 = eng.next_guide_src()
+            for i, a in enumerate(acts):
+                if (a.get("save_from") is not None and a["save_from"] <= nxt0 < 10 ** 9
+                        and i not in self.__dict__.get("_actions_done", ())):
+                    # how the fights on the way fill it (does a wurm's fight build adrenaline?)
+                    self._charge_logged = now
+                    st = game.skill_state(int(a["value"]))
+                    s.log.event("skill_charge", skill=a["value"], adrenaline=st.get("adrenaline"),
+                                need=st.get("need"), fighting=bool(self.blackboard.get("COMBAT_ACTIVE", False)),
+                                point=nxt0, dist=round(math.hypot(eng.player_xy[0] - a["pos"][0],
+                                                                  eng.player_xy[1] - a["pos"][1])) if a.get("pos") else None)
         if bool(self.blackboard.get("COMBAT_ACTIVE", False)):
+            # in a fight on foot ON the sulfur: no fighting there, get to a burrow (it kills on foot)
+            lvl = getattr(eng, "player_plane", None)
+            if (ground is not None and not ground.riding and ground.ridden
+                    and ground.on_ridden(eng.player_xy, lvl) and not game.is_junundu()):
+                return self._mount_check(eng, s, acts, ground, now, eng.next_guide_src(), urgent=True)
             return False
         nxt = eng.next_guide_src()
+        if not eng.__dict__.get("_spots_applied"):
+            eng._spots_applied = True
+            for a in acts:
+                if a.get("do") == "skill" and a.get("at") is not None:
+                    spot = ride_store.route_spot(game.map_id(), a["at"])
+                    if spot is not None:
+                        s.log.event("route_action", stage="spot_set_by_hand", at=a["at"], was=a.get("pos"), now=list(spot))
+                        a["pos"] = [spot[0], spot[1]]
         if "_actions_done" not in self.__dict__:
-            self._actions_done = set()
-            if s.__dict__.pop("_resume_route", False):
-                # picked up mid-route after a reload: what the route did before this point is done
-                self._actions_done = {i for i, a in enumerate(acts) if a["at"] < nxt}
-                s.log.event("route_action", stage="resumed", next_point=nxt, already_done=sorted(self._actions_done))
+            kept = eng.__dict__.get("_route_actions_done")
+            if kept is not None:
+                # the step was rebuilt (after a wipe) in the same visit: what was done stays done
+                # (it went back for the first burrow, across the map, and died on the way)
+                self._actions_done = kept
+                self._mount_failed = eng.__dict__.setdefault("_route_mount_failed", {})
+                s.log.event("route_action", stage="kept", next_point=nxt, already_done=sorted(kept))
+            else:
+                self._actions_done = set()
+                known = s.__dict__.pop("_resume_actions", None)
+                if s.__dict__.pop("_resume_route", False) or known is not None:
+                    # picked up mid-route after a reload: what the route did before this point is
+                    # done - as saved; from an older save, all but skill steps (a pillar passed by
+                    # is not a pillar knocked down: 0.50.46 resumed past it and never smashed it)
+                    self._actions_done = set(known) if known is not None else \
+                        {i for i, a in enumerate(acts) if a["at"] < nxt and a["do"] != "skill"}
+                    s.log.event("route_action", stage="resumed", next_point=nxt, already_done=sorted(self._actions_done))
+                eng._route_actions_done = self._actions_done
+                self._mount_failed = eng.__dict__.setdefault("_route_mount_failed", {})
         done = self._actions_done
         for i, a in enumerate(acts):
             if a.get("save_from") is not None and i not in done and a["save_from"] <= nxt < 10 ** 9 and self._riding():
                 self._save_slot(a, s, True)
+            elif a.get("save_from") is not None and not self._riding():
+                self._save_slot(a, s, False)     # on foot that slot is the character's own skill
+        deferred = eng.__dict__.setdefault("_route_deferred", {})
         for i, a in enumerate(acts):
-            if i in done or a["at"] > nxt:
+            if (a["do"] == "skill" and i not in done and a.get("save_from") is not None
+                    and a["save_from"] <= nxt and a.get("pos") and self._riding()
+                    and now - self.__dict__.get("_charge_look", 0.0) >= 1.0):
+                self._charge_look = now
+                pos = a["pos"]
+                near = math.hypot(eng.player_xy[0] - pos[0], eng.player_xy[1] - pos[1]) <= float(a.get("charged_go", 6000.0))
+                if near and game.skill_state(int(a["value"])).get("charged"):
+                    # charged in a fight on the way: go and use it now, before it drains
+                    deferred.pop(i, None)
+                    s.log.event("route_action", stage="charged_go", at=a.get("at"), skill=a["value"],
+                                dist=round(math.hypot(eng.player_xy[0] - pos[0], eng.player_xy[1] - pos[1])))
+                    return self._start_route_action(i, a, now, s)
+        for i, a in enumerate(acts):
+            if i in done or a["at"] > nxt or i in deferred:
                 continue
             if a["do"] == "gadget" and game.is_junundu():
                 done.add(i)                  # already riding: the burrow is not needed
                 self._ride_from = tuple(a["value"])
                 continue
             return self._start_route_action(i, a, now, s)
+        return self._mount_check(eng, s, acts, ground, now, nxt)
+
+    def _mount_check(self, eng, s, acts, ground, now, nxt, urgent=False):
+        """Get back into a wurm when the way needs one; True when the walk to a burrow started.
+        urgent: on foot on the sulfur in a fight; it is left for the nearest burrow at once."""
         # On foot where the wurm is needed: standing on ground we rode over (died, fell off), or
         # the walk in hand goes onto it (the game set us down on rock and the plan leads back).
         # Mount first, at the nearest burrow of the route, not the last one used. (Sulfurous
         # Wastes: set down by the second burrow, it ran for the first one across the sulfur.)
         if (ground is not None and ground.ridden and not ground.riding
-                and now - self.__dict__.get("_remount_at", 0.0) > 30.0):
+                and now - self.__dict__.get("_remount_at", 0.0) > (10.0 if urgent else 30.0)):
             walking = self._child is not None and self._key is not None and self._key[0] != "action"
-            if ground.needs_mount(eng.player_xy, self._target if walking else None):
+            lvl = getattr(eng, "player_plane", None)
+            if ground.needs_mount(eng.player_xy, self._target if walking else None, plane=lvl):
                 s.log.event("route_action", stage="needs_mount",
-                            why="standing on wurm ground" if ground.on_ridden(eng.player_xy) else "the step leads onto wurm ground",
+                            why="standing on wurm ground" if ground.on_ridden(eng.player_xy, lvl) else "the step leads onto wurm ground",
                             player=[round(eng.player_xy[0]), round(eng.player_xy[1])],
                             step=[round(self._target[0]), round(self._target[1])] if walking and self._target else None,
-                            ridden_cells=len(ground.ridden))
+                            ridden_cells=len(ground.ridden), plane=lvl)
                 failed = self.__dict__.setdefault("_mount_failed", {})
-                mounts = [tuple(a["value"]) for a in acts
-                          if a.get("do") == "gadget" and failed.get(tuple(a["value"]), 0) < 2]
-                spot = ground.nearest_mount(eng.player_xy, mounts)
-                if spot is not None:
-                    self._remount_at = now
-                    return self._start_route_action(-1, {"do": "gadget", "value": list(spot), "at": nxt}, now, s)
+                mounts = list(dict.fromkeys(tuple(a["value"]) for a in acts
+                                            if a.get("do") == "gadget" and failed.get(tuple(a["value"]), 0) < 2))
+                self._remount_at = now
+                avoid = [(hx, hy, eng.cfg.hazard_radius) for hx, hy in getattr(eng, "hazards", ())]
+                pick = ground.safest_mount(eng.nav, eng.player_xy, mounts, avoid=avoid)
+                if pick is None or (not pick[2] and not ground.on_ridden(eng.player_xy, lvl)):
+                    # no burrow can be walked to without crossing the sulfur: do not go; keep the
+                    # step that wanted it off the plan instead
+                    s.log.event("route_action", stage="no_safe_burrow", burrows=[list(m) for m in mounts],
+                                player=[round(eng.player_xy[0]), round(eng.player_xy[1])])
+                    if walking and self._target is not None:
+                        try:
+                            eng.add_wall(eng.player_xy, self._target[:2])
+                        except Exception:
+                            pass
+                        self._drop_child()
+                    return False
+                spot, way, safe = pick
+                s.log.event("route_action", stage="burrow_way", burrow=list(spot), safe=safe, points=len(way))
+                return self._start_route_action(-1, {"do": "gadget", "value": list(spot), "at": nxt, "way": way}, now, s)
         return False
+
+    def _ground_watch(self, eng, s, now):
+        """On foot, health falling fast with no enemy near and no condition or hex on us: the
+        ground itself hurts (sulfur sand never ridden, a trap). Note the spot (kept off for good,
+        and wurm ground where there are burrows) and go straight back to where it did not hurt.
+        Keeps a trail of places on foot that were safe, for that way back."""
+        if now - self.__dict__.get("_gw_t", 0.0) < 0.5:
+            return
+        self._gw_t = now
+        try:
+            hp, riding = float(game.my_health()), game.is_junundu()
+        except Exception:
+            return
+        if hp <= 0.01 or self._was_dead or now - self.__dict__.get("_revived_at", 0.0) < 3.0:
+            self.__dict__.get("_hp_hist", []).clear()   # dead, or just raised: not the ground
+            return
+        hist = self.__dict__.setdefault("_hp_hist", [])
+        hist.append((now, hp))
+        while hist and now - hist[0][0] > 2.5:
+            hist.pop(0)
+        px, py = eng.player_xy
+        drop = max(h for _t, h in hist) - hp
+        trail = self.__dict__.setdefault("_trail", [])
+        if not riding and drop < 0.02 and hp > 0.5 and (not trail or math.hypot(px - trail[-1][0], py - trail[-1][1]) > 200.0):
+            trail.append((px, py))
+            del trail[:-80]
+        ground = self.__dict__.get("_ride_ground")
+        if ground is not None and not riding and drop < 0.02 and hp > 0.5:
+            # on wurm ground on foot and not hurt for 3 s: it is not wurm ground after all
+            lvl = getattr(eng, "player_plane", None)
+            if ground.on_ridden((px, py), lvl):
+                since = self.__dict__.setdefault("_onfoot_since", {})
+                key = (int(px // 400), int(py // 400))
+                since.setdefault(key, now)
+                if now - since[key] >= 3.0 and ground.walked_safely((px, py), lvl):
+                    self._ground_dirty = True
+                    s.log.event("route_action", stage="walked_safely", player=[round(px), round(py)])
+        if riding or drop < 0.10 or now - self.__dict__.get("_gw_alarm", 0.0) < 6.0:
+            return
+        if bool(self.blackboard.get("COMBAT_ACTIVE", False)) or game.leader_conditioned():
+            return
+        if any(e.alive and e.in_range and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1500.0 for e in eng.mem.enemies.values()):
+            return
+        self._gw_alarm = now
+        if not any(math.hypot(px - x, py - y) < 200.0 for x, y in eng.hazards):
+            eng.hazards.append((px, py))
+            s.save_hazards()
+        if ground is not None:
+            ground.mark((px, py), getattr(eng, "player_plane", None))
+            self.__dict__.get("_onfoot_since", {}).pop((int(px // 400), int(py // 400)), None)
+            self._ground_dirty = True
+        s.log.event("ground_hurts", player=[round(px), round(py)], hp=round(hp, 2), drop=round(drop, 2),
+                    wurm_ground=ground is not None)
+        self._go_back(eng, s, now, (px, py), "the ground hurts")
+
+    def _teleport_watch(self, eng, s, now):
+        """Learn teleporters by watching: the leader jumps 1500+ in a moment, alive, with an object
+        beside the spot he left - that object takes people to where he is now. Kept per area in
+        gwamm_logs/teleporters.json, whoever used it (the bot or you by hand)."""
+        px, py = eng.player_xy
+        if now - self.__dict__.get("_tp_scan", 0.0) >= 1.0:
+            self._tp_scan = now
+            try:
+                self._tp_gadgets = game.gadgets_near(px, py, 1000.0)
+            except Exception:
+                self._tp_gadgets = []
+        if now - self.__dict__.get("_census_t", 0.0) >= 5.0:
+            # every object the game shows, kept for the visit and logged once each: what a
+            # teleporter pad and its switches are (and where) is learnt from this
+            self._census_t = now
+            mem = eng.__dict__.setdefault("_gadget_mem", {})
+            try:
+                seen = game.gadgets_near(px, py, 6000.0)
+            except Exception:
+                seen = []
+            fresh = [g for g in seen if g[0] not in mem]
+            for g in seen:
+                mem[g[0]] = g
+            if fresh:
+                s.log.event("gadgets_seen", player=[round(px), round(py)], new=[list(g) for g in fresh[:40]],
+                            known=len(mem))
+        last = self.__dict__.get("_tp_last")
+        self._tp_last = (now, px, py, list(self.__dict__.get("_tp_gadgets", [])))
+        if last is None or now - last[0] > 3.0 or self._was_dead or now - self.__dict__.get("_revived_at", 0.0) < 6.0:
+            return
+        if math.hypot(px - last[1], py - last[2]) < 1500.0:
+            return
+        if self.__dict__.get("_tp_job") is not None:
+            return                                       # the job records its own jump
+        near = [g for g in last[3] if math.hypot(g[2] - last[1], g[3] - last[2]) < 900.0]
+        if not near:
+            return
+        g = min(near, key=lambda g: math.hypot(g[2] - last[1], g[3] - last[2]))
+        try:
+            heroes = [round(math.hypot(x - px, y - py)) for x, y in game.hero_positions()]
+        except Exception:
+            heroes = []
+        new = ride_store.add_teleporter(game.map_id(), (g[2], g[3]), (px, py), g[1])
+        s.log.event("teleporter", learnt=new, at=[g[2], g[3]], gadget=g[1], to=[round(px), round(py)],
+                    heroes_from_me=heroes)
+
+    def _try_teleport(self, eng, s, now, goal):
+        """The objective cannot be walked to: work a teleporter. Crystal Desert ones are a pad
+        and four switches used in an order that changes every visit (Guild Wars Wiki,
+        Teleporter): step on the pad (it may be on already), then try the orders one by one
+        with the heroes flagged out of the way (a hero on the pad or a switch spoils it).
+        The jump is learnt by `_teleport_watch`. True when the job was started."""
+        from ..core.geometry import rank_teleporters, teleporter_sets
+        if self.__dict__.get("_tp_job") is not None:
+            return True
+        px, py = eng.player_xy
+        # every object seen this visit, not only those near: the pad that leads up to unreachable
+        # ground can stand far from it (Prophet's Path: the north-west shelf is reached from a
+        # pad in the south-east)
+        mem = eng.__dict__.get("_gadget_mem") or {}
+        try:
+            near = game.gadgets_near(px, py, 6000.0)
+        except Exception:
+            near = []
+        allg = {g[0]: g for g in list(mem.values()) + near}
+        tried = self.__dict__.setdefault("_tp_sets_tried", set())
+        hints = ride_store.pad_hints(game.map_id())
+        sets = []
+        for t in teleporter_sets(list(allg.values())):
+            if t["pad"][0] == 0 and hints:
+                # no pad object: the circle's centre is rough, a pad stood on before is exact
+                h = min(hints, key=lambda h: math.hypot(h[0] - t["pad"][1], h[1] - t["pad"][2]))
+                if math.hypot(h[0] - t["pad"][1], h[1] - t["pad"][2]) <= 600.0:
+                    t["pad"] = (0, h[0], h[1])
+            if (round(t["pad"][1] / 100), round(t["pad"][2] / 100)) not in tried:
+                sets.append(t)
+        # the right side: from below, a pad up on ground the pathing refused is out of reach;
+        # once across, only a pad near us can be up here with us
+        cut = ride_store.unreachable(game.map_id())
+        across = bool(self.__dict__.get("_tp_across")) and self.__dict__.get("_revived_at", 0.0) < self._tp_across
+        if across:
+            sets = [t for t in sets if math.hypot(t["pad"][1] - px, t["pad"][2] - py) < 5000.0]
+        if not sets:
+            s.log.event("teleporter", none_near=True, goal=[round(goal[0]), round(goal[1])])
+            return False
+        learnt = ride_store.teleporters(game.map_id())
+        cut = ride_store.unreachable(game.map_id())
+        ranked = rank_teleporters(sets, (px, py), goal, learnt, hints, cut)
+        if not ranked:
+            s.log.event("teleporter", none_right_side=True, sets=len(sets), goal=[round(goal[0]), round(goal[1])])
+            return False
+        sets = ranked
+        known = any(math.hypot(r["at"][0] - sets[0]["pad"][1], r["at"][1] - sets[0]["pad"][2]) < 400.0 for r in learnt)
+        tp = sets[0]
+        tried.add((round(tp["pad"][1] / 100), round(tp["pad"][2] / 100)))
+        import itertools
+        perms = list(itertools.permutations(range(4)))
+        worked = self.__dict__.get("_tp_orders", {}).get((round(tp["pad"][1] / 100), round(tp["pad"][2] / 100)))
+        # orders already tried at this pad this visit go last: the order holds for the visit
+        # (wiki), so a job cut short (a fight, a death) carries on where it left off
+        done = self.__dict__.setdefault("_tp_done_orders", {}).setdefault(
+            (round(tp["pad"][1] / 100), round(tp["pad"][2] / 100)), set())
+        if len(done) >= len(perms):
+            done.clear()                                 # all tried, none took: start again
+        perms.sort(key=lambda p: p in done)
+        if worked in perms:
+            perms.remove(worked)
+            perms.insert(0, worked)                      # the order that took us last time, first
+        self._tp_job = {"pad": tp["pad"], "sw": tp["switches"], "perms": perms, "ids": tp.get("ids"), "done": done,
+                        "order_t": now,
+                        "i": -1, "step": 0, "phase": "flag", "t0": now, "t": now, "goal": goal}
+        s.log.event("teleporter", job="start", hinted=any(math.hypot(h[0] - tp["pad"][1], h[1] - tp["pad"][2]) < 300.0 for h in hints), pad=[round(tp["pad"][1]), round(tp["pad"][2])],
+                    switches=[[round(x), round(y)] for _a, x, y in tp["switches"]], known=known)
+        self._drop_child()
+        return True
+
+    def _tp_left_behind(self, eng, s, now):
+        """Just across: wait up to 10 s for every living hero to arrive by us. Any still far away
+        were left on the other side (off the pad when it fired): logged, so the pad routine can
+        be put right, and the run goes on."""
+        landed = self.__dict__.get("_tp_landed")
+        if landed is None:
+            return False
+        t0, lx, ly, _pad = landed
+        try:
+            far = [h for h in game.hero_positions() if math.hypot(h[0] - lx, h[1] - ly) > 2000.0]
+        except Exception:
+            far = []
+        if not far:
+            s.log.event("teleporter", heroes_with_us=True, seconds=round(now - t0, 1))
+            self._tp_landed = None
+            return False
+        if now - t0 < 10.0 and not bool(self.blackboard.get("COMBAT_ACTIVE", False)):
+            self._idle_at = now
+            if not self.__dict__.get("_tp_landed_unflag"):
+                self._tp_landed_unflag = True
+                try:
+                    game.unflag_heroes(game.hero_agent_ids())
+                except Exception:
+                    pass
+            return True
+        s.log.event("teleporter", heroes_left_behind=len(far), at=[[round(x), round(y)] for x, y in far])
+        self._tp_landed = None
+        return False
+
+    def _party_watch(self, eng, s, now):
+        """The leader alive, most heroes far off (left at a flag, or run back to one from the
+        shrine): take every flag down and wait for them, rather than walk on alone. Not while
+        a pull, the front-line hold, the teleporter or a ride has them placed on purpose, and
+        not in a fight close by. True while waiting (45 s at most, then a minute's rest)."""
+        if (self._riding() or self.__dict__.get("_tp_job") is not None
+                or (self.__dict__.get("_pull") or {}).get("phase")
+                or (self.__dict__.get("_lead") or {}).get("flagged")
+                or self.__dict__.get("_gather_since") is not None
+                or now < self.__dict__.get("_regroup_off_until", 0.0)
+                or now - self.__dict__.get("_regroup_look", 0.0) < 1.0 and not self.__dict__.get("_regroup_since")):
+            return False
+        self._regroup_look = now
+        try:
+            heroes = game.hero_positions()
+        except Exception:
+            heroes = []
+        px, py = eng.player_xy
+        far = [h for h in heroes if math.hypot(h[0] - px, h[1] - py) > 2500.0]
+        close_fight = any(e.alive and e.in_range and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1200.0
+                          for e in eng.mem.enemies.values())
+        if not heroes or len(far) * 2 < len(heroes) or close_fight:
+            if self.__dict__.get("_regroup_since"):
+                s.log.event("regroup", stage="done", seconds=round(now - self._regroup_since, 1),
+                            far_left=len(far), fight=close_fight)
+            self._regroup_since = None
+            return False
+        if not self.__dict__.get("_regroup_since"):
+            self._regroup_since, self._regroup_unflag = now, 0.0
+            s.log.event("regroup", stage="start", far=len(far), heroes=len(heroes),
+                        dist=[round(math.hypot(h[0] - px, h[1] - py)) for h in heroes])
+        if now - self._regroup_since > 45.0:
+            s.log.event("regroup", stage="gave_up", far=len(far))
+            self._regroup_since, self._regroup_off_until = None, now + 60.0
+            return False
+        if now - self._regroup_unflag >= 4.0:
+            self._regroup_unflag = now
+            try:
+                game.unflag_heroes(())
+            except Exception:
+                pass
+        self._drop_child()
+        self._idle_at = now                              # waiting on purpose, not stuck
+        return True
+
+    def _teleport_first(self, eng, s, now):
+        """The objective stands where the game's pathing refused us before (kept per area): go
+        for the teleporter now instead of walking to the edge below and finding out again.
+        (Prophet's Path, started on the pad: walked 10000 back to the edge first.) Not once
+        across (after a jump, or standing near such ground); a death puts us back below."""
+        obj = eng.objective
+        if obj is None or obj.pos is None or self.__dict__.get("_tp_job") is not None or self.transit is not None:
+            return False
+        if now - self.__dict__.get("_tp_first_t", 0.0) < 5.0:
+            return False
+        self._tp_first_t = now
+        if self.__dict__.get("_tp_across") and self.__dict__.get("_revived_at", 0.0) < self._tp_across:
+            return False
+        cut = ride_store.unreachable(game.map_id())
+        if not any(math.hypot(u[0] - obj.pos[0], u[1] - obj.pos[1]) < 1500.0 for u in cut):
+            return False
+        px, py = eng.player_xy
+        if any(math.hypot(u[0] - px, u[1] - py) < 3000.0 for u in cut):
+            return False                                 # at the edge, or up there already
+        if now - self.__dict__.get("_tp_first_none", 0.0) < 60.0:
+            return False
+        if self._try_teleport(eng, s, now, obj.pos):
+            s.log.event("teleporter", first=True, goal=[round(obj.pos[0]), round(obj.pos[1])])
+            return True
+        self._tp_first_none = now
+        return False
+
+    def _tp_walk(self, eng, s, job, x, y, tol, now, what):
+        """Get the leader to (x, y) within `tol`, for the teleporter job. The game's own walk
+        first; when that stops getting closer for 3 s (it walks to the spot on the level we
+        stand on, and the pad is up on raised ground: hung 527 under it, Prophet's Path 00:12),
+        our own route in short hops onto the other level. True on arrival, "stuck" after 40 s
+        with no gain, else False."""
+        px, py = eng.player_xy
+        d = math.hypot(px - x, py - y)
+        w = job.get("walk")
+        if w is None or w["to"] != (round(x), round(y)):
+            # our own route got us here before: no 3 s on the game's walk first (it lost ~3 s
+            # an order, every order, under the raised pad)
+            first = what in job.setdefault("nav_first", set())
+            w = job["walk"] = {"to": (round(x), round(y)), "best": d, "best_t": now - (3.1 if first else 0.0),
+                               "mode": "game", "mover": None, "moved": 0.0, "planes_tried": []}
+        if d <= tol:
+            if w.get("used_nav"):
+                job.setdefault("nav_first", set()).add(what)
+            job["walk"] = None
+            return True
+        if d < w["best"] - 60.0:
+            w["best"], w["best_t"] = d, now
+        if now - w["best_t"] > 40.0:
+            s.log.event("teleporter", walk_stuck=what, dist=round(d), modes_tried=w["planes_tried"])
+            job["walk"] = None
+            return "stuck"
+        if w["mode"] == "game":
+            if now - w["moved"] >= 0.8:
+                w["moved"] = now
+                game.move_to(x, y)
+            if now - w["best_t"] > 3.0:
+                from ..core.geometry import nav_waypoints, planes_near
+                here = getattr(eng, "player_plane", None)
+                planes = [p for p in planes_near(eng.nav, (x, y)) if p not in w["planes_tried"]]
+                planes.sort(key=lambda p: p == here)     # another level than ours first
+                plane = planes[0] if planes else None
+                if plane is None and None in w["planes_tried"]:
+                    pts = []                             # every level near tried already
+                else:
+                    pts = nav_waypoints(eng.nav, (px, py), (x, y), start_plane=here, goal_plane=plane)
+                w["planes_tried"].append(plane)
+                s.log.event("teleporter", walk_hops=what, dist=round(d), my_level=here, to_level=plane,
+                            hops=len(pts))
+                if pts:
+                    w["used_nav"] = True
+                    w["mode"], w["mover"], w["mover_t"] = "nav", BT.Move(pos=[tuple(p) for p in pts], tolerance=max(60.0, tol)), now
+                else:
+                    w["best_t"] = now                    # nothing better: keep at the game's walk
+            return False
+        mv = w["mover"]
+        mv.root.blackboard = self.blackboard
+        st = mv.root.tick()
+        if st != BehaviorTree.NodeState.RUNNING or now - w.get("mover_t", now) > 30.0:
+            w["mode"], w["mover"], w["best_t"] = "game", None, now   # done or no use: the game's walk again
+        return False
+
+    def _tp_job_tick(self, eng, s, now):
+        """One tick of the teleporter job. True while it holds the party."""
+        job = self.__dict__.get("_tp_job")
+        if job is None:
+            return False
+        px, py = eng.player_xy
+        pad = job["pad"]
+        gap = math.hypot(px - pad[1], py - pad[2])
+
+        def end(result):
+            self._tp_job = None
+            if result in ("jumped", "died"):
+                # worked, or cut short: the same pad may be wanted again (a way back, after a wipe)
+                self.__dict__.get("_tp_sets_tried", set()).discard((round(pad[1] / 100), round(pad[2] / 100)))
+            try:
+                game.unflag_heroes(game.hero_agent_ids())
+            except Exception:
+                pass
+            s.log.event("teleporter", job=result, orders_tried=max(0, job["i"]), seconds=round(now - job["t0"]))
+            return False
+
+        if self.__dict__.get("_revived_at", 0.0) > job["t0"]:
+            return end("died")                           # raised elsewhere: start over when needed
+        last = job.get("last")
+        job["last"] = (px, py)
+        if last is not None and math.hypot(px - last[0], py - last[1]) > 1500.0:
+            # taken: kept with the exact pad and the switch ids, for the next visit
+            new = ride_store.add_teleporter(game.map_id(), (pad[1], pad[2]), (px, py),
+                                            (job.get("ids") or [0])[0], pad=True)
+            pk = (round(pad[1] / 100), round(pad[2] / 100))
+            self._tp_across = 0.0 if self.__dict__.get("_tp_across") else now     # each jump crosses over
+            self.__dict__.setdefault("_tp_orders", {})[pk] = job["perms"][max(0, job["i"])]
+            self.__dict__.get("_tp_sets_tried", set()).discard(pk)   # usable again (way back, after a death)
+            s.log.event("teleporter", learnt=new, at=[round(pad[1]), round(pad[2])], to=[round(px), round(py)],
+                        order=list(job["perms"][max(0, job["i"])]))
+            self._tp_landed, self._tp_landed_unflag = (now, px, py, pad), False
+            return end("jumped")
+        # no fixed time: 24 orders at ~26 s each is ~11 min (a 10 min limit quit at order 21 of
+        # 24, the right one still to come: Prophet's Path 00:28). Given up only when no order
+        # gets finished for 3 min, or after 30 min in all.
+        if now - job.get("order_t", job["t0"]) > 180.0:
+            return end("gave_up_stalled")
+        if now - job["t0"] > 1800.0:
+            return end("gave_up_time")
+        close = [e for e in eng.mem.enemies.values()
+                 if e.alive and math.hypot(e.xy[0] - px, e.xy[1] - py) < 900.0]
+        if bool(self.blackboard.get("COMBAT_ACTIVE", False)) and close:
+            if job["phase"] != "flag":                   # fight with the heroes, then start over
+                try:
+                    game.unflag_heroes(game.hero_agent_ids())
+                except Exception:
+                    pass
+                job["phase"] = "flag"
+            return False
+        self._idle_at = now
+        if now - job.get("said", 0.0) >= 5.0:
+            job["said"] = now
+            s.log.event("tp_job", phase=job["phase"], order=job["i"], switch=job.get("step"), pad_gap=round(gap),
+                        walk=(job.get("walk") or {}).get("mode"), gather=job.get("gather"))
+        def flag_away():
+            # beyond the pad, on the side away from the switches: off the pad and the switches
+            # while the order is tried (another body on them spoils it), yet close to the pad
+            cx = sum(x for _a, x, _y in job["sw"]) / 4.0
+            cy = sum(y for _a, _x, y in job["sw"]) / 4.0
+            dx, dy = pad[1] - cx, pad[2] - cy
+            d = math.hypot(dx, dy) or 1.0
+            try:
+                game.flag_all_heroes(pad[1] + dx / d * 450.0, pad[2] + dy / d * 450.0)
+            except Exception:
+                pass
+
+        if job["phase"] == "flag":
+            flag_away()
+            job["phase"], job["t"], job["gather"] = "pad", now, False
+            return True
+        if job["phase"] == "pad":
+            if gap > 1200.0:
+                # far off (the edge below the shelf to the pad: 6000+): walk the way there
+                mv = job.get("mover")
+                if mv is None:
+                    mv = job["mover"] = BT.Move(pos=(float(pad[1]), float(pad[2])), tolerance=300.0)
+                    job["mover_t"] = now
+                    job.setdefault("best", gap)
+                    job.setdefault("best_t", now)
+                mv.root.blackboard = self.blackboard
+                st = mv.root.tick()
+                if gap < job.get("best", 1e9) - 200.0:
+                    job["best"], job["best_t"] = gap, now
+                if st != BehaviorTree.NodeState.RUNNING and now - job.get("mover_t", now) < 1.5 and gap > 1500.0:
+                    job["refused"] = job.get("refused", 0) + 1
+                    if job["refused"] >= 3:
+                        return end("pad_not_walkable")   # the wrong side of the gap: try another
+                if st != BehaviorTree.NodeState.RUNNING or (now - job.get("best_t", now) > 25.0
+                                                            and now - job.get("mover_t", now) > 25.0):
+                    job["mover"] = None                  # finished or stuck: start the walk again
+                    if now - job.get("best_t", now) > 90.0:
+                        return end("cannot_reach_pad")
+                return True
+            job["mover"] = None
+            got = self._tp_walk(eng, s, job, pad[1], pad[2], 60.0, now, "pad")
+            if got == "stuck":
+                return end("cannot_get_on_pad")
+            if not got:
+                return True
+            job["phase"], job["t"], job["on_pad"] = "wait", now, True
+            return True
+        if job["phase"] == "wait":
+            if now - job["t"] < 3.0:
+                return True
+            if job.get("gather") and now - job["t"] < 12.0:
+                # the order is in: everyone onto the pad with the leader, so the heroes go too
+                try:
+                    far = [h for h in game.hero_positions() if math.hypot(h[0] - pad[1], h[1] - pad[2]) > 350.0]
+                except Exception:
+                    far = []
+                if far:
+                    return True
+            if job["i"] >= 0:
+                job["done"].add(job["perms"][job["i"]])  # tried, did not take
+            job["order_t"] = now
+            job["i"] += 1                                # not taken: the next order
+            if job["i"] >= len(job["perms"]):
+                return end("gave_up_all_orders")
+            if job.get("gather"):
+                flag_away()                              # off the pad and switches again
+                job["gather"], job["sw_after"] = False, now + 3.0
+            job["phase"], job["step"], job["on_pad"] = "sw", 0, False
+            return True
+        if job["phase"] == "sw":
+            # Click the switch the way a player does: the game walks up to it and uses it.
+            # (Walking to within 180 first hung for good at switch 754, which cannot be stood
+            # closer to than ~230: Prophet's Path 00:01.) Done when the leader has stopped
+            # beside it after a click, or after 8 s whatever happened.
+            if now < job.get("sw_after", 0.0):
+                return True                              # heroes still walking off
+            k = job["perms"][job["i"]][job["step"]]
+            agent, sx, sy = job["sw"][k]
+            here = [g for g in self.__dict__.get("_tp_gadgets", []) if math.hypot(g[2] - sx, g[3] - sy) < 150.0]
+            if here:
+                agent = min(here, key=lambda g: math.hypot(g[2] - sx, g[3] - sy))[0]
+            d = math.hypot(px - sx, py - sy)
+            if job.get("sw_t") is None:
+                job["sw_t"], job["sw_last"], job["sw_still"] = now, (px, py), now
+            if d > 900.0:                                # far (fought away): walk back near first
+                if self._tp_walk(eng, s, job, sx, sy, 600.0, now, "switch") == "stuck":
+                    return end("cannot_reach_switch")
+                job["sw_t"] = now
+                return True
+            if now - job.get("used", 0.0) >= 1.5:
+                game.use_gadget(agent)                   # a click, no dialog
+                job["used"] = now
+                job["clicks"] = job.get("clicks", 0) + 1
+            if math.hypot(px - job["sw_last"][0], py - job["sw_last"][1]) > 25.0:
+                job["sw_last"], job["sw_still"] = (px, py), now
+            stopped = now - job["sw_still"] >= 1.0 and d < 450.0 and job.get("clicks", 0) >= 2
+            if stopped or now - job["sw_t"] > 8.0:
+                if not stopped:
+                    s.log.event("teleporter", switch_slow=k, dist=round(d))
+                job["step"] += 1
+                job["sw_t"], job["clicks"] = None, 0
+                if job["step"] >= 4:
+                    job["phase"], job["gather"] = "pad", True
+                    try:
+                        game.unflag_heroes(game.hero_agent_ids())   # follow the leader onto the pad
+                    except Exception:
+                        pass
+            return True
+        return False
+
+    def _go_back(self, eng, s, now, xy, why):
+        """Walk at once to the last place on foot that was safe, at least 700 from `xy`
+        (else the engine's way clear). Uses the step-clear slot, so the plan resumes after."""
+        pt = None
+        for x, y in reversed(self.__dict__.get("_trail", [])):
+            if math.hypot(x - xy[0], y - xy[1]) >= 700.0:
+                pt = (x, y)
+                break
+        if pt is None:
+            try:
+                pt = eng.escape_point(eng.player_xy, xy, goal=None)
+            except Exception:
+                pt = None
+        if pt is None:
+            s.log.event("go_back", why=why, ok=False)
+            return False
+        self._drop_child()
+        self._child = BT.Move(pos=(float(pt[0]), float(pt[1])), tolerance=150.0)
+        self._key, self._target, self._started = ("escape", int(now)), (pt[0], pt[1]), now
+        self._escape_until = now + 12.0
+        self._progress_at, self._progress_xy, self._progress_kills = now, None, -1
+        s.log.event("go_back", why=why, to=[round(pt[0]), round(pt[1])], frm=[round(xy[0]), round(xy[1])])
+        return True
+
+    def _hands_off(self, s, off, why):
+        """HeroAI off the leader's fighting while the bot moves him itself (on: off=True), and
+        back on. Kept on the session so a rebuilt step, or any way out, puts it back."""
+        if bool(off) == bool(s.__dict__.get("_heroai_off")):
+            return
+        try:
+            ok = game.leader_combat(not off)
+        except Exception as e:
+            ok = repr(e)
+        s._heroai_off = bool(off)
+        s.log.event("leader_combat", heroai=not off, why=why, ok=ok)
+
+    def _hands_back_if_done(self, s, now):
+        """Safety: HeroAI's hands off only while a pillar step or a step clear is under way."""
+        if not s.__dict__.get("_heroai_off"):
+            return
+        k = self._key
+        if k is not None and k[0] == "escape" and now < self._escape_until + 1.0:
+            return
+        if k is not None and k[0] == "action" and self.__dict__.get("_skill_step"):
+            return
+        self._hands_off(s, False, "done")
 
     def _riding(self):
         """Mounted (junundu wurms): the party is a pack of wurms that goes in together. The
@@ -284,29 +907,68 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         it drains after 25 s out of a fight (Guild Wars Wiki). So with `charge_with` "attack":
         go and hit the nearest enemy within `charge_reach` with plain attacks until the skill
         shows charged, then straight back onto the spot and use it, inside those 25 s.
-        Gives up after 120 s."""
+        Gives up after `give_up` s (60); the route then holds the step until a fight on the way
+        charges it (`deferred`, `charged_go`)."""
         skill = int(a.get("value") or 0)
         st = self.__dict__.get("_skill_try")
         if st is None:
             st = self._skill_try = {"t": now, "next": now, "tries": 0, "hits": 0, "misses": 0, "peak": 0,
-                                    "before": game.skill_state(skill), "targets": [], "charged_at": None}
+                                    "before": game.skill_state(skill), "targets": [], "charged_at": None,
+                                    "rises": [], "last_adr": 0, "progress": now, "kills0": self._kills_safe()}
         state = game.skill_state(skill)
         adr, need = state.get("adrenaline") or 0, state.get("need") or 0
         used = bool(st["tries"]) and (st["peak"] - adr >= max(1.0, need * 0.5) or (state.get("recharge") or 0) > 0)
+        if adr > st["last_adr"]:
+            # what raised it: which skill the leader was casting, or a plain attack (learning
+            # which junundu actions build adrenaline, as no source we have says for sure)
+            cast, attacking = game.leader_action()
+            if len(st["rises"]) < 25:
+                st["rises"].append([round(now - st["t"], 1), adr, cast, attacking])
+            st["progress"] = now
+        st["last_adr"] = adr
+        kills = self._kills_safe()
+        if kills is not None and st["kills0"] is not None and kills > st["kills0"]:
+            st["kills0"], st["progress"] = kills, now      # killing the ones behind the pillar counts too
         st["peak"] = max(st["peak"], adr)
         pos = a.get("pos")
         px, py = game.player_xy()
-        if not used and state["slot"] and now - st["t"] < 120.0:
+        # Keep at it while it gets somewhere: adrenaline rising or foes falling (those stuck
+        # behind the pillar can be fought from the sulfur below). 60 s with neither; 300 s at most.
+        stalled = now - st["progress"] > float(a.get("give_up", 60.0))
+        if not used and state["slot"] and not stalled and now - st["t"] < 300.0:
             if now < st["next"]:
                 return True
             charged = state.get("charged")
-            if charged is False and a.get("charge_with") == "attack" and st["misses"] < 8:
-                foe = game.nearest_enemy(float(a.get("charge_reach", 3000.0)))
-                st["next"] = now + 1.0
+            if charged is False and a.get("charge_with") == "attack":
+                # Charge from the spot itself: plain attacks (each hit one strike, 25 of the 100;
+                # being hit fills it too) on a foe in reach FROM HERE - with a bow or spear held,
+                # the wurm attacks at range, so the foes up on the plateau will do (Guild Wars
+                # Wiki). Never walked after: that dragged it off the spot into the obstruction.
+                if "ranged" not in st:
+                    st["ranged"] = bool(game.holds_ranged())
+                reach = 1150.0 if st["ranged"] else 260.0
+                st["next"] = now + 0.5
+                if pos and math.hypot(px - pos[0], py - pos[1]) > 250.0:
+                    if st.get("foe"):
+                        st.setdefault("passed", []).append(st["foe"])   # it pulled us off: not that one
+                        st["foe"] = None
+                    game.move_to(pos[0], pos[1])
+                    return True
+                if st.get("foe") and now - st.get("foe_since", now) > 15.0 and now - st["progress"] > 15.0:
+                    st.setdefault("passed", []).append(st["foe"])
+                    st["foe"] = None
+                foe = game.nearest_enemy(reach, skip=st.get("passed", ()))
+                if foe is None and st.get("passed"):
+                    st["passed"] = []
+                    foe = game.nearest_enemy(reach)
                 if foe is None:
-                    st["misses"] += 1                # nothing to hit: wait a little, then report
-                else:
+                    st["misses"] += 1                # nothing in reach: hold the spot, the fights come to us
+                elif foe[0] != st.get("foe") or not game.is_attacking() or now - st.get("ordered", 0.0) > 6.0:
+                    # a fresh order restarts the swing: order once, again only when it stopped
+                    if foe[0] != st.get("foe"):
+                        st["foe_since"] = now
                     game.attack(foe[0])
+                    st["foe"], st["ordered"] = foe[0], now
                     st["hits"] += 1
                     if len(st["targets"]) < 5 and list(foe) not in st["targets"]:
                         st["targets"].append(list(foe))
@@ -314,8 +976,10 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             if charged and st["charged_at"] is None:
                 st["charged_at"] = now
             if not (charged is False and a.get("charge_with")):
-                if pos and math.hypot(px - pos[0], py - pos[1]) > 150.0 and st.get("walks", 0) < 30:
-                    st["walks"] = st.get("walks", 0) + 1     # back onto the spot (charging took us off it)
+                if pos and math.hypot(px - pos[0], py - pos[1]) > 120.0:
+                    # never anywhere else: only right under the pillar does it break it. Back
+                    # onto the spot first (charging took us off it); stalls end the try.
+                    st["walks"] = st.get("walks", 0) + 1
                     game.move_to(pos[0], pos[1])
                     st["next"] = now + 0.7
                     return True
@@ -326,11 +990,20 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         s.log.event("route_action", stage="skill", skill=skill, used=used, tries=st["tries"], before=st["before"],
                     after=state, peak=st["peak"], attack_orders=st["hits"], nothing_to_hit=st["misses"],
                     targets=st["targets"], back_after=None if st["charged_at"] is None else round(now - st["charged_at"], 1),
+                    rises=st["rises"], stalled=stalled, ranged=st.get("ranged"),
                     seconds=round(now - st["t"], 1), player=[round(px), round(py)], riding=game.is_junundu(),
                     gadgets_near=self._gadgets_for_log(px, py))
         self._skill_try = None
+        self._skill_used = used
         self._save_slot(a, s, False)
         return False
+
+    @staticmethod
+    def _kills_safe():
+        try:
+            return int(game.foes_killed())
+        except Exception:
+            return None
 
     def _gadgets_for_log(self, px, py):
         """What stands near a place the party could not get past: [agent, gadget id, x, y]. A
@@ -371,13 +1044,46 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if ground is None:
             if not any(a.get("do") == "gadget" for a in acts):
                 return None
-            ground = self._ride_ground = s.ride_ground = RideGround()
-            ground.ridden.update(s.__dict__.pop("_resume_ridden", None) or ())     # kept across a reload
+            # One record per visit: kept on the engine, so a step rebuilt after a wipe (revived at
+            # a shrine) still knows the sulfur. A fresh one forgot it and walked onto it on foot.
+            ground = eng.__dict__.get("_ride_ground_kept")
+            if ground is None:
+                ground = eng._ride_ground_kept = RideGround()
+                ground.ridden.update(s.__dict__.pop("_resume_ridden", None) or ())     # kept across a reload
+                try:
+                    # where the sulfur is, from earlier runs: known from the first step
+                    cells, levels = ride_store.load(game.map_id())
+                    ground.absorb(cells, levels)
+                    s.log.event("route_action", stage="ground_known", cells=len(cells), levels=len(levels))
+                except Exception as e:
+                    s.log.event("route_action", stage="ground_known", error=repr(e))
+                for c, planes in (s.__dict__.pop("_resume_levels", None) or ()):
+                    ground.levels[tuple(c)] = set(planes)
+            self._ride_ground = s.ride_ground = ground
         s.ride_ground = ground               # where the session saves it from, for a reload
+        swap = s.__dict__.get("_weapon_swap")
+        if swap is not None:
+            if game.is_junundu():
+                swap["rode"] = True
+            elif swap["rode"]:
+                try:
+                    game.equip_items(swap["held"])
+                    s.log.event("weapon_swap", restored=swap["held"])
+                except Exception as e:
+                    s.log.event("weapon_swap", restored=False, error=repr(e))
+                s._weapon_swap = None
         if now - self.__dict__.get("_ride_seen", 0.0) >= 0.3:
             self._ride_seen = now
             fresh = now - self.__dict__.get("_revived_at", 0.0) < 15.0     # lost by dying, not set down
-            if ground.note(eng.player_xy, game.is_junundu(), alive=not fresh) == "off":
+            changed = len(ground.ridden)
+            off = ground.note(eng.player_xy, game.is_junundu(), alive=not fresh,
+                              plane=getattr(eng, "player_plane", None))
+            if len(ground.ridden) != changed or off:
+                self._ground_dirty = True
+            if self.__dict__.get("_ground_dirty") and (off or now - self.__dict__.get("_ground_saved", 0.0) >= 60.0):
+                self._ground_dirty, self._ground_saved = False, now
+                ride_store.save(game.map_id(), ground)
+            if off == "off":
                 s.log.event("route_action", stage="set_down", player=[round(eng.player_xy[0]), round(eng.player_xy[1])],
                             ridden_cells=len(ground.ridden))
         return ground
@@ -389,7 +1095,18 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             # leader used a junundu burrow was left on foot); the using comes after that.
             self._gadget_phase = "walk"
             self._gather_since = None
-            child = BT.Move(pos=tuple(v), tolerance=250.0)
+            way = a.get("way")
+            ground = self.__dict__.get("_ride_ground")
+            if way is None and ground is not None and ground.ridden and not game.is_junundu():
+                try:
+                    eng_ = self.session.engine
+                    pts, safe, _l = ground.foot_way(eng_.nav, game.player_xy(), tuple(v),
+                                                    avoid=[(hx, hy, eng_.cfg.hazard_radius) for hx, hy in getattr(eng_, "hazards", ())])
+                    way = pts if pts else None
+                except Exception:
+                    way = None
+            self._gadget_way = way
+            child = BT.Move(pos=[tuple(p) for p in way], tolerance=250.0) if way else BT.Move(pos=tuple(v), tolerance=250.0)
         elif do == "npc":
             child = BT.MoveAndInteract(pos=tuple(v), log=True)
         elif do == "dialog":
@@ -400,11 +1117,35 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             # use a skill of the bar at a spot (a wurm's Junundu Smash by the pillar that falls
             # into a bridge): walk right up to the spot first, the using is done on arrival
             if a.get("riding") and not game.is_junundu():
+                # needs a wurm: go and get one first (nearest burrow reached on foot without
+                # crossing sulfur), then this step comes round again. Skipped only after 3 tries.
+                tries = self.__dict__.setdefault("_skill_mount_tries", {})
+                tries[i] = tries.get(i, 0) + 1
+                ground = self.__dict__.get("_ride_ground")
+                eng_ = self.session.engine
+                pick = None
+                if ground is not None and tries[i] <= 3:
+                    failed = self.__dict__.setdefault("_mount_failed", {})
+                    mounts = list(dict.fromkeys(tuple(b["value"]) for b in eng_.guide_actions
+                                                if b.get("do") == "gadget" and failed.get(tuple(b["value"]), 0) < 2))
+                    avoid = [(hx, hy, eng_.cfg.hazard_radius) for hx, hy in getattr(eng_, "hazards", ())]
+                    pick = ground.safest_mount(eng_.nav, eng_.player_xy, mounts, avoid=avoid)
+                if pick is not None:
+                    spot, way, safe = pick
+                    s.log.event("route_action", stage="mount_for_skill", at=a.get("at"), burrow=list(spot),
+                                safe=safe, attempt=tries[i])
+                    self._remount_at = now
+                    return self._start_route_action(-1, {"do": "gadget", "value": list(spot), "at": a.get("at"),
+                                                         "way": way}, now, s)
                 self.__dict__.setdefault("_actions_done", set()).add(i)
-                s.log.event("route_action", stage="skipped", do=do, value=v, at=a.get("at"), why="not riding")
+                s.log.event("route_action", stage="skipped", do=do, value=v, at=a.get("at"), why="not riding",
+                            tries=tries[i])
                 self._save_slot(a, s, False)
                 return False
             child = BT.Move(pos=tuple(a["pos"]), tolerance=120.0) if a.get("pos") else BT.Wait(duration_ms=100)
+            # the walk to the spot and all at it are the bot's: HeroAI's wurm build drags the
+            # leader at the nearest foe in earshot, up on the plateau, off the spot
+            self._hands_off(s, True, "pillar")
         elif do == "dropbundle":
             child = BT.DropBundle(log=True)
         else:
@@ -413,6 +1154,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             return False
         self._drop_child()
         self._child = child
+        self._skill_step = do == "skill"
         self._key, self._target, self._started = ("action", i), (tuple(v) if isinstance(v, (list, tuple)) else None), now
         self._progress_at, self._progress_xy, self._progress_kills = now, None, -1
         s.log.event("route_action", stage="start", do=do, value=v, at=a.get("at"), remount=(i == -1),
@@ -427,6 +1169,25 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             self._use_gadget(s, now, 0.0, [])
             return True
         if self._gather_since is None:
+            self._ranged_for_coming_skill(s)
+            # the walk ended short of it: the using would let the game walk the rest its own
+            # way, straight over whatever lies between. Walk our way again (twice), else stop.
+            px, py = game.player_xy()
+            short = math.hypot(px - spot[0], py - spot[1])
+            if short > 600.0:
+                n = self.__dict__.get("_walk_retries", 0)
+                s.log.event("route_action", stage="walk_short", at=list(spot), short_by=round(short), retry=n)
+                if n < 2:
+                    self._walk_retries = n + 1
+                    a = {"do": "gadget", "value": list(spot), "at": None}     # way worked out afresh from here
+                    i = self._key[1]
+                    self._start_route_action(i, a, now, s)
+                    return True
+                self._walk_retries = 0
+                self._action_fin = (now, False)
+                self._gadget_phase = None
+                return True
+            self._walk_retries = 0
             self._gather_since = now
             try:
                 game.flag_all_heroes(spot[0], spot[1])
@@ -443,6 +1204,35 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         self._use_gadget(s, now, now - self._gather_since,
                          [round(math.hypot(xy[0] - spot[0], xy[1] - spot[1])) for xy in far])
         return True
+
+    def _ranged_for_coming_skill(self, s):
+        """About to become a wurm with a skill step ahead that charges by attacking (the pillar):
+        take a bow or spear in hand first, so the wurm attacks at range (each hit a strike of
+        adrenaline, foes up on a ledge in reach). Put back once on foot again."""
+        if s.__dict__.get("_weapon_swap"):
+            return
+        eng = s.engine
+        acts = getattr(eng, "guide_actions", None) or ()
+        nxt = eng.next_guide_src()
+        done = self.__dict__.get("_actions_done", set())
+        soon = [a for i, a in enumerate(acts) if a.get("do") == "skill" and a.get("charge_with") == "attack"
+                and i not in done and a["at"] - nxt <= 15]
+        if not soon:
+            return
+        try:
+            held, ranged = game.equip_ranged_weapon()
+        except Exception as e:
+            s.log.event("weapon_swap", ok=False, error=repr(e))
+            return
+        if held is None:
+            s.log.event("weapon_swap", note="a bow or spear is held already")
+            return
+        if ranged is None:
+            s.log.event("weapon_swap", ok=False, note="no bow or spear in the bags: the wurm attacks in melee "
+                        "only and the pillar must be charged from the fights near it (carry any bow)")
+            return
+        s._weapon_swap = {"held": held, "rode": False}
+        s.log.event("weapon_swap", ok=True, ranged=ranged, held_before=held)
 
     def _use_gadget(self, s, now, waited, far):
         spot = self._target
@@ -494,11 +1284,21 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
 
     def _route_action_done(self, eng, s, now, ok):
         self._remount_retry = False
+        self._skill_step = False
         self._gadget_phase = None
         i = self._key[1]
         acts = eng.guide_actions
         a = acts[i] if 0 <= i < len(acts) else {"do": "gadget"}
-        if i >= 0:
+        deferred = eng.__dict__.setdefault("_route_deferred", {})
+        unused = a["do"] == "skill" and self.__dict__.pop("_skill_used", None) is False
+        if i >= 0 and unused and deferred.get(i, 0) < 3 and self._riding():
+            # not charged at the spot (nothing in reach to hit): not given up. It is used as
+            # soon as a fight on the way charges it while the spot is near (`charged_go`).
+            deferred[i] = deferred.get(i, 0) + 1
+            s.log.event("route_action", stage="deferred", at=a.get("at"), skill=a.get("value"), times=deferred[i])
+            self._save_slot(a, s, True)
+        elif i >= 0:
+            deferred.pop(i, None)
             self.__dict__.setdefault("_actions_done", set()).add(i)
         riding = game.is_junundu()
         if a["do"] == "gadget":
@@ -506,7 +1306,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 self._ride_from = tuple(a.get("value") or self._target or (0, 0))
                 ground = self.__dict__.get("_ride_ground")
                 if ground is not None:
-                    ground.note(eng.player_xy, True)         # known at once, not at the next look
+                    ground.note(eng.player_xy, True, plane=getattr(eng, "player_plane", None))   # known at once
                 if "_pull" in self.__dict__:
                     self._pull["phase"] = None
                 try:
@@ -541,7 +1341,25 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         hist.append((now, round(x / 150.0), round(y / 150.0), eng.player_xy, kills))
         while hist and now - hist[0][0] > 60.0:
             hist.pop(0)
-        if len(hist) < 12 or getattr(self, "_direct", None) is not None:
+        if getattr(self, "_direct", None) is not None:
+            return
+        # A wider circuit: the same objective for 90 s, no kill, and never 300 nearer to it than
+        # before (map 13: seven points round a ridge, 11 minutes, the region never reached).
+        obj = eng.objective
+        if obj is not None:
+            ox, oy = obj.pos[0], obj.pos[1]
+            d = math.hypot(eng.player_xy[0] - ox, eng.player_xy[1] - oy)
+            prog = self.__dict__.get("_obj_prog")
+            if prog is None or prog[0] != key or prog[4] != kills:
+                prog = self._obj_prog = [key, d, now, now, kills]
+            elif d < prog[1] - 300.0:
+                prog[1], prog[2] = d, now
+            if now - prog[2] > 90.0 and d > 900.0:
+                self._obj_prog = None
+                hist.clear()
+                self._loop_found(eng, key, eng.player_xy[0], eng.player_xy[1], 0, now, why="no nearer in 90 s")
+                return
+        if len(hist) < 12:
             return
         spots = {(h[1], h[2]) for h in hist}
         px = sum(h[3][0] for h in hist) / len(hist)
@@ -550,16 +1368,33 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 or any(math.hypot(h[3][0] - px, h[3][1] - py) > 900.0 for h in hist)):
             return
         hist.clear()
+        self._loop_found(eng, key, px, py, len(spots), now)
+
+    def _direct_start(self, eng, obj, key, now):
+        """Let the game's own pathing walk at the objective. Where the area's known route runs
+        from near here to near it, walk that stretch of the route point by point first (it is
+        the way people go)."""
+        from ..core.geometry import route_chain
+        chain = route_chain(getattr(eng, "_route_src", None), eng.player_xy, obj.pos)
+        self._direct_chain = [tuple(p) for p in chain] + [(obj.pos[0], obj.pos[1])] if chain else None
+        self._direct = (now + (30.0 if chain else 40.0), (obj.pos[0], obj.pos[1]), key)
+        self._direct_hard = now + 60.0 + 30.0 * len(chain)      # the whole walk, fights and all
+        self.session.log.event("step_loop", key=key, direct_walk="start", via_route=len(chain),
+                               chain=[[round(x), round(y)] for x, y in chain][:8])
+
+    def _loop_found(self, eng, key, px, py, spots, now, why="same few points"):
+        """A step loop on this objective: first the game's own pathing at it for 40 s, the
+        second time give the objective up."""
         obj = eng.objective
         loops = self.__dict__.setdefault("_loops", {})
         loops[key] = loops.get(key, 0) + 1
-        self.session.log.event("step_loop", key=key, player=[round(px), round(py)], spots=len(spots),
+        self.session.log.event("step_loop", key=key, player=[round(px), round(py)], spots=spots, why=why,
                                times=loops[key], target=None if obj is None else [round(obj.pos[0]), round(obj.pos[1])])
         if eng.nav.stacked(px, py) and not any(math.hypot(px - wx, py - wy) < 300.0 for wx, wy in eng.walls):
             eng.walls.append((px, py))       # a climb the map allows and the game does not: route round it
             eng.player_node = None
         if loops[key] == 1 and obj is not None:
-            self._direct = (now + 40.0, (obj.pos[0], obj.pos[1]), key)
+            self._direct_start(eng, obj, key, now)
         else:
             eng.mem.blocked[key] = eng.cfg.max_failures
             eng.objective = None
@@ -570,11 +1405,43 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
 
     def _start_step(self, step, key):
         x, y, radius = step
+        eng = self.session.engine
+        # every step in the area we are working keeps its end off the doors, not only while foes
+        # remain: walking for map cells after the last kill took the party out through a door
+        # twice (53, 54), and the area was written down as left, not done
+        if (self.transit is None and eng is not None and key[0] != "escape"
+                and not (eng.objective is not None and eng.objective.kind == "goto")):
+            from ..core.geometry import keep_off_doors
+            doors = list(getattr(eng, "portals", ())) + [tuple(e[:2]) for e in getattr(eng, "exits", ())] \
+                + [tuple(e[:2]) for e in getattr(eng, "removed_exits", ())]
+            nx, ny = keep_off_doors((x, y), eng.player_xy, doors)
+            if (nx, ny) != (x, y):
+                self.session.log.event("door_kept_off", key=key, wanted=[round(x), round(y)], now=[round(nx), round(ny)])
+                x, y = nx, ny
         # Map cells can be slivers of ground: stand on the exact spot, not somewhere near it.
         exact = self.session.engine.objective is not None and self.session.engine.objective.kind == "carto"
-        self._child = BT.MoveAndKill(pos=(x, y), clear_area_radius=radius, move_tolerance=40.0 if exact else 150.0)
+        tol = 150.0
+        if exact:
+            tol = 40.0
+            try:
+                depth = eng.carto.stand[tuple(eng.objective.key[1])][2]
+                tol = max(10.0, min(40.0, depth * 0.7))   # a sliver at a cliff edge: stop right on it
+            except Exception:
+                pass
+        self._child = BT.MoveAndKill(pos=(x, y), clear_area_radius=radius, move_tolerance=tol)
         self._key, self._target, self._started = key, (x, y), time.time()
-        self.session.log.event("step_start", key=key, target=[round(x), round(y)], clear_radius=round(radius))
+        aim, way = None, None
+        try:
+            if eng is not None and eng.objective is not None and eng.objective.pos is not None:
+                aim = [round(eng.objective.pos[0]), round(eng.objective.pos[1])]
+                ra = getattr(eng, "route_ahead", None) or []
+                way = round(sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(ra, ra[1:])))
+        except Exception:
+            pass
+        # where the objective is and how long the planned way to it is, at every step: a walk
+        # back and forth (Kessex Peak, a minute short of the last groups) shows up here
+        self.session.log.event("step_start", key=key, target=[round(x), round(y)], clear_radius=round(radius),
+                               aim=aim, way=way)
         self._loop_check(key, x, y)
         # The stall clock restarts only for a different step. Restarting it for the same step
         # again and again hid a loop where each "walk" finished at once without moving.
@@ -624,8 +1491,22 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 eng.player_node = None
             if obj is not None and getattr(self, "_direct", None) is None:
                 self._direct = (now + 25.0, (obj.pos[0], obj.pos[1]), self._key)
+                self._direct_chain = None
             s.log.event("wall", player=[round(px), round(py)], target=list(self._target), stacked=True,
                         times_here=self._stuck_n, direct_walk=obj is not None)
+            return
+        if not walking and bool(self.blackboard.get("COMBAT_ACTIVE", False)) and self._stuck_n >= 2:
+            # Held in a fight that goes nowhere: HeroAI keeps the leader on a foe it cannot reach
+            # (one up on a ledge). That is not scenery: no wall (it walled the pillar spot off).
+            # Step well clear with HeroAI's hands off, so the foe drops out of its sight.
+            near = [(e.xy[0], e.xy[1]) for e in eng.mem.enemies.values()
+                    if e.alive and e.in_range and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1600.0]
+            away = min(near, key=lambda q: math.hypot(q[0] - px, q[1] - py)) if near else None
+            self._escape = eng.escape_point((px, py), away, goal=None) if away else None
+            self._escape_secs, self._escape_radius, self._escape_hands_off = 10.0, 1500.0, True
+            s.log.event("combat_stuck", player=[round(px), round(py)], times_here=self._stuck_n,
+                        foes_near=len(near), step_clear=None if self._escape is None else
+                        [round(self._escape[0]), round(self._escape[1])], riding=self._riding())
             return
         if (walking or self._stuck_n >= 2) and self._target is not None:
             spot = eng.add_wall((px, py), self._target, detour=self._stuck_n >= 2)
@@ -666,9 +1547,24 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             return S.SUCCESS
         if self.target_map_id is not None and game.map_ready() and game.map_id() != self.target_map_id:
             self._drop_child()
-            if getattr(self, "_vq_done", False) or (
+            left = s.__dict__.get("last_left") or {}
+            if left.get("map") != self.target_map_id:
+                left = {}
+            try:
+                done_in_game = self.target_map_id in game.vanquished_ids()
+            except Exception:
+                done_in_game = False
+            if self.transit is None and left.get("xy"):
+                # walked out through a door mid-run: that point is a door, remember it
+                try:
+                    if s.learn_exit(self.target_map_id, left["xy"]):
+                        s.log.event("door_learnt", map_id=self.target_map_id, at=[round(left["xy"][0]), round(left["xy"][1])])
+                except Exception:
+                    pass
+            if getattr(self, "_vq_done", False) or done_in_game or (
                     self.transit is None and s.engine is not None and s.engine.cfg.do_vanquish
-                    and s.engine.foes_remaining == 0):
+                    and s.engine.foes_remaining == 0) or (self.transit is None and left.get("foes") == 0
+                                                          and getattr(s.cfg, "do_vanquish", True)):
                 # stepped through a door while clearing the map edges after the vanquish: it counts
                 s.result = "complete"
                 s.log.event("finished", result=s.result, note="left the area after the vanquish was done")
@@ -679,6 +1575,17 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if not s.ensure_engine():
             self._drop_child()               # loading screen or map change: hold everything
             t = time.time()
+            if game.map_ready() and getattr(s, "error", ""):
+                # the map is up but its model cannot be built: not a loading screen. Give the
+                # step up after a minute so the campaign moves on (it held 25 min in The Black
+                # Curtain with nothing written down)
+                self._build_fail_since = self.__dict__.get("_build_fail_since") or t
+                if t - self._build_fail_since > 60.0:
+                    s.result = s.error
+                    s.log.event("finished", result=s.result)
+                    return S.FAILURE
+            else:
+                self._build_fail_since = None
             self._no_map_since = getattr(self, "_no_map_since", 0.0) or t
             if t - self._no_map_since > 45.0 and not getattr(self, "_no_map_said", False):
                 # far longer than any loading screen: the connection dropped. Reconnecting puts the
@@ -686,6 +1593,25 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 self._no_map_said = True
                 s.resumed = "no map for 45 s - disconnected? Reconnect and the run carries on from where it was."
                 s.log.event("no_map", seconds=round(t - self._no_map_since), map_loading=game.map_loading_safe())
+            return S.RUNNING
+        # The game frozen with the map still up (connection dropped, the last frame stays):
+        # the instance clock stops. Hold everything; stalls seen then are not walls (map 13:
+        # 12 "walls" and 2 saved snags made while disconnected).
+        t = time.time()
+        up = game.instance_uptime()
+        last = self.__dict__.get("_uptime_seen")
+        if last is None or (up != last[0] and game.leader_connected()):
+            if self.__dict__.get("_frozen_said"):
+                s.log.event("connection_back", after=round(t - last[1]))
+                self._frozen_said = False
+            self._uptime_seen = (up, t)
+        elif t - last[1] > 6.0:
+            if not self.__dict__.get("_frozen_said"):
+                self._frozen_said = True
+                s.resumed = "the game stopped (connection lost?) - holding until it is back"
+                s.log.event("connection_lost", frozen_for=round(t - last[1]), connected=game.leader_connected())
+            self._idle_at = t
+            self._progress_at = t
             return S.RUNNING
         if getattr(self, "_no_map_since", 0.0):
             if getattr(self, "_no_map_said", False):
@@ -757,8 +1683,25 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         # --- death: note where, drop the walk, and let Reforged's wipe recovery do its part ---
         try:
             cond = game.party_condition()
-        except Exception:
+        except Exception as e:
             cond = None
+            if not self.__dict__.get("_cond_err"):
+                self._cond_err = True
+                s.log.event("error", where="party_condition", error=repr(e))
+        # The dead flag alone missed a death: also no health, or not alive, held for 2 s (a
+        # moment of 0 is read while the game swaps the leader's body at a shrine).
+        down, hp_now = game.leader_down()
+        if down:
+            if self.__dict__.get("_down_since") is None:
+                self._down_since = now
+        else:
+            self._down_since, self._down_said = None, False
+        if down and (cond is None or not cond["player_dead"]) and now - (self._down_since or now) >= 2.0:
+            cond = dict(cond or {"hp": 0.0, "energy": 0.0, "dead_allies": 0, "ally_hp": 1.0})
+            cond["player_dead"] = True
+            if not self.__dict__.get("_down_said"):
+                self._down_said = True
+                s.log.event("death_seen_otherwise", hp=hp_now, flag=False)
         self._cond = cond
         if "_party_size" not in self.__dict__:
             try:
@@ -768,12 +1711,30 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if cond is not None and cond["player_dead"]:
             self._unflag("leader died")
             self._pull_reset("leader died")
+            # whatever put a flag up, take every flag down now and again while lying dead, so
+            # the heroes come and raise the leader (one was left parked: dead an hour)
+            if now - self.__dict__.get("_dead_unflag_t", 0.0) >= 5.0:
+                self._dead_unflag_t = now
+                try:
+                    game.unflag_heroes(())
+                except Exception:
+                    pass
+                if not self.__dict__.get("_dead_unflag_said"):
+                    self._dead_unflag_said = True
+                    try:
+                        far = [round(math.hypot(x - eng.player_xy[0], y - eng.player_xy[1])) for x, y in game.hero_positions()]
+                    except Exception:
+                        far = []
+                    s.log.event("dead_unflag", heroes_alive_at=far)
             if not self._was_dead:
                 self._was_dead = True
                 px, py = eng.player_xy
                 foes_near = sum(1 for e in eng.mem.enemies.values()
                                 if e.alive and not e.lost and math.hypot(e.xy[0] - px, e.xy[1] - py) < 1800.0)
-                hazard = foes_near == 0
+                # killed by enemies that then walked off, and the death read late (a leader alone,
+                # no heroes: Dragon's Gullet), is not the ground: a foe near in the last minute
+                hazard = foes_near == 0 and now - self.__dict__.get("_foes_near_t", 0.0) > 60.0
+                self._hazard_death = (px, py) if hazard and not game.is_junundu() else None
                 self._death_xy = (px, py) if not hazard else None
                 eng.record_death(eng.player_xy, hazard=hazard)
                 if hazard:
@@ -785,6 +1746,21 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                     s.log.event("hazard", player=[round(px), round(py)], known=len(eng.hazards), gadgets_near=near[:30])
                 if isinstance(foes_near, int) and foes_near >= 7:
                     s.note_hard_spot(eng.player_xy)
+                if (self._key is not None and self._key[0] == "action" and isinstance(foes_near, int)
+                        and foes_near == 0):
+                    # killed by the ground (sulfur, a trap) while doing a route step: twice for the
+                    # same step and that step is given up, not walked into a third time
+                    k = self._key[1] if self._key[1] >= 0 else ("burrow", tuple(self._target or ()))
+                    bad = eng.__dict__.setdefault("_route_action_deaths", {})
+                    bad[k] = bad.get(k, 0) + 1
+                    if bad[k] >= 2:
+                        if isinstance(k, int):
+                            self.__dict__.setdefault("_actions_done", set()).add(k)
+                        else:
+                            failed = self.__dict__.setdefault("_mount_failed", {})
+                            failed[k[1]] = 2
+                        s.log.event("route_action", stage="given_up", why="died twice on the way, nothing near",
+                                    action=k if isinstance(k, int) else list(k[1]))
                 s.log.event("death", player=list(eng.player_xy), key=self._key, deaths=eng.deaths, foes_near=foes_near,
                             riding=game.is_junundu(),
                             enemies_in_view=sum(1 for e in eng.mem.enemies.values() if e.alive and e.in_range),
@@ -794,15 +1770,54 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if self._was_dead:
             self._was_dead = False
             self._revived_at = now
+            self._dead_unflag_said = False
+            try:
+                game.unflag_heroes(())       # raised (or back at a shrine): nobody stays parked
+            except Exception:
+                pass
             px_, py_ = eng.player_xy
             hot = any(e.alive and e.in_range and math.hypot(e.xy[0] - px_, e.xy[1] - py_) < 1300.0
                       for e in eng.mem.enemies.values())
             # at a shrine (nothing near): let things settle. Raised mid-fight: no standing about.
             self._hold_until = now if hot else now + 3.0
+            spot = self.__dict__.pop("_hazard_death", None)
+            if spot is not None and math.hypot(eng.player_xy[0] - spot[0], eng.player_xy[1] - spot[1]) < 600.0:
+                # raised where the ground killed us (Joko's Domain: raised in the sulfur sand
+                # and killed again, 12 times): no standing, straight back the way we came
+                self._hold_until = now
+                self._go_back(eng, s, now, spot, "raised where the ground killed us")
             self._recover_until = now + 14.0 if hot else 0.0
             s.log.event("revived", player=[round(eng.player_xy[0]), round(eng.player_xy[1])], riding=game.is_junundu())
+            # Raised with little energy (a shrine after a wipe): do not walk into the next fight
+            # until it is back. (Eastern Frontier: raised by the entry shrine next to a camp,
+            # straight back in at low energy, died 7 times there, morale 85 -> 40.)
+            self._energy_wait_until = now + 30.0
+        self._ground_watch(eng, s, now)
+        self._teleport_watch(eng, s, now)
+        px_, py_ = eng.player_xy
+        if any(e.alive and not e.lost and math.hypot(e.xy[0] - px_, e.xy[1] - py_) < 1800.0
+               for e in eng.mem.enemies.values()):
+            self._foes_near_t = now
+        if self._party_watch(eng, s, now):
+            return S.RUNNING
+        if now < self.__dict__.get("_energy_wait_until", 0.0):
+            fighting = bool(self.blackboard.get("COMBAT_ACTIVE", False))
+            energy = (cond or {}).get("energy", 1.0) if isinstance(cond, dict) else 1.0
+            if not fighting and energy is not None and energy < 0.7:
+                if not self.__dict__.get("_energy_wait_said"):
+                    self._energy_wait_said = True
+                    s.log.event("resting", reason="raised with low energy", energy=round(energy, 2))
+                self._drop_child()
+                self._idle_at = now
+                return S.RUNNING
+            self._energy_wait_until, self._energy_wait_said = 0.0, False
         if now < self.__dict__.get("_hold_until", 0.0):
             self._idle_at = now              # standing still on purpose is not being stuck
+            return S.RUNNING
+        self._hands_back_if_done(s, now)
+        if self._tp_job_tick(eng, s, now):
+            return S.RUNNING
+        if self._tp_left_behind(eng, s, now):
             return S.RUNNING
         if self._riding() and self._wurm_heal(s, now):
             return S.RUNNING
@@ -989,15 +2004,36 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             until, (tx, ty), dkey = direct
             px_, py_ = eng.player_xy
             fighting = bool(self.blackboard.get("COMBAT_ACTIVE", False))
-            if now < until and not fighting and math.hypot(tx - px_, ty - py_) > 600.0:
+            chain = self.__dict__.get("_direct_chain") or []
+            if chain and math.hypot(chain[0][0] - px_, chain[0][1] - py_) < 300.0:
+                chain.pop(0)                 # reached this point of the known route: on to the next
+                if chain and now < self.__dict__.get("_direct_hard", 0.0):
+                    until = now + 30.0
+                    self._direct = (until, (tx, ty), dkey)
+            if chain:
+                tx, ty = chain[0]
+            near_foes = sum(1 for e in eng.mem.enemies.values()
+                            if e.alive and e.in_range and math.hypot(e.xy[0] - px_, e.xy[1] - py_) < 2000.0)
+            if near_foes >= 6:
+                # A crowd ahead: the planner takes over (pulls, one group at a time). Walking on
+                # by the game's pathing marched the party into 19 of them (Diessa, a wipe).
+                self._direct, self._direct_chain = None, None
+                s.log.event("step_loop", key=dkey, direct_walk="stopped", why="enemies near", foes=near_foes,
+                            chain_left=len(chain))
+            elif chain and fighting and now < self.__dict__.get("_direct_hard", 0.0):
+                # a fight on the known route: fight it, then go on along the route
+                self._direct = (max(until, now + 10.0), direct[1], dkey)
+            elif now < until and not fighting and math.hypot(tx - px_, ty - py_) > (300.0 if chain else 600.0):
                 self._drop_child()
                 if now - self.__dict__.get("_direct_move", 0.0) >= 1.5:
                     self._direct_move = now
                     game.move_to(tx, ty)
                 return S.RUNNING
-            self._direct = None
-            s.log.event("step_loop", key=dkey, direct_walk="done", gap=round(math.hypot(tx - px_, ty - py_)),
-                        fighting=fighting)
+            else:
+                self._direct = None
+                self._direct_chain = None
+                s.log.event("step_loop", key=dkey, direct_walk="done", gap=round(math.hypot(tx - px_, ty - py_)),
+                            fighting=fighting, chain_left=len(chain))
 
         # Backed off from a big crowd: hold here for it. If it does not come, it was not coming
         # for us; leave that ground for later rather than walking back into it.
@@ -1072,22 +2108,28 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                     "stopped: nothing left to search but foes remain"
                 s.log.event("finished", result=s.result, status=eng.status())
                 return S.FAILURE
-            key = eng.objective.key
+            # a step with no objective behind it (a way out just after a wipe): its own key.
+            # (Diessa: eng.objective was None here, the error repeated and the area was dropped.)
+            key = eng.objective.key if eng.objective is not None else ("step", round(step[0]), round(step[1]))
+            if self._teleport_first(eng, s, now):
+                return S.RUNNING
             if self._escape is not None:
                 # just marked an obstacle: first a short step clear of it, then back to the plan
                 step, key = (self._escape[0], self._escape[1], self._escape_radius), ("escape", int(now))
                 self._escape, self._escape_until = None, now + self._escape_secs
+                if self.__dict__.pop("_escape_hands_off", False):
+                    self._hands_off(s, True, "combat_stuck")
                 self._escape_secs, self._escape_radius = 6.0, 900.0
                 self._drop_child()
                 self._start_step(step, key)
-            elif self._child is not None and self._key and self._key[0] == "escape" and now < self._escape_until:
+            elif self._child is not None and self._key and self._key[0] in ("escape", "teleport") and now < self._escape_until:
                 pass                         # let the step clear finish
             elif self._child is None:
                 self._start_step(step, key)
             elif key != self._key:
                 self._drop_child()           # the plan changed: abandon the walk in progress
                 self._start_step(step, key)
-            elif (self._target is not None and eng.objective.kind != "carto"
+            elif (self._target is not None and eng.objective is not None and eng.objective.kind != "carto"
                   and math.hypot(eng.player_xy[0] - self._target[0], eng.player_xy[1] - self._target[1]) < 700.0
                   and math.hypot(step[0] - self._target[0], step[1] - self._target[1]) > 400.0
                   and not any(e.alive and e.in_range
@@ -1180,8 +2222,30 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             s.log.event("step_failed", key=self._key, target=self._target, player=[round(px), round(py)],
                         short_by=round(miss), seconds=round(now - self._started, 1),
                         riding=self._riding(), gadgets_near=self._gadgets_for_log(px, py))
+            obj = eng.objective
+            if (miss > 1000.0 and now - self._started < 1.5 and self.transit is None and obj is not None
+                    and self._key and self._key[0] not in ("teleport", "escape")):
+                # refused at once by the game's pathing: no way on foot. Twice for one objective
+                # and a teleporter is tried (Prophet's Path: groups up on teleporter-only ground).
+                inst = self.__dict__.setdefault("_instant_fails", {})
+                inst[obj.key] = inst.get(obj.key, 0) + 1
+                if inst[obj.key] == 2 and ride_store.add_unreachable(game.map_id(), obj.pos):
+                    s.log.event("unreachable_on_foot", pos=[round(obj.pos[0]), round(obj.pos[1])])
+                if inst[obj.key] == 2 and self._try_teleport(eng, s, now, obj.pos):
+                    return S.RUNNING
             if miss > 400.0:
                 eng.step_failed()            # could not get there: count it against the objective
+                # the same leg failing again: our map shows a way the game does not walk (map 13:
+                # five times short by 1000-1700 at one spot, while the game's own pathing got
+                # there). Let the game path at the objective for a while.
+                fails = self.__dict__.setdefault("_leg_fails", {})
+                leg = (round(tx / 300.0), round(ty / 300.0))
+                fails[leg] = fails.get(leg, 0) + 1
+                obj = eng.objective
+                if fails[leg] == 2 and obj is not None and self.__dict__.get("_direct") is None:
+                    self._direct_start(eng, obj, self._key, now)
+                    s.log.event("step_loop", key=self._key, why="same leg failed twice", leg=[round(tx), round(ty)],
+                                direct_walk="start")
             self._drop_child()
         return S.RUNNING
 

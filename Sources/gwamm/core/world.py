@@ -25,6 +25,18 @@ class World:
         self.outpost_xy = {int(k): v for k, v in w.get("outpost_xy", {}).items()}
         self.names = {int(k): v for k, v in w["names"].items()}
         self.vanquishable = set(w["explorable"])
+        # A gate whose recorded node holds another area than the one it leads to: trust the
+        # area it leads to (Beetletun's gate into Watchtower Coast was filed under Cursed
+        # Lands, so the way to Cursed Lands was "travel to Beetletun, step out" and ended in
+        # Watchtower Coast)
+        self.gate_fixes = 0
+        for gs in self.gates.values():
+            for g in gs:
+                node = self.nodes.get(g.get("node")) if isinstance(self.nodes, dict) else None
+                right = self.area_node.get(g.get("to_map"))
+                if node is not None and right is not None and node.get("map") != g.get("to_map") and right in self.nodes:
+                    g["node"] = right
+                    self.gate_fixes += 1
 
     def name(self, map_id):
         return self.names.get(map_id, f"map {map_id}")
@@ -108,7 +120,16 @@ class World:
             # The outpost sits inside this same walkable piece: walk to its own arrival point
             # and the gate is crossed on the way.
             if o in self.outpost_xy:
-                out.append((o, {"do": "walk_in", "xy": self.outpost_xy[o], "expect": o, "through": map_id}))
+                # Its own arrival point lies on the outpost's ground, walled off from the area
+                # (Seekers Passage from The Salt Flats: 2900 from any ground the party could
+                # reach, so the walk was refused). Where the outpost's gate into this area was
+                # recorded, its last point is at the doorway: walk there, then through.
+                door = next((g["path"][-1] for g in self.gates.get(o, [])
+                             if g.get("to_map") == map_id and g.get("path")), None)
+                leg = {"do": "walk_in", "xy": door or self.outpost_xy[o], "expect": o, "through": map_id}
+                if door is not None:
+                    leg["beyond"] = self.outpost_xy[o]
+                out.append((o, leg))
         for d in self.nodes[node]["doors"]:
             other = self.nodes[d["to"]]
             if other["map"] is None:

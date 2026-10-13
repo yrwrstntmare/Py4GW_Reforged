@@ -8,7 +8,8 @@ Smash (Guild Wars Wiki, The Sulfurous Wastes). The route has no step for it and 
 bridge on foot. Added after the point at (-13595, 8507), while still riding: along the narrow
 east-west strip of sulfur to its dead end under the bridge, Smash there, and back. Seen
 2026-10-09: party stopped on foot at (-11295, 10174), 12 foes left on the plateau. The spot is
-from the area's ground data (the strip is ground piece 592); NOT yet seen working in game.
+from the area's ground data (the strip is ground piece 592); confirmed in game 2026-10-12 as
+(-11528, 10360) ("pillar-spot-confirmed").
 """
 import json
 
@@ -55,6 +56,16 @@ def main():
                 a["charge_with"], a["charge_reach"] = "attack", 3000
                 a["save_from"] = a["at"] - 6
         r["patched"].append("pillar-attack")
+    if "pillar-spot-confirmed" not in r["patched"]:
+        # The spot right under the pillar, marked in game by standing there (2026-10-12; the
+        # ground-data guess was (-11600, 10330), 75 away). Route point and skill step both.
+        spot = [-11528, 10360]
+        for a in r["actions"]:
+            if a.get("do") == "skill" and a.get("value") == JUNUNDU_SMASH:
+                old = a["pos"]
+                a["pos"] = spot
+                r["points"] = [spot if list(p) == list(old) else p for p in r["points"]]
+        r["patched"].append("pillar-spot-confirmed")
     json.dump(data, open(PATH, "w"))
     print("444:", len(r["points"]), "points;", r["actions"])
 

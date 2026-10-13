@@ -139,6 +139,18 @@ class RunLog:
                 far = sorted(((f[0] - px) ** 2 + (f[1] - py) ** 2) ** 0.5 for _c, f, _n, _r in (getattr(eng, "carto_targets", None) or ()))
                 beat["carto_left"] = len(far)
                 beat["carto_nearest"] = round(far[0]) if far else None
+                # fog with ground under it that no plan clears (Toolbox showed map left to do
+                # while carto_left read 0): every 2 min, when the count changes
+                if now - getattr(self, "_carto_miss_t", 0.0) >= 120.0:
+                    self._carto_miss_t = now
+                    try:
+                        miss = eng.carto.missing(eng.grid)
+                    except Exception as e:
+                        miss = {"error": repr(e)}
+                    sig = {k: v for k, v in miss.items() if k != "where"}
+                    if sig and sig != getattr(self, "_carto_miss_sig", None):
+                        self._carto_miss_sig = sig
+                        self.event("carto_missing", **miss)
             if extra:
                 beat.update(extra)
             self.event("beat", **beat)

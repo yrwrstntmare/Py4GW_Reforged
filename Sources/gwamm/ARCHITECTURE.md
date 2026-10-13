@@ -65,6 +65,7 @@ no game running. If a planning change needs something from the game, add a funct
   - `node_blessing.py` – shrine blessings and bounties
   - `node_capture.py` – elite capture
 - `cross.py` – `CrossNode`: step through a door into the next area.
+- `ride_store.py` – wurm ground (`core/mounts.py`) learnt per area, kept between runs.
 - `campaign.py` – `Campaign`: the queue, its results, saved teams, the order areas are run in.
 - `maprun.py` – `MapRunNode`: one queued area from start to finish (travel, walk in, vanquish,
   leave). Its outpost preparation is a mixin:

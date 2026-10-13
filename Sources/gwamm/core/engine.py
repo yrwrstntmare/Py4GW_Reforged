@@ -39,6 +39,7 @@ class Config:
     summon_stones = False        # call a summoned ally (summoning stone) whenever none is out; needs consumables on
     pull_shift = False           # drag a fight away from a group that is walking in. Off: every time it was tried
                                  # in the recorded runs the leader outran the heroes and it cost a death
+    auto_reconnect = True        # press Yes on the game's "reconnect to your last game?" prompt while running
     keep_at_it = False           # testing: stay on the fight in front of us. Deaths, wipes and postponed fights
                                  # do not send the party elsewhere in the area, and the area is never given up.
     pull_groups = False          # bring the nearest group back to the parked party instead of walking into it
@@ -72,6 +73,8 @@ class Config:
     danger_radius = 2500.0       # after a death, leave this much ground around it for later
     danger_seconds = 600.0
     danger_path_factor = 3.0     # paths elsewhere accept a detour this many times longer to stay off ground we died on
+    wipe_return_seconds = 300.0  # after a wipe, keep off that ground this long, then go back for it (it has to be
+                                 # done anyway; leaving it for last only meant dying there again at the end)
     wipe_path_factor = 6.0       # ...and this many times longer round a place the whole party died
     carto_fetch_limit = -1.0     # (off: no gain in simulation) fetch a far map cell when the plan brings us nearest, up to this walk
     carto_leftover_walk = 0.0    # after the vanquish, skip a leftover map cell that needs a longer walk than this (0 = no limit)
@@ -145,9 +148,14 @@ class Engine:
         # door gets a small one (Nightfall maps list many spawns for their missions, and full
         # rings round all of them walled off parts of nearly every area).
         self.exit_r = {}
+        # a fourth value "out": the party once walked out of the area through it, so it is a
+        # door for certain; its ring may be narrowed to the doorway but is never taken off
+        self.never_remove = set()
         for e in exits:
             if len(e) > 2 and e[2]:
                 self.exit_r[(float(e[0]), float(e[1]))] = float(e[2])
+            if len(e) > 3 and e[3] == "out":
+                self.never_remove.add((float(e[0]), float(e[1])))
         exits = [(float(e[0]), float(e[1])) for e in exits]
         self.exits = self._relevant_exits(exits, start_xy)
         self.walked_through = self._drop_walked_exits(list(guide or hints or ()), start_xy)
@@ -236,7 +244,8 @@ class Engine:
         # route turns 115 from a "portal" at the top of the ramp to the bridge; its ring cut the
         # bridge off and the party looped below it).
         dropped = [e for e in self.exits
-                   if (any(seg_gap(e, a, b) <= near for a, b in legs)
+                   if e not in getattr(self, "never_remove", ())
+                   and (any(seg_gap(e, a, b) <= near for a, b in legs)
                        or any(math.hypot(e[0] - x, e[1] - y) <= 250.0 for x, y in inner))
                    and math.hypot(e[0] - sx, e[1] - sy) > 600.0]
         self.exits = [e for e in self.exits if e not in dropped]
@@ -278,9 +287,10 @@ class Engine:
         if cur >= 0.95 * full:
             return []
         level = {}
+        keep = set(getattr(self, "never_remove", ()))
         for e in self.exits:
             for lv in ("small", "none"):
-                if lv == "none" and e in sure:
+                if lv == "none" and (e in sure or e in keep):
                     break
                 fence({**level, e: lv})
                 c = count()
@@ -293,10 +303,10 @@ class Engine:
             # (Resplendent Makuun: 15 of 16 rings went, two real doors among them; the party
             # walked into a doorway and every step from there was refused, 827 times, until
             # every region was written off and the run ended with 88 foes left.)
-            level = {e: ("small" if e in sure or e in shown else "none") for e in self.exits}
+            level = {e: ("small" if e in sure or e in shown or e in keep else "none") for e in self.exits}
             fence(level)
             cur = count()
-            for e in sorted(shown):
+            for e in sorted(shown - keep):
                 fence({**level, e: "none"})
                 c = count()
                 if c >= cur + 0.03 * full:
@@ -705,6 +715,12 @@ class Engine:
         self.snags.append((float(spot[0]), float(spot[1])))
         return True
 
+    def _door_near(self, reach):
+        """An exit of this area within `reach` of the party (its own doors and portals)."""
+        px, py = self.player_xy
+        doors = list(getattr(self, "exits", ())) + list(getattr(self, "removed_exits", ())) + list(getattr(self, "portals", ()) or ())
+        return any(math.hypot(float(d[0]) - px, float(d[1]) - py) <= reach for d in doors)
+
     def _hazard_near(self, reach):
         px, py = self.player_xy
         return any(math.hypot(x - px, y - py) <= reach for x, y in self.hazards)
@@ -757,12 +773,22 @@ class Engine:
         the party can take as it found it: leave it until everything else is done (fewer
         patrols left to join in, and any morale items used by then), and keep paths to other
         places off that ground."""
-        for w in self.wipes:
+        t = self.__dict__.setdefault("_wipe_t", {})
+        for k, w in enumerate(self.wipes):
             if math.hypot(w[0] - xy[0], w[1] - xy[1]) < 1200.0:
                 w[2] += 1
+                t[k] = self._now
                 return w[2]
         self.wipes.append([xy[0], xy[1], 1])
+        t[len(self.wipes) - 1] = self._now
         return 1
+
+    def in_recent_wipe_zone(self, pos):
+        """Inside a wipe zone the party went down in during the last `wipe_return_seconds`."""
+        r2 = self.cfg.danger_radius ** 2
+        t = self.__dict__.get("_wipe_t", {})
+        return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 and self._now - t.get(k, -1e18) < self.cfg.wipe_return_seconds
+                   for k, (x, y, _n) in enumerate(self.wipes))
 
     def near_hard_spot(self, pos, radius=1500.0):
         r2 = radius * radius
@@ -794,8 +820,8 @@ class Engine:
     def _dangerous(self, pos):
         if self.cfg.keep_at_it:
             return False
-        if self.in_wipe_zone(pos):
-            return True
+        if self.in_recent_wipe_zone(pos):
+            return True                  # for a while; then it is gone back to, taken in small bites
         r2 = self.cfg.danger_radius ** 2
         return any((pos[0] - x) ** 2 + (pos[1] - y) ** 2 <= r2 for x, y, until in self.danger if until > self._now)
 
@@ -956,7 +982,8 @@ class Engine:
             for cell, footing, node, reveals in self.carto_targets:
                 key = ("carto", cell)
                 if not blocked(key):
-                    obj = Objective("carto", key, footing, self.rm.node_region[node], 0.8, reveals)
+                    spot = getattr(self, "_carto_edge_pos", {}).get(cell)
+                    obj = Objective("carto", key, spot or footing, self.rm.node_region[node], 0.8, reveals)
                     # Same rule as for enemies: a fogged cell in ground the sweep has already
                     # passed will not be met again, so stand in it now. Returning for it from the
                     # far end of the map costs many times more than the detour does here.
@@ -1005,6 +1032,59 @@ class Engine:
             score *= 4.0                 # the enemies standing round a blessing giver go first
         return score
 
+    def _goal_node(self, obj):
+        """The graph node to walk to for this objective. Where levels lie over one another the
+        nearest node in plan view can be on the wrong one, and as an enemy target moved the goal
+        flipped between levels, with the way to it 3,000 one moment and 12,000 the next: the party
+        walked east, west, north and east again for a minute short of the last groups (Kessex
+        Peak). The enemy's own level is used when the game told us it; else, for the same
+        objective, the level chosen last time."""
+        x, y = obj.pos
+        plane = None
+        if obj.kind == "cluster" and getattr(obj, "target", None) in self.mem.enemies:
+            plane = getattr(self.mem.enemies[obj.target], "plane", None)
+        if plane is None:
+            last = getattr(self, "_goal_plane", None)
+            if last is not None and last[0] == obj.key:
+                plane = last[1]
+        if plane is not None:
+            g = self.nav.nearest_node(x, y, allowed=self.rm.reachable, max_radius=600.0, plane=plane)
+            if g is not None:
+                self._goal_plane = (obj.key, plane)
+                return g
+        g = self.nav.nearest_node(x, y, allowed=self.rm.reachable)
+        if g is not None:
+            self._goal_plane = (obj.key, self.nav.node_plane(g))
+        return g
+
+    def _carto_edge_spot(self, cell, lost):
+        """The walkable spot in `cell` nearest the fogged cells `lost`, once per cell; None if
+        tried already, nothing is lost but the cell itself, or there is no better spot."""
+        tried = self.__dict__.setdefault("_carto_edge_pos", {})
+        others = [c for c in lost if c != tuple(cell)]
+        if tuple(cell) in tried or not others or self.carto is None:
+            return None
+        proj = self.carto.proj
+        cs = [proj.cell_corners(*c) for c in others]
+        tx = sum((c[0] + c[2]) / 2.0 for c in cs) / len(cs)
+        ty = sum((c[1] + c[3]) / 2.0 for c in cs) / len(cs)
+        x0, y0, x1, y1 = proj.cell_corners(*cell)
+        reach = math.hypot(x1 - x0, y1 - y0) * 2.0
+        best, best_d = None, None
+        for i in self.nav.nodes_within(tx, ty, reach):
+            if not self.rm.reachable[i]:
+                continue
+            x, y = self.nav.nodes[i]
+            if proj.cell(x, y) != tuple(cell) or self.nav.in_no_go(x, y):
+                continue
+            d = math.hypot(x - tx, y - ty)
+            if best is None or d < best_d:
+                best, best_d = (x, y), d
+        tried[tuple(cell)] = best
+        if best is None:
+            return None
+        return best
+
     def _still_valid(self, obj):
         if obj is None or self.mem.blocked.get(obj.key, 0) >= self.cfg.max_failures:
             return False
@@ -1049,6 +1129,15 @@ class Engine:
                     self._stand_since = self._now
                 elif self._now - self._stand_since > self.cfg.carto_patience:
                     lost = {c for c in obj.data if not self.grid.explored(*c)}
+                    # The cell itself is credited but fog next to it (off the path, over an edge)
+                    # is not: we stood on the far side of the cell. Once, stand on the walkable
+                    # spot of this cell nearest that fog before giving up on it.
+                    spot = self._carto_edge_spot(obj.key[1], lost)
+                    if spot is not None:
+                        obj.pos = spot
+                        self._stand_since = None
+                        self.note = f"map cell {obj.key[1]}: fog next to it not cleared; standing nearer it"
+                        return True
                     self.carto.declined |= lost
                     self.note = f"stood in map cell {obj.key[1]} without credit; gave up on {len(lost)} cells"
                     self.carto_given_up += len(lost)
@@ -1310,7 +1399,7 @@ class Engine:
             px, py = self.player_xy
             nearest = min(math.hypot(self.mem.enemies[i].xy[0] - px, self.mem.enemies[i].xy[1] - py) for i in self.walled)
             radius = max(500.0, min(radius, nearest - 150.0))
-        goal = self.nav.nearest_node(obj.pos[0], obj.pos[1], allowed=self.rm.reachable)
+        goal = self._goal_node(obj)
         here = self.player_node
         if here is None:                 # we are off the known ground for a moment: no judgement on the objective
             self.route_ahead = [(obj.pos[0], obj.pos[1])]
@@ -1322,6 +1411,7 @@ class Engine:
             g2 = self.nav.nearest_node(via[0], via[1], allowed=self.rm.reachable)
             if g2 is not None:
                 goal = g2
+        pen = None                       # (a goto with no route reached _no_path_step without it: error x3, map 110)
         if obj.kind == "goto":
             route, left = (getattr(self, "_goto_route", None) or self._transit_route()), self.cfg.transit_step_length
         else:
@@ -1349,6 +1439,11 @@ class Engine:
                         self.plain_routes = getattr(self, "plain_routes", 0) + 1
         if self._hazard_near(left + 600.0):
             left = min(left, 450.0)      # short steps near a trap, so the walk keeps to the path round it
+        elif obj.kind != "goto" and self._door_near(left + 900.0):
+            # and near a door: the game's own walk between two far step points cut through the
+            # doorway and the party zoned out mid-area (map 106 mid-vanquish, 53 and 54 while
+            # mapping): short steps keep it on our path, which goes round the door's ring
+            left = min(left, 450.0)
         elif self._snag_near(1500.0):
             left = min(left, 600.0)      # and near scenery we were caught on: the game's own walk between two
                                          # far points cuts the corner we are trying to go round

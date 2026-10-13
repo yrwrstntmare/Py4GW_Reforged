@@ -292,10 +292,19 @@ def town_waypoints(traps, links, start_xy, goal_xy, start_plane=None, gap=450.0)
     or over the target when the arrival point is on another level, and it paces about there.
     Walking our own route in short hops keeps each hop on one level. [] if there is no route."""
     nav = NavGraph(traps, links=links)
+    return nav_waypoints(nav, start_xy, goal_xy, start_plane=start_plane, gap=gap)
+
+
+def nav_waypoints(nav, start_xy, goal_xy, start_plane=None, goal_plane=None, gap=450.0):
+    """`town_waypoints` over an existing NavGraph; `goal_plane` picks which level the goal is
+    on where one lies over another (a teleporter pad up on raised ground: the game's own walk
+    stops on the floor under it)."""
     a = nav.nearest_node(start_xy[0], start_xy[1], max_radius=600.0, plane=start_plane) if start_plane is not None else None
     if a is None:
         a = nav.nearest_node(start_xy[0], start_xy[1])
-    b = nav.nearest_node(goal_xy[0], goal_xy[1])
+    b = nav.nearest_node(goal_xy[0], goal_xy[1], max_radius=600.0, plane=goal_plane) if goal_plane is not None else None
+    if b is None:
+        b = nav.nearest_node(goal_xy[0], goal_xy[1])
     if a is None or b is None:
         return []
     route = nav.path(a, b)
@@ -312,6 +321,11 @@ def town_waypoints(traps, links, start_xy, goal_xy, start_plane=None, gap=450.0)
     if not out or math.hypot(out[-1][0] - goal_xy[0], out[-1][1] - goal_xy[1]) > 150.0:
         out.append((goal_xy[0], goal_xy[1]))
     return out
+
+
+def planes_near(nav, xy, radius=600.0):
+    """The ground pieces (levels) with walkable ground within `radius` of a spot."""
+    return sorted({nav.node_plane(i) for i in nav.nodes_within(xy[0], xy[1], radius)})
 
 
 def loose_links(traps, vert_tol=100.2, horiz_tol=100.6):
@@ -353,3 +367,166 @@ def walked_round(point, trail, inner=300.0, outer=900.0):
             if len(quarters) == 4:
                 return True
     return False
+
+
+def route_chain(route, start, goal, near=2500.0):
+    """The stretch of a known route (its points, in order) that leads from near `start` to near
+    `goal`, to be walked point by point with the game's own pathing when our map's way does not
+    get there (Diessa Lowlands: the hand-made route goes straight from (-1545, -8141) down to
+    (-3883, -10860), where our graph kept sending the party round a ridge). [] if the route
+    passes neither end within `near`, or the stretch would not end nearer the goal."""
+    pts = [tuple(p) for p in route or ()]
+    if len(pts) < 2:
+        return []
+    d = lambda a, b: math.hypot(a[0] - b[0], a[1] - b[1])
+    i = min(range(len(pts)), key=lambda k: d(pts[k], start))
+    j = min(range(len(pts)), key=lambda k: d(pts[k], goal))
+    if d(pts[i], start) > near or d(pts[j], goal) > near or i == j:
+        return []
+    chain = pts[i:j + 1] if i < j else pts[j:i + 1][::-1]
+    if d(chain[-1], goal) >= d(start, goal):
+        return []
+    return chain
+
+
+def keep_off_doors(target, player, doors, radius=700.0):
+    """A step's end point moved back out of a door's reach: a point within `radius` of a door is
+    put `radius` from it on the party's side (a target past the door is not followed through
+    it). (Regent Valley, 5 foes left: a map-cell walk ended 457 from a portal whose ring had
+    been dropped, the party zoned out and the area was lost.) Unchanged when no door is close."""
+    tx, ty = float(target[0]), float(target[1])
+    for d in doors or ():
+        if math.hypot(tx - d[0], ty - d[1]) >= radius:
+            continue
+        dx, dy = player[0] - d[0], player[1] - d[1]
+        gap = math.hypot(dx, dy) or 1.0
+        tx, ty = d[0] + dx / gap * radius, d[1] + dy / gap * radius
+    return tx, ty
+
+
+def choose_teleporter(player, goal, teleporters, gain=1000.0):
+    """The teleporter that best takes the party towards `goal` it cannot walk to: the one whose
+    arrival point is nearest the goal, counting the walk to the teleporter itself, and only if
+    that beats where the party stands by `gain`. teleporters: [{"at": [x, y], "to": [x, y]}].
+    (Prophet's Path: groups up on ground reached only by a teleporter.) None if none helps."""
+    d = lambda a, b: math.hypot(a[0] - b[0], a[1] - b[1])
+    here = d(player, goal)
+    best, best_cost = None, None
+    for tp in teleporters or ():
+        after = d(tp["to"], goal)
+        if after > here - gain:
+            continue
+        cost = d(player, tp["at"]) * 0.5 + after
+        if best is None or cost < best_cost:
+            best, best_cost = tp, cost
+    return best
+
+
+def circle_centre(points):
+    """Centre and radius of the circle best through `points` [(x, y), ...] (least squares), or
+    None when they lie near a straight line."""
+    n = len(points)
+    if n < 3:
+        return None
+    mx = sum(p[0] for p in points) / n
+    my = sum(p[1] for p in points) / n
+    suu = suv = svv = suuu = svvv = suvv = svuu = 0.0
+    for x, y in points:
+        u, v = x - mx, y - my
+        suu += u * u
+        suv += u * v
+        svv += v * v
+        suuu += u * u * u
+        svvv += v * v * v
+        suvv += u * v * v
+        svuu += v * u * u
+    det = suu * svv - suv * suv
+    if abs(det) < 1e-6 * max(1.0, (suu + svv) ** 2):
+        return None
+    r1 = 0.5 * (suuu + suvv)
+    r2 = 0.5 * (svvv + svuu)
+    uc = (r1 * svv - r2 * suv) / det
+    vc = (r2 * suu - r1 * suv) / det
+    r = math.sqrt(uc * uc + vc * vc + (suu + svv) / n)
+    return (mx + uc, my + vc, r)
+
+
+def teleporter_sets(gadgets, reach=900.0):
+    """Crystal Desert teleporters: a pad with four switches round it (Guild Wars Wiki,
+    Teleporter: the switches are used in an order that changes every visit). From the objects
+    seen [(agent, gadget id, x, y)], each group of four switches within `reach` of one another -
+    four of one kind, or four whose ids run on (Prophet's Path: 751-754, every switch its own
+    id). The pad is the object of another kind at the centre of the circle the switches stand
+    on (they stand about 750 round it); when the pad is not an object at all the centre itself,
+    agent 0. {"pad": (agent, x, y), "switches": [(agent, x, y), ...]}. Nearest-first is the
+    caller's business."""
+    out, used = [], set()
+    for a in gadgets:
+        if a[0] in used:
+            continue
+        near = [g for g in gadgets if g[0] not in used and math.hypot(g[2] - a[2], g[3] - a[3]) <= reach]
+        kinds = {}
+        for g in near:
+            kinds.setdefault(g[1], []).append(g)
+        rows = [v[:4] for v in kinds.values() if len(v) >= 4]
+        if not rows:
+            ids = sorted({g[1] for g in near})
+            for i in range(len(ids) - 3):
+                if ids[i + 3] - ids[i] == 3:
+                    run = [next(g for g in near if g[1] == ids[i + k]) for k in range(4)]
+                    if all(math.hypot(p[2] - q[2], p[3] - q[3]) <= reach for p in run for q in run):
+                        rows.append(run)
+                        break
+        if not rows:
+            continue
+        row = max(rows, key=len)
+        rowids = {g[0] for g in row}
+        others = [g for g in near if g[0] not in rowids]
+        fit = circle_centre([(g[2], g[3]) for g in row])
+        pad = None
+        if fit is not None and 300.0 <= fit[2] <= 1500.0:
+            at_centre = [g for g in others if math.hypot(g[2] - fit[0], g[3] - fit[1]) <= 450.0]
+            if at_centre:
+                g = min(at_centre, key=lambda g: math.hypot(g[2] - fit[0], g[3] - fit[1]))
+                pad = (g[0], g[2], g[3])
+            else:
+                pad = (0, round(fit[0]), round(fit[1]))
+        elif others:
+            cx = sum(g[2] for g in row) / len(row)
+            cy = sum(g[3] for g in row) / len(row)
+            g = min(others, key=lambda g: math.hypot(g[2] - cx, g[3] - cy))
+            pad = (g[0], g[2], g[3])
+        if pad is None:
+            continue
+        out.append({"pad": pad, "switches": [(g[0], g[2], g[3]) for g in row],
+                    "ids": [g[1] for g in row]})
+        used.update(rowids)
+        if pad[0]:
+            used.add(pad[0])
+    return out
+
+
+def rank_teleporters(sets, player, goal, learnt=(), hints=(), cut=()):
+    """Which teleporter sets to work, best first, leaving out those on the wrong side.
+    sets: from `teleporter_sets`. learnt: [{"at", "to"}] jumps seen. hints: spots known to be
+    pads. cut: spots the game will not walk us to from below.
+    Left out: a pad already seen to take us somewhere no nearer the goal. Last: a pad standing
+    on the cut-off ground while we are below (likely the one for coming back, but raised ground
+    can have a way up). First: a pad seen to take us nearer the goal; then a known pad; then the nearest."""
+    d = lambda a, b: math.hypot(a[0] - b[0], a[1] - b[1])
+    here = d(player, goal)
+    below = not any(d(u, player) < 3000.0 for u in cut)
+    out = []
+    for t in sets:
+        pad = (t["pad"][1], t["pad"][2])
+        # on the cut-off ground while we are below: tried last, not never - a pad up on raised
+        # ground can still have a way up to it (the walk to it gives up after 90 s if not)
+        high = below and any(d(u, pad) < 2500.0 for u in cut)
+        went = [r for r in learnt if d(r["at"], pad) < 400.0]
+        helps = any(d(r["to"], goal) < here - 1000.0 for r in went)
+        if went and not helps:
+            continue
+        hinted = any(d(h, pad) < 300.0 for h in hints)
+        out.append(((3 if high else 0 if helps else 1 if hinted else 2, d(pad, player)), t))
+    out.sort(key=lambda x: x[0])
+    return [t for _k, t in out]

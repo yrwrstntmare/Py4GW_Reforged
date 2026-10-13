@@ -70,6 +70,14 @@ class Session:
     def drop(self):
         """Forget everything tied to the instance (map change, loading screen)."""
         if self.engine is not None:
+            # what the area looked like when it went away: the node reads it after the drop (it
+            # used to look at the engine, gone by then, so a finished vanquish left by a door
+            # was written down as "left the area": 53, 54)
+            try:
+                self.last_left = {"map": self.map_id, "xy": tuple(self.engine.player_xy),
+                                  "foes": self.engine.foes_remaining, "t": time.time()}
+            except Exception:
+                self.last_left = None
             self.log.event("instance_end", reason="map changed or loading", result=self.result)
             self.log.close()
         self.fights.close()
@@ -302,7 +310,11 @@ class Session:
                     # in the version that picks this up), and the ground crossed as a wurm
                     "guide_i": eng.guide_i, "guide_done": bool(eng.guide) and not eng.guiding(),
                     "guide_next": list(eng.guide[eng.guide_i]) if eng.guiding() else None,
+                    "actions_done": sorted(getattr(eng, "_route_actions_done", None) or ()),
+                    "actions_known": getattr(eng, "_route_actions_done", None) is not None,
                     "ridden": sorted(getattr(getattr(self, "ride_ground", None), "ridden", ())),
+                    "ridden_levels": [[list(c), sorted(p)] for c, p in
+                                      sorted(getattr(getattr(self, "ride_ground", None), "levels", {}).items())],
                     # enemies seen and still to be dealt with: far ones are not in the game's list
                     # after a reload, so without this a group left for later would be forgotten
                     "enemies": [[e.id, round(e.xy[0]), round(e.xy[1]), bool(e.boss)]
@@ -368,6 +380,10 @@ class Session:
                     eng.guide_i = min(range(len(eng.guide)), key=lambda i: ((eng.guide[i][0] - px) ** 2 + (eng.guide[i][1] - py) ** 2, -i))
             self._resume_route = eng.guide_i != was
             self._resume_ridden = [tuple(c) for c in d.get("ridden", [])]
+            self._resume_levels = [(tuple(c), p) for c, p in d.get("ridden_levels", [])]
+            # which route steps were really done (a pillar not knocked down is not done just
+            # because the route went past it); None from saves before 0.50.47
+            self._resume_actions = set(d.get("actions_done", [])) if d.get("actions_known") else None
             from ..core.memory import Enemy
             known = 0
             for eid, x, y, boss in d.get("enemies", []):
@@ -424,6 +440,7 @@ class Session:
             # what the game lists (portals full, spawn points small); then the world map's doors
             # (a door we came through gets the full ring and is never narrowed: see Engine._unfence_cuts)
             found = [(p[0], p[1], self.cfg.exit_avoid_radius) for p in self._learned_exits(mid)] + game.read_exits()
+            found += [(p[0], p[1], self.cfg.exit_avoid_radius, "out") for p in self._zoned_out_doors(mid)]
             if self.world is not None:
                 doors = list(self.world.exits_of(mid))
                 if doors:
@@ -530,14 +547,61 @@ class Session:
             if goto is None:
                 _r0 = time.perf_counter()
                 self.ride_ground, self._resume_route, self._resume_ridden = None, False, []   # per visit
+                self._resume_levels = []
+                self._resume_actions = None
                 self._try_resume(mid)
                 self.log.event("resume_time", seconds=round(time.perf_counter() - _r0, 2))
                 self._last_resume_save = time.time()
         except Exception as e:
             self.error = f"could not build the map model: {e!r}"
             self.engine = None
+            # written down where it can be read (it used to vanish: no log is open until the
+            # model is built, and a crossing of The Black Curtain sat 25 minutes with no trace)
+            now_ = time.time()
+            if now_ - getattr(self, "_build_err_t", 0.0) > 60.0:
+                self._build_err_t = now_
+                try:
+                    import traceback
+                    if getattr(self.log, "_file", None) is None:
+                        self.log.open(mid)
+                    self.log.event("error", where="build", error=repr(e), transit=self.transit,
+                                   trace=traceback.format_exc()[-2000:])
+                except Exception:
+                    pass
             return False
         return True
+
+    def learn_exit(self, mid, xy):
+        """A door the party walked out through by mistake: remembered with the arrival points
+        (known_exits.json), so next time it gets its full ring and is never taken off (rings
+        are dropped round points that only look like doors, and three real ones went that way:
+        54, 101, 106 zoned out through them). True if new."""
+        path = os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "known_exits.json")
+        try:
+            with open(path, encoding="utf-8") as f:
+                known = json.load(f)
+        except Exception:
+            known = {}
+        points = known.setdefault("out", {}).setdefault(str(mid), [])
+        if any((xy[0] - p[0]) ** 2 + (xy[1] - p[1]) ** 2 < 400.0 ** 2 for p in points):
+            return False
+        points.append([round(xy[0]), round(xy[1])])
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(known, f)
+        except Exception:
+            return False
+        return True
+
+    def _zoned_out_doors(self, mid):
+        """Doors the party once walked out through by mistake (known_exits.json, "out")."""
+        path = os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "known_exits.json")
+        try:
+            with open(path, encoding="utf-8") as f:
+                return [tuple(p) for p in json.load(f).get("out", {}).get(str(mid), [])]
+        except Exception:
+            return []
 
     def _learned_exits(self, mid):
         """Where the party has arrived in this map before. Each arrival point sits beside the

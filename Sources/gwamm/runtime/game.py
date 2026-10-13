@@ -197,6 +197,93 @@ def enemy_details(agent_id):
         return None
 
 
+HELD_TYPES = {2, 5, 12, 15, 22, 24, 26, 27, 32, 35, 36}     # weapons, off-hands and shields (Item_enums.ItemType)
+RANGED_TYPES = (5, 36)                                       # Bow, Spear
+
+
+def _items_in(*bags):
+    from Py4GWCoreLib.ItemArray import ItemArray
+    return list(ItemArray.GetItemArray(ItemArray.CreateBagList(*bags)) or [])
+
+
+def _item_type(item_id):
+    from Py4GWCoreLib.Item import Item
+    try:
+        return int(Item.GetItemType(item_id)[0])
+    except Exception:
+        return -1
+
+
+def held_items():
+    """Item ids the leader holds now (weapon, off-hand, shield), from the equipped-items bag."""
+    return [i for i in _items_in(22) if _item_type(i) in HELD_TYPES]
+
+
+def equip_ranged_weapon():
+    """Put a bow or a spear from the bags in the leader's hands, for a wurm's ranged basic attack
+    (Guild Wars Wiki, Sulfurous Wastes: with a bow or spear equipped the junundu attacks at
+    range, and each hit is one strike of adrenaline). Returns (held_before, ranged_id) or
+    (held_before, None) when the bags hold none; None, None when one is held already.
+    ASSUMED, not yet seen in game: Inventory.EquipItem(item, own agent) while on foot."""
+    held = held_items()
+    if any(_item_type(i) in RANGED_TYPES for i in held):
+        return None, None
+    for i in _items_in(1, 2, 3, 4, 5):
+        if _item_type(i) in RANGED_TYPES:
+            from Py4GWCoreLib.Inventory import Inventory
+            Inventory.EquipItem(i, Player.GetAgentID())
+            return held, i
+    return held, None
+
+
+def equip_items(item_ids):
+    """Equip these items again (what was held before a swap), weapon first."""
+    from Py4GWCoreLib.Inventory import Inventory
+    me = Player.GetAgentID()
+    order = sorted(item_ids, key=lambda i: _item_type(i) in (12, 24))   # off-hand / shield last
+    for i in order:
+        try:
+            Inventory.EquipItem(int(i), me)
+        except Exception:
+            continue
+
+
+def holds_ranged():
+    """Does the leader hold a bow or a spear?"""
+    try:
+        return any(_item_type(i) in RANGED_TYPES for i in held_items())
+    except Exception:
+        return False
+
+
+def leader_combat(on):
+    """Let HeroAI fight for the leader, or not. Off while the bot moves him itself: the wurm
+    build locks onto the nearest foe in earshot, which can be one up on a ledge it cannot
+    reach (Sulfurous Wastes: it stood under the pillar 20 minutes, attacking the plateau).
+    Same switch maprun_setup uses for other accounts (HeroAI option "Combat")."""
+    email = str(Player.GetAccountEmail() or "")
+    if not email:
+        return False
+    set_heroai_option(email, "Combat", bool(on))
+    return True
+
+
+def use_gadget(agent_id):
+    """Use an object (a teleporter, a lever) - the same call as talking to someone."""
+    if agent_id and Agent.IsValid(agent_id):
+        Player.Interact(agent_id, False)
+        return True
+    return False
+
+
+def is_attacking():
+    """Is the leader in an attack swing?"""
+    try:
+        return bool(Agent.IsAttacking(Player.GetAgentID()))
+    except Exception:
+        return False
+
+
 def attack(agent_id):
     """Have the leader attack this enemy (the client walks into weapon range and starts)."""
     if agent_id and Agent.IsValid(agent_id) and Agent.IsAlive(agent_id):
@@ -229,6 +316,15 @@ def skill_name(skill_id):
         return str(Skill.GetName(int(skill_id))).replace("_", " ")
     except Exception:
         return str(skill_id)
+
+
+def leader_action():
+    """(skill being cast, attacking?) for the leader: what was going on when adrenaline rose."""
+    try:
+        me = Player.GetAgentID()
+        return int(Agent.GetCastingSkillID(me) or 0), bool(Agent.IsAttacking(me))
+    except Exception:
+        return 0, False
 
 
 def enemy_casting(agent_id):
@@ -456,6 +552,75 @@ def fight_snapshot(radius=3200.0, known=()):
         except Exception:
             out[key] = None
     return out
+
+
+def instance_uptime():
+    """The instance's own clock (ms), from the game. It stops while the connection is down,
+    though the map still looks ready (the last frame stays up)."""
+    try:
+        return int(Map.GetInstanceUptime() or 0)
+    except Exception:
+        return 0
+
+
+def leader_connected():
+    """False when the game says our player in this party is not connected."""
+    try:
+        return bool(Player.IsPlayerLoaded())
+    except Exception:
+        return True
+
+
+def reconnect_prompt_yes():
+    """The game's own "reconnect to your last game?" prompt (after a dropped connection): press
+    Yes if it is up. True when pressed. Uses the frame Reforged's FrameTree names
+    DidNotCleaningDisconnectPopupCharselectYesButton. ASSUMED, not yet seen in game."""
+    try:
+        from Py4GWCoreLib.FrameTree import Frame, FrameId
+        f = Frame(FrameId.DidNotCleaningDisconnectPopupCharselectYesButton)
+        if f.exists and f.is_visible:
+            f.click()
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def leave_party_prompt_yes():
+    """The game's "your party is too large for this destination: leave your party?" yes/no
+    window, raised by a travel with too many heroes. Press Yes: the leader travels alone (the
+    heroes are dismissed) and the outpost's build is loaded there. True when pressed. Frame from
+    Reforged's FrameTree: ScreenFrame.LeaveYourPartyDialog.YesLeaveYourPartyButton. ASSUMED,
+    not yet seen in game."""
+    try:
+        from Py4GWCoreLib.FrameTree import Frame, FrameId
+        f = Frame(FrameId.ScreenFrame.LeaveYourPartyDialog.YesLeaveYourPartyButton)
+        if f.exists and f.is_visible:
+            f.click()
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def leave_party_dialog_up():
+    """Is the "leave your party?" window itself up (whether or not its Yes could be pressed)."""
+    try:
+        from Py4GWCoreLib.FrameTree import Frame, FrameId
+        f = Frame(FrameId.ScreenFrame.LeaveYourPartyDialog)
+        return bool(f.exists and f.is_visible)
+    except Exception:
+        return False
+
+
+def leader_conditioned():
+    """Is the leader under a condition (poison, bleeding, burning...): health can fall then with
+    no enemy near, and that is not the ground."""
+    try:
+        me = Player.GetAgentID()
+        return bool(Agent.IsConditioned(me)) or bool(Agent.IsHexed(me))
+    except Exception:
+        return False
 
 
 def my_health():
@@ -774,8 +939,16 @@ def flag_hero(agent_id, x, y):
 def unflag_heroes(agent_ids=()):
     """Take down every hero flag, by every route the library offers. Which form a single hero's
     flag wants (its agent id, or its place in the party) differs between Reforged's stubs and
-    its own hero panel, so both are sent; each is harmless if it is the wrong one."""
-    for a in agent_ids:
+    its own hero panel, so both are sent; each is harmless if it is the wrong one. Every hero's
+    own id is always added: a pull flags heroes one by one, and its "take them down" passed no
+    ids (Dragon's Gullet: the leader died, then walked on alone from the shrine while the
+    heroes stood at the pull's flags, and lay dead an hour)."""
+    ids = list(agent_ids or ())
+    try:
+        ids += [a for a in hero_agent_ids() if a not in ids]
+    except Exception:
+        pass
+    for a in ids:
         try:
             Party.Heroes.UnflagHero(a)
         except Exception:
@@ -1104,6 +1277,18 @@ def map_max_party(map_id):
         return 0
 
 
+def leader_down():
+    """(dead, health) for the leader, by two signs: the game's dead flag, or no health left
+    (Diessa Lowlands: the leader lay dead 12 minutes and the dead flag never showed, so heroes
+    parked for a pull stayed parked and nobody raised him). (None, None) if unreadable."""
+    try:
+        me = Player.GetAgentID()
+        hp = float(Agent.GetHealth(me))
+        return bool(Agent.IsDead(me)) or not bool(Agent.IsAlive(me)) or hp <= 0.0, hp
+    except Exception:
+        return None, None
+
+
 def player_dead_safe():
     try:
         return bool(Agent.IsDead(Player.GetAgentID()))
@@ -1332,13 +1517,14 @@ def skill_state(skill_id):
     return out
 
 
-def nearest_enemy(reach=3000.0):
-    """The nearest living enemy within `reach` of the leader: (agent, distance) or None."""
+def nearest_enemy(reach=3000.0, skip=()):
+    """The nearest living enemy within `reach` of the leader, not in `skip`: (agent, distance)
+    or None."""
     px, py = Player.GetXY()
     best = None
     for enemy in AgentArray.GetEnemyArray():
         try:
-            if Agent.IsAlive(enemy):
+            if Agent.IsAlive(enemy) and int(enemy) not in skip:
                 ex, ey = Agent.GetXY(enemy)
                 d = math.hypot(ex - px, ey - py)
                 if d <= reach and (best is None or d < best[1]):

@@ -18,7 +18,7 @@ from Py4GWCoreLib.BottingTree import BottingTree
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.py4gwcorelib_src.Settings import Settings
 
-SCRIPT_VERSION = "0.50.41"
+SCRIPT_VERSION = "0.50.75"
 INSTALL_PROBLEM = ""
 
 # Py4GW keeps imported packages in memory when a script is reloaded, so without this an
@@ -229,8 +229,44 @@ def ensure_tree():
     global botting_tree, built_queue
     queue = list(get_campaign().queue) + (["exit"] if get_campaign().exit_when_done else []) + (["multibox"] if session.cfg.multibox else [])
     session.save_options_if_changed()
+    if botting_tree is not None and botting_tree.IsStarted() and session.cfg.auto_reconnect:
+        # the game's "reconnect to your last game?" prompt after a dropped connection: Yes, so the
+        # party goes back into the same instance and the run carries on from its saved state
+        now_ = time.time()
+        if now_ - session.__dict__.get("_reconnect_look", 0.0) >= 2.0:
+            session._reconnect_look = now_
+            try:
+                if game.reconnect_prompt_yes():
+                    session.log.event("reconnect", pressed="yes")
+            except Exception:
+                pass
+    if botting_tree is not None and botting_tree.IsStarted() and not session.cfg.multibox:
+        # a travel with too many heroes for the destination stops on the game's "leave your
+        # party?" window (the "party too large" stops). Yes: the leader goes alone, the heroes
+        # are sent home, and the outpost's build is loaded on arrival. Not with other accounts
+        # in the party: that would break the party up.
+        now_ = time.time()
+        if now_ - session.__dict__.get("_leave_party_look", 0.0) >= 1.0:
+            session._leave_party_look = now_
+            try:
+                if game.leave_party_prompt_yes():
+                    session.log.event("leave_party_prompt", pressed="yes")
+                elif game.leave_party_dialog_up() and now_ - session.__dict__.get("_leave_party_said", 0.0) > 30.0:
+                    session._leave_party_said = now_
+                    session.log.event("leave_party_prompt", pressed="no: window up, Yes button not found")
+            except Exception:
+                pass
     if botting_tree is None or not botting_tree.IsStarted():
+        session.transit = None           # a crossing left over from before the stop is not the plan now
         session.refresh_party()
+        if session.__dict__.get("_heroai_off"):
+            # stopped while the bot was moving the leader itself (pillar, step clear): give
+            # HeroAI its hands back
+            try:
+                game.leader_combat(True)
+            except Exception:
+                pass
+            session._heroai_off = False
     if botting_tree is not None and not botting_tree.IsStarted():
         get_campaign().__dict__["_plan"] = {}        # not running: the next Start plans afresh
     if botting_tree is not None and queue != built_queue and not botting_tree.IsStarted():
@@ -361,7 +397,7 @@ def draw_status():
         if st["patrols"]:
             _line("PATROLS", f"{st['patrols']} enemies seen walking a beat (their paths are kept and checked before a fight is started)")
         if st["wipe_zones"]:
-            _line("PARTY WIPES", f"{st['wipes']} at {st['wipe_zones']} place(s): left for last and walked round (red rings on the map)", BAD)
+            _line("PARTY WIPES", f"{st['wipes']} at {st['wipe_zones']} place(s): kept off for 5 min, then taken in small bites (red rings on the map)", BAD)
         if session.stalls:
             _line("STALLS", f"{session.stalls} recovered")
         if getattr(session, "route_note", ""):
@@ -432,6 +468,43 @@ def dump_debug():
 
 
 
+def draw_route_spots():
+    """Skill steps of this area's route (the Sulfurous Wastes pillar): stand exactly where it
+    must be done and press the button; the bot uses that spot from then on."""
+    from Sources.gwamm.runtime import ride_store
+    if not game.map_ready():
+        return
+    here = game.map_id()
+    eng = session.engine
+    if eng is not None and session.map_id == here:
+        acts = getattr(eng, "guide_actions", None) or ()
+    else:
+        try:
+            import json as _json
+            import os as _os
+            if session.__dict__.get("_routes") is None:
+                with open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "Sources", "gwamm", "data",
+                                        "routes.json"), encoding="utf-8") as f:
+                    session._routes = _json.load(f)
+            acts = (session._routes.get(str(here)) or {}).get("actions") or ()
+        except Exception:
+            acts = ()
+    for a in acts:
+        if a.get("do") != "skill" or a.get("at") is None:
+            continue
+        pos = ride_store.route_spot(here, a["at"]) or a.get("pos")
+        PyImGui.text(f"Route step {a['at']}: {game.skill_name(int(a['value']))} at "
+                     f"{'(%d, %d)' % (pos[0], pos[1]) if pos else 'no spot'}")
+        if PyImGui.button(f"Do it where I stand now##spot{a['at']}"):
+            x, y = game.player_xy()
+            if ride_store.set_route_spot(here, a["at"], (x, y)):
+                if eng is not None and session.map_id == here:
+                    for b in getattr(eng, "guide_actions", None) or ():
+                        if b.get("do") == "skill" and b.get("at") == a["at"]:
+                            b["pos"] = [round(x), round(y)]
+                session.log.event("route_action", stage="spot_set_by_hand", at=a["at"], was=pos, now=[round(x), round(y)])
+
+
 def draw_developer():
     """Data-building tools used while writing the bot. Nobody needs them to run it."""
     running = botting_tree is not None and botting_tree.IsStarted()
@@ -440,6 +513,7 @@ def draw_developer():
     if session.fights.written or session.fights.error:
         PyImGui.text(f"Fights recorded this session: {session.fights.written}" + (f"   (problem: {session.fights.error})" if session.fights.error else ""))
     View.show_reforged = PyImGui.checkbox("Show Reforged's own bot window (behaviour tree view)", View.show_reforged)
+    safe("route spots", draw_route_spots)()
     if world_dump.running():
         PyImGui.text(f"WORLD DATA: reading map {world_dump.progress} of 900...")
     else:
@@ -557,6 +631,7 @@ def draw_options():
     cfg.route_hints = PyImGui.checkbox("Use the area's known route as a guide (and as the way round when blocked)", cfg.route_hints)
     cfg.edge_pass = PyImGui.checkbox("After the vanquish, also clear map cells beside exits (takes extra time)", cfg.edge_pass)
     cfg.call_targets = PyImGui.checkbox("Call targets: healers, bosses and casters first", cfg.call_targets)
+    cfg.auto_reconnect = PyImGui.checkbox("Reconnect by itself when the connection drops (presses Yes on the game's prompt)", cfg.auto_reconnect)
     cfg.keep_at_it = PyImGui.checkbox("Testing: keep at the fight in front of us (deaths and wipes do not send the party elsewhere; never give the area up)", cfg.keep_at_it)
     cfg.pull_groups = PyImGui.checkbox("New, untested: pull the nearest group back to the party before fighting (heroes and henchmen only)", cfg.pull_groups)
     cfg.pull_ranged = PyImGui.checkbox("Pull from weapon range (wand, staff or bow): hit one enemy from outside their notice range, so only its group comes", cfg.pull_ranged)

@@ -1,37 +1,36 @@
 # Status (keep under 40 lines; replace, don't append history)
 
-Version 0.50.41 (2026-10-11).
+Version 0.50.75 (2026-10-13).
 
 ## Seen working in game
-- 444: burrow mounts, heroes mount (7/7), riding kept after a revive, in-order route with
-  `route_wait`, pack mode, elite capture. 395: gate crossed by `cross_other_side`.
+- 444 burrows/riding/pack/capture; 0.50.70: dead_unflag, regroup, Cursed Lands route fix, 4 areas done.
 
 ## Shipped, not yet seen working in game
-- 0.50.38 The dead are waited for once (75 s); if nobody was raised the run carries on without
-  them (`dead_left`). Before: the wait restarted for ever (402: leader + 1 hero, 10 min).
-- 0.50.38 Walls: kept-off ground round a pinned spot 400 -> `Config.wall_radius` 250; a wall
-  that would cut >3% of the map away is walked with care instead (`soft_walls`, `wall`
-  only_way); standing still on purpose (rest, hold) no longer counts as stalled (it marked
-  a wall ahead the moment each rest ended: `step_abandoned` seconds 0).
-- 0.50.36 Doorways (402 ended "blocked", 88 left): a portal the game shows keeps its doorway
-  ring unless that ring cuts the map; `exit_guard` only refuses steps leading further in.
-- 0.50.36 Gate walk (395 from Mihanu Township failed 10 times: the recorded path's last leg
-  pushes west along the wall, the portal is beside it). `CrossNode` turns to the nearest
-  game portal after 15 s and tries its sides (`cross_other_side`). Seen: got through.
-- 0.50.37 Doors remember where they took us (`gwamm_logs/gate_spots.json`, `gate_spot`).
-
-- 0.50.40 Start in an outpost with nothing queued: stops (`nothing_here`) instead of mapping the town.
-- 0.50.41 Burrows: walk up, flag heroes onto it until all are within 450 (12 s, `gathered`), then use
-  it; on-foot heroes flagged to it at 6 s (`stragglers`); at 18 s leave + re-enter once (`remount_retry`).
+- 0.50.69 "Leave your party?" Yes pressed (unseen). 0.50.66/68 carto: `carto_missing`, `_carto_edge_spot`.
+- 0.50.50 `step_loop`, `connection_lost`, `auto_reconnect` (unseen); 0.50.51 `leave_to_travel`; `_direct_start`; 0.50.53 `on_the_way`; 0.50.54 death = no health 2 s;
+  wipe zones 300 s; 0.50.55 `keep_off_doors`; 30 s energy wait after a raise.
+- 0.50.56-65 Teleporters (Prophet's Path, teleporters.json): `_tp_job` pad (no object) + switches 751-754,
+  24 orders, KNOWN_CUT, `rank_teleporters`, `_tp_walk` onto the raised pad (WORKS). Not yet seen to jump.
+- 0.50.70: `unflag_heroes` all ids; `dead_unflag`; `regroup`; hazard needs no foe 60 s; /stuck fix;
+  zone-outs: short steps near doors, ends off doors, door learnt ("out"), vanquish counted; world gates.
+  Wrong door in an area -> route switch. `leave_party_prompt` logs "window up, no button".
+  0.50.71: never vanquish in normal mode. 0.50.72: HM the whole way when the last step in is a door from another area (`_enters_from_area`);
+  walk_in to a shared-file outpost aims at its gate's doorway (Seekers Passage unlock WORKED 15:11).
+  0.50.73: next leg waits for the map (a door leg built during the load became a bare CrossNode: stood
+  25 min at the Black Curtain arrival, no log); build errors logged + step given up after 60 s;
+  town-return count per queue turn (Talmark dropped at once); stale transit cleared on stop.
+  0.50.74: a recorded "gate" walk of 3000+ inside an area is crossed with the engine (`gate_walk` log).
+  0.50.75: Kessex Peak walked E/W/N/E 1 min for one cluster (cause NOT found: one level there).
+  step_start now logs `aim` + `way` length; `_goal_node` keeps the goal on the target's level.
+  NOTE: smoke_campaign stops at the first travel - it does not test routes.
 ## Sulfurous Wastes pillar (NOT yet run in game)
-- Route 444 (`gwamm_tools/patch_routes.py`): after (-13595,8507), riding, along the sulfur
-  strip to its dead end under the bridge (-11600,10330), Junundu Smash (4 adrenaline), back.
-- 0.50.39 Adrenaline: junundu skills build none (Siege included); weapon hits and damage do;
-  it drains after 25 s out of a fight. HeroAI is kept off Smash from 4 points before
-  (`save_from`); if not charged at the spot, plain attacks on the nearest enemy within 3000
-  until it is, then back onto the spot and Smash (`route_action` `skill`: back_after, targets).
-- Other Desolation areas: no pillars. 439: centre paths shut until Ruins of Morah is done.
-## Watch: 402, six heroes in a clump fell in ~20 s to 4 foes with Energy Surge (no flag error)
+- Route 444 (`gwamm_tools/patch_routes.py`): riding to the spot under the pillar, Smash (4 adrenaline).
+- 0.50.46: `weapon_swap` bow/spear at the burrow before the pillar (restored on foot; needs one in
+  the bags); HeroAI combat off for the leader through the whole pillar step (`leader_combat`); charge
+  only by attacking foes in reach FROM the spot (1150 ranged / 260 melee), never walking off it.
+  Combat that goes nowhere: `combat_stuck` -> 1500 step clear, HeroAI off, no wall (it walled the spot).
+  Not persisted across a reload: the swap and the HeroAI switch (stop/start restores HeroAI).
+- 0.50.47 resume keeps `actions_done`; 0.50.48 pillar spot CONFIRMED (-11528,10360) in routes.json.
 ## Where things are
 - Device: `C:\Users\tryst\Py4GW_Reforged` (Windows). Logs in `gwamm_logs/`; the current
   log's name is in `gwamm_logs/latest_run.txt` (do not list the folder: it is huge).

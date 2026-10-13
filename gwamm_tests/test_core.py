@@ -42,6 +42,60 @@ def test_cartography():
     print("cartography ok")
 
 
+def test_world_gate_fix():
+    """A gate filed under another area than the one it leads to is put right: the way to Cursed
+    Lands from Beetletun went out into Watchtower Coast and stopped there."""
+    from Sources.gwamm.core.world import World
+    w = World()
+    r = w.route(56, [136])
+    assert r and r[-1].get("expect") == 56, r
+
+
+def test_carto_edge_spot():
+    """Stood in a map cell, it was credited, but the fogged cell beside it (off the path) was
+    not: once, the bot stands on the spot of its cell nearest that fog before giving up."""
+    import math
+    from simulate import load
+    from Sources.gwamm.core.engine import Engine
+    traps, start, b = load()
+    proj = Projection(1000.0, 2000.0, b[0], b[3])
+    eng = Engine(traps, start, projection=proj)
+    cell, (foot, _n, _d) = next(iter(eng.carto.stand.items()))
+    side = (cell[0] + 1, cell[1])
+    spot = eng._carto_edge_spot(cell, {cell, side})
+    assert spot is not None and proj.cell(*spot) == cell
+    x0, y0, x1, y1 = proj.cell_corners(*side)
+    fog = ((x0 + x1) / 2, (y0 + y1) / 2)
+    assert math.hypot(spot[0] - fog[0], spot[1] - fog[1]) <= math.hypot(foot[0] - fog[0], foot[1] - fog[1]) + 1
+    assert eng._carto_edge_spot(cell, {cell, side}) is None          # once only
+
+
+def test_carto_missing():
+    """Fog on ground our map cannot walk to is reported, not silently left (Toolbox showed map
+    left to do while the bot's count read 0)."""
+    from Sources.gwamm.core.cartography import CartoPlan
+
+    class Nav:
+        traps = [(0, 0.0, 3000.0, 3000.0, 0.0, 3000.0, 0.0),            # walkable, reached
+                 (0, 20000.0, 23000.0, 3000.0, 20000.0, 23000.0, 0.0)]  # walkable, cut off
+        nodes = [(1500.0, 1500.0), (21500.0, 1500.0)]
+        trap_nodes = [[0], [1]]
+
+        def in_no_go(self, x, y):
+            return False
+
+    class RM:
+        nav = Nav()
+        reachable = [True, False]
+
+    proj = Projection(1000.0, 2000.0, -9229.5, 49152.0)
+    plan = CartoPlan(RM(), proj)
+    grid = CartoGrid(256, 512, [0] * 4096)
+    miss = plan.missing(grid)
+    assert miss.get("cut", 0) >= 1 and miss["where"]["cut"], miss
+    assert proj.cell(21500.0, 1500.0) not in plan.stand
+
+
 def test_elites():
     area = elites.AREAS[91]
     sec, pick = elites.choose(6, area, learnt=set(), signets=2)
@@ -241,6 +295,150 @@ def test_ride_ground():
     assert g.needs_mount((7000, -900))
 
 
+def _grid_nav(w, h, step=200.0):
+    """A plain open field as a map graph (nodes every `step`, 8 neighbours)."""
+    import math
+    from collections import defaultdict
+    from Sources.gwamm.core import geometry as G
+    nav = object.__new__(G.NavGraph)
+    nx, ny = int(w // step) + 1, int(h // step) + 1
+    nav.nodes = [(i * step, j * step) for j in range(ny) for i in range(nx)]
+    nav.adj = [[] for _ in nav.nodes]
+    for j in range(ny):
+        for i in range(nx):
+            for di, dj in ((1, 0), (0, 1), (1, 1), (1, -1)):
+                a, b = i + di, j + dj
+                if 0 <= a < nx and 0 <= b < ny:
+                    u, v = j * nx + i, b * nx + a
+                    d = step * math.hypot(di, dj)
+                    nav.adj[u].append((v, d))
+                    nav.adj[v].append((u, d))
+    nav.forbidden = [False] * len(nav.nodes)
+    nav._hash = defaultdict(list)
+    for k, (x, y) in enumerate(nav.nodes):
+        nav._hash[(int(x // G._HASH), int(y // G._HASH))].append(k)
+    return nav
+
+
+def test_foot_way_keeps_off_sulfur():
+    """On foot, the walk to a burrow goes round ground ridden as a wurm, and the burrow picked
+    is the nearest one reached that way (Sulfurous Wastes: it ran across the sulfur for a
+    burrow 11k away and died, again and again)."""
+    from Sources.gwamm.core.mounts import RideGround
+    nav = _grid_nav(8000, 4000)
+    g = RideGround()
+    for y in range(0, 3001, 200):                       # a sulfur strip with rock above it
+        g.note((4000, y), True)
+    g.note((4000, 3000), False, alive=False)
+    pts, safe, length = g.foot_way(nav, (1000, 500), (6000, 500))
+    assert pts and safe and length > 6000, (safe, length)
+    assert all(not g.on_ridden(p) for p in pts[:-1])
+    for y in range(3000, 4001, 200):                    # now the strip runs edge to edge
+        g.note((4000, y), True)
+    _pts, safe, _l = g.foot_way(nav, (1000, 500), (6000, 500))
+    assert not safe
+    spot, _w, safe = g.safest_mount(nav, (1000, 500), [(6000, 500), (1500, 3800)])
+    assert spot == (1500, 3800) and safe
+    # a bridge over the strip is another level: walking it is not walking the sulfur
+    b = RideGround()
+    for y in range(0, 3001, 200):
+        b.note((4000, y), True, plane=0)
+    b.note((4000, 3000), False, alive=False, plane=0)
+    assert b.on_ridden((4000, 1500), plane=0) and b.on_ridden((4000, 1500))
+    assert not b.on_ridden((4000, 1500), plane=1)
+    assert not b.needs_mount((2000, 1500), (6000, 1500), plane=1)
+    assert b.needs_mount((2000, 1500), (6000, 1500), plane=0)
+    # learnt ground carries to the next visit; ground found walkable is dropped from it
+    cells, levels = b.merged_with([], [])
+    c = RideGround()
+    c.absorb(cells, levels)
+    assert c.needs_mount((2000, 1500), (6000, 1500), plane=0) and not c.on_ridden((4000, 1500), plane=1)
+    c.note((4000, 1000), True, plane=0)
+    assert c.note((4000, 1000), False, plane=0) == "off"          # set down here: walkable
+    cells2, _l = c.merged_with(cells, levels)
+    assert len(cells2) < len(cells)
+    d = RideGround()
+    d.cleared = set(c.cleared)
+    d.absorb(cells, levels)
+    assert not d.on_ridden((4000, 1000))
+    # walked on foot unharmed: cleared; hurt on foot where never ridden: marked
+    e = RideGround()
+    e.absorb(cells, levels)
+    assert e.walked_safely((4000, 2200), plane=0) and not e.on_ridden((4000, 2200), plane=0)
+    e.mark((100, 100), plane=0)
+    assert e.on_ridden((100, 100), plane=0)
+
+
+def test_route_chain():
+    """Stuck short of an objective: the known route's own stretch towards it, in walking order."""
+    from Sources.gwamm.core.geometry import route_chain
+    route = [(0, 0), (1000, 0), (-1545, -8141), (-3883, -10860), (-3743, -12348), (5000, 5000)]
+    assert route_chain(route, (-1400, -8000), (-3700, -12000)) == [(-1545, -8141), (-3883, -10860), (-3743, -12348)]
+    assert route_chain(route, (-3700, -12300), (-1500, -8100)) == [(-3743, -12348), (-3883, -10860), (-1545, -8141)]
+    assert route_chain(route, (20000, 20000), (-3700, -12000)) == []
+
+
+def test_keep_off_doors():
+    """A step that would end on a door is pulled back out of its reach."""
+    import math
+    from Sources.gwamm.core.geometry import keep_off_doors
+    door = (24133.0, -4517.0)
+    t = keep_off_doors((24585.0, -4445.0), (20000.0, -4000.0), [door])
+    assert abs(math.hypot(t[0] - door[0], t[1] - door[1]) - 700.0) < 1.0 and t[0] < door[0]   # our side
+    assert keep_off_doors((10000.0, 0.0), (0.0, 0.0), [door]) == (10000.0, 0.0)
+    t = keep_off_doors(door, (23000.0, -4517.0), [door])            # dead on it: back towards us
+    assert t[0] < door[0]
+
+
+def test_choose_teleporter():
+    """The teleporter whose arrival is nearest the unreachable goal; none if it does not help."""
+    from Sources.gwamm.core.geometry import choose_teleporter
+    tps = [{"at": [0, 0], "to": [5000, 5000]}, {"at": [1000, 0], "to": [-16000, 12000]}]
+    assert choose_teleporter((500, 500), (-17000, 12500), tps)["to"] == [-16000, 12000]
+    assert choose_teleporter((-16500, 12200), (-17000, 12500), tps) is None   # already there
+    assert choose_teleporter((0, 0), (0, 500), tps) is None
+
+
+def test_teleporter_sets():
+    """A pad with four switches of one kind beside it is a teleporter; loose objects are not."""
+    import math
+    from Sources.gwamm.core.geometry import teleporter_sets
+    g = [(1, 500, 0, 0), (2, 77, 300, 100), (3, 77, 400, 100), (4, 77, 500, 100), (5, 77, 600, 100),
+         (9, 12, 9000, 9000), (10, 12, 9050, 9000)]
+    sets = teleporter_sets(g)
+    assert len(sets) == 1 and sets[0]["pad"][0] == 1 and sorted(a for a, _x, _y in sets[0]["switches"]) == [2, 3, 4, 5]
+    assert teleporter_sets([(9, 12, 0, 0), (10, 12, 50, 0)]) == []
+    # Prophet's Path, as seen standing on the pad at (-5053, 6002): four switches, each its own
+    # id, no pad object - the pad is the centre of the circle they stand on
+    pp = [(6, 751, -4308, 5897), (7, 752, -4364, 5680), (8, 753, -4581, 5411), (9, 754, -4809, 5343)]
+    sets = teleporter_sets(pp)
+    assert len(sets) == 1 and sets[0]["pad"][0] == 0, sets
+    assert math.hypot(sets[0]["pad"][1] + 5053, sets[0]["pad"][2] - 6002) < 250, sets
+    assert teleporter_sets([(6, 751, 0, 0), (7, 760, 300, 0), (8, 770, 600, 0), (9, 780, 0, 300)]) == []
+
+
+def test_rank_teleporters():
+    """The teleporter on the wrong side is left alone: the pad up on the cut-off ground while we
+    are below, and a pad seen to take us away from the goal. One seen to help goes first."""
+    from Sources.gwamm.core.geometry import rank_teleporters
+    sw = lambda x, y: [(0, x + 700, y)] * 4
+    below = {"pad": (0, -5053, 6002), "switches": sw(-5053, 6002)}
+    other = {"pad": (0, -8256, 9363), "switches": sw(-8256, 9363)}
+    up = {"pad": (0, -16500, 12000), "switches": sw(-16500, 12000)}
+    cut = [(-16238, 11104), (-17037, 13891)]
+    goal = (-16238, 11104)
+    at_edge = (-10000, 4000)
+    r = rank_teleporters([up, other, below], at_edge, goal, hints=[(-5053, 6002)], cut=cut)
+    assert r == [below, other, up], r                                 # the one up there last
+    went_away = [{"at": [-8256, 9363], "to": [9000, -9000]}]
+    assert rank_teleporters([other, below], at_edge, goal, learnt=went_away, cut=cut) == [below]
+    went_up = [{"at": [-8256, 9363], "to": [-16000, 11500]}]
+    assert rank_teleporters([below, other], at_edge, goal, learnt=went_up, hints=[(-5053, 6002)], cut=cut)[0] is other
+    # up there, going back down: the pad up there is the right one now
+    r = rank_teleporters([below, up], (-16400, 11800), (-5000, 5000), cut=cut)
+    assert r[0] is up, r
+
+
 def test_put_off_helps():
     """A crowd too big to take is only left for later when later is better (death penalty to
     work off). At full strength it is the same crowd after a longer walk."""
@@ -294,7 +492,8 @@ def test_step_clear():
 
 
 def test_wipe_zone():
-    """Where the whole party died is left for last and paths to other places cost more there."""
+    """Where the whole party died is kept off for a while (not for good: it has to be done) and
+    paths to other places cost more there."""
     from simulate import load
     from Sources.gwamm.core.engine import Engine
     traps, start, _b = load()
@@ -308,6 +507,8 @@ def test_wipe_zone():
     assert pen and pen[eng.player_node] == eng.cfg.wipe_path_factor
     assert eng.next_step() is not None                 # still plans (it is not a wall)
     assert eng.walled_off() == set()                   # no enemies known: nobody behind a wall
+    eng.update(spot, [], 50, eng.cfg.wipe_return_seconds + 1.0)
+    assert not eng._dangerous(spot) and eng.in_wipe_zone(spot)   # later: gone back to, carefully
 
 
 def test_pull_rule():
@@ -809,6 +1010,9 @@ def test_raisers_and_protectors():
 if __name__ == "__main__":
     test_geometry()
     test_cartography()
+    test_carto_missing()
+    test_carto_edge_spot()
+    test_world_gate_fix()
     test_elites()
     test_full_runs()
     test_route_and_trap_together()
@@ -818,6 +1022,12 @@ if __name__ == "__main__":
     test_shown_portal_keeps_its_doorway()
     test_route_groups_now_or_later()
     test_ride_ground()
+    test_foot_way_keeps_off_sulfur()
+    test_route_chain()
+    test_keep_off_doors()
+    test_choose_teleporter()
+    test_teleporter_sets()
+    test_rank_teleporters()
     test_put_off_helps()
     test_detour_on_wall()
     test_step_clear()

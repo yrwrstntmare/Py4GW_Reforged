@@ -21,6 +21,13 @@ MAX_STARTS = 4           # times one area may be started over (after wipes that 
 LEG_RETRIES = 3          # times a leg of the journey is tried again before giving up on the area
 
 
+def route_areas(legs):
+    """How many areas a way in walks across before the target (each gate or door leg is one
+    map crossed; the last one leads into the target itself)."""
+    n = sum(1 for leg in legs if leg.get("do") in ("gate", "door", "npc_entry"))
+    return max(0, n - 1)
+
+
 class MapRunNode(SetupMixin, BehaviorTree.Node):
     """One area from start to finish: get there (map travel, then on foot through whatever lies
     between), vanquish, walk into a locked outpost if one is reachable, come back. It always
@@ -123,19 +130,36 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                     # accounts cannot be sent home like heroes: this area is not for this party
                     self._too_many = f"party of {have} is too large for {game.map_name(outpost)} (limit {cap})"
                     return BehaviorTree.NodeState.FAILURE
+                if game.is_explorable() and not st.get("direct_tried") and not self.__dict__.get("_direct_travel_failed"):
+                    # First just travel: the game asks "leave your party?" and the watcher in
+                    # GWAMM_Vanquish answers yes (the leader goes alone, heroes sent home). If the
+                    # travel still fails, the old way below (leave the area first) follows.
+                    st["direct_tried"] = True
+                    self._direct_travel_try = True
+                    log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have, limit=cap,
+                              outpost=game.map_name(outpost), from_explorable=True,
+                              next="travel; the leave-party prompt is answered yes")
+                    return BehaviorTree.NodeState.SUCCESS
                 if game.is_explorable():
                     # Heroes cannot be sent home out here, and the game will not travel this party
                     # to a smaller outpost (Cliffs of Dohjok -> Blacktide Den stopped on the yes/no
                     # window). Travel first to an outpost that takes the whole party, shrink there.
-                    stage = self._staging_outpost(have)
+                    # A staging outpost was tried here before, and its travel failed too (Diessa
+                    # Lowlands -> Bloodstone Fen, every time). Leaving by resigning always works:
+                    # fail this travel, and the travel phase leaves the area that way.
+                    if self.__dict__.get("_left_to_travel"):
+                        stage = self._staging_outpost(have)
+                        log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have, limit=cap,
+                                  outpost=game.map_name(outpost), from_explorable=True,
+                                  staging=game.map_name(stage) if stage else None)
+                        if stage is None:
+                            return BehaviorTree.NodeState.SUCCESS
+                        st.update(stage=stage, stage_t=now)
+                        game.travel_to(stage)
+                        return BehaviorTree.NodeState.RUNNING
                     log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have, limit=cap,
-                              outpost=game.map_name(outpost), from_explorable=True,
-                              staging=game.map_name(stage) if stage else None)
-                    if stage is None:
-                        return BehaviorTree.NodeState.SUCCESS   # nothing better: let the travel try
-                    st.update(stage=stage, stage_t=now)
-                    game.travel_to(stage)
-                    return BehaviorTree.NodeState.RUNNING
+                              outpost=game.map_name(outpost), from_explorable=True, next="leave the area first")
+                    return BehaviorTree.NodeState.FAILURE
                 log.event("campaign", map_id=self.map_id, phase="shrink_party", have=have, limit=cap,
                           outpost=game.map_name(outpost), multibox=self.session.cfg.multibox)
             limit = st["limit"]
@@ -222,9 +246,11 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             legs = c.world.route(self.map_id, c.unlocked(refresh=True))
             if legs and not any(legs == l for _n, l in out):
                 out.append(("world", legs))
-        # the way that worked last time first
+        # The shortest way first: fewest areas crossed on foot (Diessa Lowlands: the recorded
+        # walk starts at Yak's Bend and crosses two areas; Grendich Courthouse opens straight
+        # onto it). Among equals, the way that worked last time, then NPC / recorded / world.
         good = (c.results.get(self.map_id) or {}).get("route")
-        out.sort(key=lambda o: o[0] != good)
+        out.sort(key=lambda o: (route_areas(o[1]), o[0] != good))
         return out
 
     def _plan_route(self):
@@ -294,7 +320,8 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             # but a recorded entry (an NPC, or the vanquish bots' own walk) is the way in: going
             # through it in normal mode only means arriving in normal mode with no way to switch.
             hm = (leg.get("hm") or getattr(self, "_force_hm", False)
-                  or not self._crosses_other_areas(self._legs))
+                  or not self._crosses_other_areas(self._legs)
+                  or self._enters_from_area(self._legs))
             if not hm:
                 self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode",
                                        note="walking through other areas to get there: normal mode until the last outpost")
@@ -356,6 +383,17 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                                           here, timeout_s=600.0 if leg.get("slow") else 75.0))
             if len(path) == 1:
                 return push
+            length = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(path, path[1:]))
+            if game.map_ready() and game.is_explorable() and length > 3000.0:
+                # A long recorded walk across an area (The Black Curtain to Kessex Peak: a bot's
+                # recording, walked point by point with no pathing and no fighting - an odd way
+                # round, and it stalled by the Shining Blade camp after 6 minutes). Cross it with
+                # the engine instead: shortest walkable way, fighting what is in the way.
+                self.session.log.event("campaign", map_id=self.map_id, phase="gate_walk", in_map=here,
+                                       recorded_length=round(length), how="engine crossing")
+                walk = BehaviorTree(AdaptiveNode(self.session, target_map_id=here, transit={"xy": list(cross_leg["xy"])},
+                                                 arrive_map=leg["expect"]))
+                return BT.Sequence(name="GateCross", children=[walk, push])
             return BT.Sequence(name="GateWalk", children=[BT.Move(pos=path[:-1], tolerance=150.0), push])
         cross = BehaviorTree(CrossNode(self.session, leg, here))
         if not game.is_explorable():
@@ -418,6 +456,22 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         return BehaviorTree(CrossNode(self.session, {"xy": [x, y], "beyond": [x, y], "expect": leg["expect"]},
                                       game.map_id(), timeout_s=120.0))
 
+    def _enters_from_area(self, legs):
+        """True when the last step into the area is a door out of another explorable area: no
+        outpost comes after this travel to switch to hard mode in, so the whole walk must be
+        in hard mode (The Salt Flats by way of Diviner's Ascent arrived in normal mode, and
+        had to go all the way round again)."""
+        c = self.campaign
+        towns = c.world.all_outposts() if c.world is not None else set()
+        rest = [l for l in legs if l.get("do") != "travel"]
+        if not rest:
+            return False
+        last = rest[-1]
+        if last.get("do") == "door" and last.get("fight"):
+            # unless an outpost is walked into after this travel and before that door
+            return not any(l.get("expect") in towns for l in rest[:-1])
+        return False
+
     def _crosses_other_areas(self, legs):
         """True when these legs walk through an explorable area other than the one to vanquish
         (getting there through other areas, or opening an outpost on the way)."""
@@ -429,8 +483,48 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                     return True
         return False
 
+    def _on_the_way(self):
+        """Walking through another area that is in the queue too, in hard mode: vanquish it now,
+        while the party is in it, then go on to this run's area. (Diessa Lowlands by way of
+        Ascalon Foothills: the walk through cleared most of the Foothills and then left it.)
+        True when that vanquish was started."""
+        c = self.campaign
+        try:
+            if not (game.map_ready() and game.is_explorable()):
+                return False
+            here = game.map_id()
+            if (here == self.map_id or here not in c.queue or here in self.__dict__.setdefault("_combined", set())
+                    or here in game.vanquished_ids() or not game.hard_mode()
+                    or not self.session.cfg.do_vanquish
+                    or (c.results.get(here) or {}).get("attempts", 0) >= 3):
+                return False
+        except Exception:
+            return False
+        self._combined.add(here)
+        self._combine_started, self._combine_area = time.time(), here
+        self.session.log.event("campaign", map_id=self.map_id, phase="on_the_way", vanquish=here,
+                               name=game.map_name(here), legs_left=len(self._legs or []))
+        c.current = here
+        self._set("on_the_way", BehaviorTree(AdaptiveNode(self.session, target_map_id=here)))
+        return True
+
     def _next_leg(self):
         """Start the next leg, or the vanquish once we are standing in the area."""
+        nxt = self._legs[0] if self._legs else None
+        passed = self.__dict__.pop("_await_passed", False)
+        if (not passed and nxt is not None and nxt.get("do") == "door" and nxt.get("through")
+                and game.map_ready() and game.map_id() != nxt["through"]):
+            self._phase, self._await_t, self._await_ready = "await_map", time.time(), 0.0   # its area not up yet
+            return
+        if not passed and not game.map_ready():
+            # still on the loading screen after a door: what the next leg is made of depends on
+            # where we land (in an area it is walked with the engine; built during the load it
+            # became a bare walk at a door 30000 away, and the party stood at the arrival point
+            # in The Black Curtain for 25 minutes). Wait for the map, then plan it.
+            self._phase, self._await_t, self._await_ready = "await_map", time.time(), 0.0
+            return
+        if self._on_the_way():
+            return
         if game.map_ready() and game.map_id() == self.map_id and game.is_explorable():
             if not game.hard_mode() and not getattr(self, "_hm_retry", False):
                 # got here in normal mode (no outpost on the way to switch in): go round by an
@@ -456,10 +550,23 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                 self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode", note=self._outcome)
                 self._finish()
                 return
-            if getattr(self, "_route_label", ""):
-                self.campaign.results.setdefault(self.map_id, {"attempts": 0})["route"] = self._route_label
-            self._set("vanquish", BehaviorTree(AdaptiveNode(self.session, target_map_id=self.map_id)))
-            return
+            if not game.hard_mode() and self.session.cfg.do_vanquish:
+                # Never vanquish in normal mode: nothing counts (The Salt Flats swept for 1 and 2
+                # hours with no foe counter, because the hard-mode retry set its new legs and
+                # this check then started the vanquish where it stood).
+                if (getattr(self, "_force_hm", False) and self._legs and self._legs[0]["do"] == "travel"
+                        and not getattr(self, "_hm_legs_taken", False)):
+                    self._hm_legs_taken = True           # go round by them: travel out, back in hard mode
+                else:
+                    self._outcome = "reached the area in normal mode and could not get back in hard mode"
+                    self.session.log.event("campaign", map_id=self.map_id, phase="normal_mode", note=self._outcome)
+                    self._finish()
+                    return
+            else:
+                if getattr(self, "_route_label", ""):
+                    self.campaign.results.setdefault(self.map_id, {"attempts": 0})["route"] = self._route_label
+                self._set("vanquish", BehaviorTree(AdaptiveNode(self.session, target_map_id=self.map_id)))
+                return
         if not self._legs:
             self._outcome = f"route ended in {game.map_name(game.map_id())}, not the area"
             self._finish()
@@ -499,14 +606,21 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
     def _tick_core(self):
         S, c = BehaviorTree.NodeState, self.campaign
         if self._phase == "start":
+            new_go = c.current != self.map_id            # a fresh turn from the queue, not a restart
             c.current = self.map_id
             self._started = self._started or time.time()
             # Each wipe that ends in town restarts this area from the top. Past a few of those
-            # the area is beyond this team: record it and let the queue move on.
+            # the area is beyond this team: record it and let the queue move on. Only restarts of
+            # the same turn count: a new turn from the queue starts at 0, and so does a restart
+            # this node asked for itself (leaving to travel, another way in). (Talmark Wilderness
+            # was dropped at once - "sent back to town 4 times", 0 minutes - from counts piled up
+            # by earlier turns and route switches over the day.)
             starts = c.__dict__.setdefault("_starts", {})
             n, since = starts.get(self.map_id, (0, time.time()))
-            if time.time() - since > 6 * 3600:
+            if time.time() - since > 6 * 3600 or new_go:
                 n, since = 0, time.time()
+            if self.__dict__.pop("_restart_no_count", False):
+                n -= 1
             starts[self.map_id] = (n + 1, since)
             if n + 1 > MAX_STARTS and not self.session.cfg.keep_at_it and not (game.map_ready() and game.map_id() == self.map_id and game.is_explorable()):
                 self.session.log.event("campaign", map_id=self.map_id, phase="gave_up", starts=n + 1)
@@ -550,12 +664,44 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
         if self._phase == "done":
             return S.SUCCESS
 
+        if self._phase == "await_map":
+            nxt = self._legs[0] if self._legs else None
+            want = nxt.get("through") if nxt is not None and nxt.get("do") == "door" else None
+            now_ = time.time()
+            here_ok = want is None or game.map_id() == want or now_ - self.__dict__.get("_await_t", now_) > 20.0
+            if game.map_ready() and here_ok:
+                if not self.__dict__.get("_await_ready"):
+                    self._await_ready = now_             # just loaded: let it settle a moment
+                elif now_ - self._await_ready >= 1.5:
+                    self._await_ready, self._await_passed = 0.0, True
+                    self._next_leg()
+            else:
+                self._await_ready = 0.0
+            return S.RUNNING
+
         self._child.root.blackboard = self.blackboard
         state = self._child.root.tick()
         if state == S.RUNNING:
             return S.RUNNING
 
+        if self._phase == "leave_to_travel":
+            # back in an outpost (or given up trying): plan the way in again from here
+            self._phase = "start"
+            self._restart_no_count = True
+            return S.RUNNING
+
         if self._phase == "travel":                       # arrived in the starting outpost
+            if state != S.SUCCESS and game.map_ready() and game.is_explorable() \
+                    and not self.__dict__.get("_left_to_travel"):
+                # Map travel out of an explorable area failed (a party too big for every outpost
+                # the bot tried: Diessa Lowlands, 6 in a party, Ascalon outposts take 4; the
+                # whole queue then failed in 12 minutes). Leave the way the party came (resign,
+                # return to the outpost): there heroes can be sent home, and travel works.
+                self._left_to_travel = True
+                self.session.log.event("campaign", map_id=self.map_id, phase="leave_to_travel",
+                                       in_map=game.map_id(), party=game.party_count())
+                self._set("leave_to_travel", self._resign_tree())
+                return S.RUNNING
             if state != S.SUCCESS:
                 if not getattr(self, "_too_many", "") and self._switch_route("could not travel to the outpost"):
                     return S.RUNNING
@@ -609,11 +755,23 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                     self.session.log.event("campaign", map_id=self.map_id, phase="leave_town", wrong_exit=list(xy),
                                            led_to=here, town=town)
                 self._outcome = f"door led to {game.map_name(here)}, expected {game.map_name(expect)}"
-                if not game.is_explorable() and self._switch_route(self._outcome):
+                # in an area too (Talmark Wilderness from The Black Curtain opened its War in Kryta
+                # twin): the next way in starts with a map travel, which works from out here
+                if self._switch_route(self._outcome):
                     return S.RUNNING
                 self._finish()
             else:
                 self._next_leg()
+            return S.RUNNING
+
+        if self._phase == "on_the_way":
+            here = getattr(self, "_combine_area", None)
+            result = "complete" if state == S.SUCCESS else (self.session.result or "failed")
+            if here:
+                c.record(here, result, getattr(self, "_combine_started", time.time()))
+                self.session.log.event("campaign", map_id=self.map_id, phase="on_the_way_done", area=here, result=result)
+            c.current = self.map_id
+            self._next_leg()                          # on to this run's own area
             return S.RUNNING
 
         if self._phase == "vanquish":
@@ -671,7 +829,8 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
             # same walkable piece: head for the outpost's own arrival point; the gate is on the way
             walk = BehaviorTree(AdaptiveNode(self.session, target_map_id=self.map_id,
                                              transit={"xy": leg["xy"]}, arrive_map=o))
-            push = BehaviorTree(CrossNode(self.session, {"xy": leg["xy"], "beyond": leg["xy"], "expect": o}, self.map_id))
+            push = BehaviorTree(CrossNode(self.session, {"xy": leg["xy"], "beyond": leg.get("beyond") or leg["xy"], "expect": o},
+                                          self.map_id))
             self._set("unlock", BT.Sequence(name="WalkIntoOutpost", children=[walk, push]))
         else:
             self._set("unlock", self._leg_tree(leg))

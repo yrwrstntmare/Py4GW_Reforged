@@ -85,9 +85,22 @@ class CartoPlan:
         self.rm, self.proj = region_map, projection
         nav = region_map.nav
         self.stand = {}                  # cell -> (footing xy, graph node, depth inside the cell)
+        # cells with ground in them that are NOT stood in, and why (for `missing`):
+        # "cut" = ground our map cannot walk to; "thin"/"no_go" = only a sliver / a door ring
+        self.left_out = {}
         for ti, trap in enumerate(nav.traps):
             ids = [i for i in nav.trap_nodes[ti] if region_map.reachable[i]]
             if not ids:
+                _p, xtl, xtr, yt, xbl, xbr, yb = trap
+                c1 = projection.cell(min(xtl, xbl), yb)
+                c2 = projection.cell(max(xtr, xbr), yt)
+                for cx in range(min(c1[0], c2[0]), max(c1[0], c2[0]) + 1):
+                    for cy in range(min(c1[1], c2[1]), max(c1[1], c2[1]) + 1):
+                        x0, y0, x1, y1 = projection.cell_corners(cx, cy)
+                        piece = _clip([(xtl, yt), (xtr, yt), (xbr, yb), (xbl, yb)], x0, y0, x1, y1)
+                        if len(piece) >= 3:
+                            self.left_out.setdefault((cx, cy), ("cut", (sum(p[0] for p in piece) / len(piece),
+                                                                         sum(p[1] for p in piece) / len(piece))))
                 continue
             _p, xtl, xtr, yt, xbl, xbr, yb = trap
             poly = [(xtl, yt), (xtr, yt), (xbr, yb), (xbl, yb)]
@@ -102,9 +115,11 @@ class CartoPlan:
                     fx = sum(p[0] for p in piece) / len(piece)
                     fy = sum(p[1] for p in piece) / len(piece)
                     if nav.in_no_go(fx, fy):
+                        self.left_out.setdefault((cx, cy), ("no_go", (fx, fy)))
                         continue
                     depth = min(fx - x0, x1 - fx, fy - y0, y1 - fy)
                     if depth < min_depth:
+                        self.left_out.setdefault((cx, cy), ("thin", (fx, fy)))
                         continue
                     best = self.stand.get((cx, cy))
                     if best is None or depth > best[2]:
@@ -141,4 +156,24 @@ class CartoPlan:
             out.append((best, footing, node, got))
             gains = {c: g - got for c, g in gains.items() if g - got}
         self._cache_key, self._cache = key, out
+        return out
+
+    def missing(self, grid, samples=6):
+        """Fogged cells with ground in them that no plan here will clear, by reason:
+        {"cut": n, "thin": n, "no_go": n, "declined": n, "where": {reason: [[x, y], ...]}}.
+        (Toolbox showed map left to do that the bot's own count called finished.)"""
+        out, where = {}, {}
+        for cell, (why, xy) in self.left_out.items():
+            if cell in self.coverable and cell not in self.declined or grid.explored(*cell):
+                continue
+            out[why] = out.get(why, 0) + 1
+            if len(where.setdefault(why, [])) < samples:
+                where[why].append([round(xy[0]), round(xy[1])])
+        for cell in self.declined:
+            if not grid.explored(*cell):
+                out["declined"] = out.get("declined", 0) + 1
+                if len(where.setdefault("declined", [])) < samples and cell in self.stand:
+                    xy = self.stand[cell][0]
+                    where["declined"].append([round(xy[0]), round(xy[1])])
+        out["where"] = where
         return out
