@@ -88,6 +88,13 @@ def draw() -> None:
                 PySystem.Console.Log(MODULE_NAME, "Title On Map Load boot failed: %s" % title_error,
                                      PySystem.Console.MessageType.Error)
             try:
+                from Py4GWCoreLib.py4gwcorelib_src.system_settings.blessings import get_controller as _blessings_get
+
+                _blessings_get().register()
+            except Exception as blessings_error:
+                PySystem.Console.Log(MODULE_NAME, "Blessings boot failed: %s" % blessings_error,
+                                     PySystem.Console.MessageType.Error)
+            try:
                 from Py4GWCoreLib.py4gwcorelib_src.system_settings.travel_on_character_load import get_controller as _travel_get
 
                 _travel_get().register()

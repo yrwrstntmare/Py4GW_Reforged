@@ -8,6 +8,7 @@ from Py4GWCoreLib.Player import Player
 from Py4GWCoreLib.enums_src.UI_enums import ControlAction
 from Py4GWCoreLib.UIManager import UIManager
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
+from Py4GWCoreLib.py4gwcorelib_src.MovementHold import MovementHold
 
 from ..cache_data import CacheData
 from .smart_unstuck import (
@@ -184,6 +185,13 @@ def execute_follower_follow(
     options = cached_data.account_options
     if not options or not options.Following:
         state.recovery_active = False
+        return BehaviorTree.NodeState.FAILURE
+
+    # A global movement hold (e.g. this account's blessing detour) owns the character; following
+    # the leader now would drag it off the detour. Reset so following restarts cleanly afterwards.
+    if MovementHold.IsHeld():
+        state.recovery_active = False
+        _reset_follow_runtime()
         return BehaviorTree.NodeState.FAILURE
 
     # During an active stuck-avoidance detour, BT.Move needs to tick at the

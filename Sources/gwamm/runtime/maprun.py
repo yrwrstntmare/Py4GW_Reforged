@@ -41,7 +41,7 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         super().__init__(name=f"Area {map_id}", node_type="MapRun", node_category="action")
         self.stay = stay                 # a single run started by hand: do not resign at the end
         self.session, self.campaign, self.map_id = session, campaign, map_id
-        self.entry = campaign.travel.get(map_id)
+        self.entry = campaign.entry_for(map_id)
         self._phase, self._child, self._started, self._outcome = "start", None, 0.0, ""
         self._legs, self._home = [], 0
         self._restore_secondary = False
@@ -233,15 +233,18 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
                 if ent.get("via"):               # the NPC is out in a neighbouring area
                     legs.append({"do": "gate", "path": [list(p) for p in ent["via_path"]], "expect": ent["via"]})
                 out.append(("npc", legs + [talk]))
-        e = self.entry
-        if e and e["plain"] and game.map_unlocked(e["outpost"]):
+        # Every recorded way in, preferred first (default outpost, or the start outpost override);
+        # the later ones are what _switch_route falls back to.
+        for n, e in enumerate(c.recorded_entries(self.map_id)):
+            if not (e["plain"] and game.map_unlocked(e["outpost"])):
+                continue
             legs = [{"do": "travel", "outpost": e["outpost"], "hm": True}]
             first = e["transit"][0]["map"] if e["transit"] else self.map_id
             legs.append({"do": "gate", "path": e["outpost_path"], "expect": first})
             for i, leg in enumerate(e["transit"]):
                 nxt = e["transit"][i + 1]["map"] if i + 1 < len(e["transit"]) else self.map_id
                 legs.append({"do": "gate", "path": leg["path"], "expect": nxt, "slow": True})
-            out.append(("recorded", legs))
+            out.append(("recorded" if n == 0 else f"recorded from {game.map_name(e['outpost'])}", legs))
         if c.world is not None:
             legs = c.world.route(self.map_id, c.unlocked(refresh=True))
             if legs and not any(legs == l for _n, l in out):
@@ -710,6 +713,12 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                 if at:
                     home = next((leg["outpost"] for leg in self._legs if leg["do"] == "travel"), None)
                     self._home = home if home is not None else getattr(self, "_home", None)
+                    self._legs = [dict(self._legs[i], path=path[k:])] + self._legs[i + 1:]
+                    self.session.log.event("campaign", map_id=self.map_id, phase="resume", from_map=here,
+                                           legs_left=len(self._legs), from_waypoint=k)
+                elif at:
+                    home = next((leg["outpost"] for leg in self._legs if leg["do"] == "travel"), None)
+                    self._home = home if home is not None else getattr(self, "_home", None)
                     self._legs = self._legs[at[-1]:]
                     self.session.log.event("campaign", map_id=self.map_id, phase="resume", from_map=here,
                                            legs_left=len(self._legs))
@@ -925,6 +934,14 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
             self.session.log.event("gear", error=repr(e))
         if self.stay and self._outcome != "complete":
             self._conclude()                 # a hand-started run that did not finish: stay put, keep the progress
+        elif (self._outcome == "complete" and game.map_ready() and game.is_explorable()
+              and game.map_id() == self.map_id and self.campaign.continues_from(self.map_id, exclude=(self.map_id,))):
+            # A queued area's route walks on from here: carry on through the door instead of going
+            # back to town. The next area keeps this bar and team (they can only change in an outpost).
+            onward = self.campaign.continues_from(self.map_id, exclude=(self.map_id,))
+            self.session.log.event("campaign", map_id=self.map_id, phase="leave", how="walk on",
+                                   onward=[game.map_name(m) for m in onward])
+            self._conclude()
         elif game.map_ready() and game.is_explorable():
             # Never resign: that kills the party and leaves it on the "return to outpost" prompt.
             # With more areas queued, map-travel out so the next one starts from an outpost

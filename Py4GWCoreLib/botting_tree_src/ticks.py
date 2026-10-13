@@ -6,6 +6,7 @@ import PySystem
 from ..GlobalCache import GLOBAL_CACHE
 from ..Routines import Routines
 from ..py4gwcorelib_src.BehaviorTree import BehaviorTree
+from ..py4gwcorelib_src.MovementHold import MovementHold
 from .account_config import BottingTreeAccountConfig
 from .enums import HeroAIStatus, PlannerStatus
 
@@ -193,8 +194,8 @@ class BottingTreeTicksMixin:
             bb['PLANNER_OWNER'] = PlannerStatus.OWNER_PLANNER.value
             return BehaviorTree.NodeState.RUNNING
 
-        if bb.get('SHRINE_BLESSING_ACTIVE', False):
-            bb['PLANNER_STATUS'] = 'PAUSED: Shrine blessing'
+        if MovementHold.IsHeld():
+            bb['PLANNER_STATUS'] = f'PAUSED: {MovementHold.GetReason() or MovementHold.GetOwner()}'
             bb['PLANNER_OWNER'] = PlannerStatus.OWNER_PLANNER.value
             return BehaviorTree.NodeState.RUNNING
 

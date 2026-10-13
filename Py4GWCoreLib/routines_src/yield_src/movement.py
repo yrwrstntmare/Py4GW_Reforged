@@ -6,6 +6,7 @@ from ...Agent import Agent
 from ...Player import Player
 from ...GlobalCache import GLOBAL_CACHE
 from ...Py4GWcorelib import ConsoleLog, Console, Utils, ActionQueueManager
+from ...py4gwcorelib_src.MovementHold import MovementHold
 from ...enums_src.UI_enums import ControlAction
 from .helpers import wait
 from .keybinds import Keybinds
@@ -137,6 +138,11 @@ class Movement:
             path_points[:] = trimmed_bridge + remaining_tail
             return 0, True
 
+        def _pause_requested() -> bool:
+            # A global MovementHold (e.g. a blessing detour) pauses the route like a custom pause;
+            # the resume handling below then re-picks the waypoint and bridges back to the path.
+            return MovementHold.IsHeld() or bool(custom_pause_fn and custom_pause_fn())
+
         ConsoleLog("FollowPath", f"Starting path with {total_points} points.", Console.MessageType.Info, log=log)
 
         idx = 0
@@ -190,9 +196,9 @@ class Movement:
                     yield from wait(750)
                     continue
 
-                if custom_pause_fn:
+                if _pause_requested():
                     was_paused = False
-                    while custom_pause_fn():
+                    while _pause_requested():
                         was_paused = True
                         if not _map_still_valid():
                             return _abort_on_map_invalid("Map changed while movement was paused, aborting.")

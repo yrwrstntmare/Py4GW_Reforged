@@ -278,3 +278,4 @@ Py4GW_Reforged_Launcher/*.exe
 # store) -- not meant for the eventual PR to Apo, just internal working notes
 Py4GW_Reforged_Launcher/dev_notes/
 Py4GW.dll
+gwamm_logs/*

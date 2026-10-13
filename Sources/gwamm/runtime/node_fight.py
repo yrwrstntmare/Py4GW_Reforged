@@ -335,7 +335,7 @@ class FightMixin:
                 infos.append({"id": e.id, "xy": e.xy, "hp": d[0], "level": d[1], "caster": d[2], "boss": e.boss, "prof": prof,
                               "role": tactics.role_of(model), "casting": casting,
                               "skill": game.skill_name(cast) if casting else ""})
-            target = tactics.pick_target(infos, (px, py), st["called"])
+            target = tactics.pick_target(infos, (px, py), st["called"], focus=bool(cfg.focus_target))
             if target and (target != st["called"] or now - st["called_at"] > 8.0):
                 try:
                     if game.call_target(target):

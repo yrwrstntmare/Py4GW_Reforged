@@ -53,6 +53,7 @@ from typing import Any, TYPE_CHECKING, Callable, TypedDict, cast
 from ...Agent import Agent
 
 from ...Map import Map
+from ...py4gwcorelib_src.MovementHold import MovementHold
 from ...enums_src.GameData_enums import Allegiance
 from ...enums_src.GameData_enums import Range
 from ...native_src.internals.types import Point2D
@@ -168,7 +169,8 @@ class BTMovement:
         avoidance_logged_ignored_target_ids: set[int]
         combat_release_pending: bool
         combat_release_started_ms: int | None
-        
+        hold_generation: int | None
+
     #region Move
     @staticmethod
     def Move(
@@ -256,6 +258,7 @@ class BTMovement:
             "avoidance_logged_ignored_target_ids": set(),
             "combat_release_pending": bool(pause_on_combat and int(combat_release_delay_ms) > 0),
             "combat_release_started_ms": None,
+            "hold_generation": None,
         }
 
         def _reset_runtime() -> None:
@@ -307,6 +310,7 @@ class BTMovement:
             state["avoidance_logged_ignored_target_ids"] = set()
             state["combat_release_pending"] = bool(pause_on_combat and int(combat_release_delay_ms) > 0)
             state["combat_release_started_ms"] = None
+            state["hold_generation"] = None
 
         def _reset_result() -> None:
             """
@@ -454,6 +458,8 @@ class BTMovement:
                 UserDescription: Internal support routine.
                 Notes: Returns an empty string when movement should continue normally.
             """
+            if MovementHold.IsHeld():
+                return "movement_hold"
             account_email: str = Player.GetAccountEmail()
             index: int
             message: Any
@@ -1017,6 +1023,26 @@ class BTMovement:
                 if log:
                     _log("Move", f"Movement already failed ({state['result_reason']}).", message_type=Console.MessageType.Warning, log=log)
                 return BehaviorTree.NodeState.FAILURE
+
+            hold_generation: int = MovementHold.GetGeneration()
+            if state["hold_generation"] is None:
+                state["hold_generation"] = hold_generation
+            elif state["hold_generation"] != hold_generation:
+                # A MovementHold (e.g. a blessing detour) ended since this path was planned. The
+                # character was walked elsewhere, and a paused planner may not have ticked this node
+                # at all meanwhile, so re-plan from the current position and restart the waypoint
+                # timeout. Caller-supplied points (MoveDirect) are kept and simply resumed.
+                state["hold_generation"] = hold_generation
+                if path_points_override is None:
+                    state["path_gen"] = None
+                    state["path_points"] = None
+                state["move_issued"] = False
+                state["last_distance"] = None
+                state["last_progress_ms"] = now
+                state["last_move_point"] = None
+                state["resume_recovery_restart_pending"] = True
+                if log:
+                    _log("Move", "Movement hold ended; re-planning from current position.", message_type=Console.MessageType.Info, log=log)
 
             if state["path_gen"] is None and state["path_points"] is None:
                 _reset_result()

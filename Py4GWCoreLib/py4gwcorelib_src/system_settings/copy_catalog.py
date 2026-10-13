@@ -78,6 +78,31 @@ def _register_title() -> None:
     ))
 
 
+def _register_blessings() -> None:
+    from .blessings import persistence
+    from .blessings.controller import get_controller
+
+    controller = get_controller()
+    register_spec(AccountCopySpec(
+        setting_id="map.blessings",
+        label="Blessings",
+        build_operations=lambda: (
+            SettingsSectionOperation(
+                persistence.DOCUMENT,
+                persistence.OPTIONS_SECTION,
+                persistence.options_values(controller.config),
+            ),
+            SettingsSectionOperation(
+                persistence.DOCUMENT,
+                persistence.NPC_SECTION,
+                persistence.npc_values(controller.config),
+            ),
+        ),
+        apply_runtime=controller.reload_account_settings,
+        settings_documents=(persistence.DOCUMENT,),
+    ))
+
+
 def _register_camera() -> None:
     from .camera_smoothing.controller import get_controller
 
@@ -385,6 +410,7 @@ def register_default_specs() -> None:
     _register_native_listeners()
     _register_travel()
     _register_title()
+    _register_blessings()
     _register_camera()
     _register_window_renamer()
     _register_map_utilities()

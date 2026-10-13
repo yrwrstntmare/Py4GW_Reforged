@@ -48,6 +48,8 @@ class Campaign:
         self.signet_slots = [5, 6]   # bar slots given up for signets, in order
         self.max_signets = 2
         self.exit_when_done = False  # close the game once the queue has been worked through
+        self.start_outpost = 0       # 0 = each area's default outpost; else prefer routes starting here
+        self.chain_areas = True      # walk on into the next queued area when its route passes through this one
         self.nodata_signets = 1      # signets to carry into an area we have no boss list for
         self.builds = {}             # "party size:signets" -> saved team (bar + heroes)
         self.library = []            # teams imported from Toolbox, to choose from
@@ -71,6 +73,8 @@ class Campaign:
             self.max_signets = int(data.get("max_signets", self.max_signets))
             self.nodata_signets = int(data.get("nodata_signets", self.nodata_signets))
             self.exit_when_done = bool(data.get("exit_when_done", False))
+            self.start_outpost = int(data.get("start_outpost", 0) or 0)
+            self.chain_areas = bool(data.get("chain_areas", True))
             self.builds = dict(data.get("builds", {}))
             self.library = list(data.get("library", []))
             self.toolbox_path = data.get("toolbox_path", "")
@@ -92,6 +96,7 @@ class Campaign:
                 json.dump({"queue": self.queue, "results": self.results,
                            "capture_template": self.capture_template, "signet_slots": self.signet_slots,
                            "max_signets": self.max_signets, "nodata_signets": self.nodata_signets, "exit_when_done": self.exit_when_done,
+                           "start_outpost": self.start_outpost, "chain_areas": self.chain_areas,
                            "builds": self.builds, "library": self.library}, f)
             with open(self._local_path(), "w", encoding="utf-8") as f:
                 json.dump({"toolbox_path": self.toolbox_path}, f)
@@ -181,6 +186,43 @@ class Campaign:
             out.setdefault(region, []).append(mid)
         return {r: sorted(ids, key=game.map_sort_key) for r, ids in sorted(out.items())}
 
+    def recorded_entries(self, mid):
+        """The recorded ways into an area, best first. An entry may list "alternates" that start from
+        other outposts (The Breach: Yak's Bend by default so the party can be 6, Piken Square as an
+        alternate). With start_outpost set, routes starting there come first."""
+        e = self.travel.get(mid)
+        if not e:
+            return []
+        out = [e] + [dict(e, **alt) for alt in e.get("alternates", [])]
+        if self.start_outpost:
+            out.sort(key=lambda r: r["outpost"] != self.start_outpost)
+        return out
+
+    def entry_for(self, mid):
+        """The recorded route to use for an area: the first one whose outpost is unlocked."""
+        entries = self.recorded_entries(mid)
+        unlocked = self.unlocked()
+        return next((r for r in entries if r["outpost"] in unlocked), entries[0] if entries else None)
+
+    def doors_from(self, mid, here):
+        """Doors left to walk through to reach `mid` from inside area `here`, when the recorded
+        route to `mid` passes through `here`; None when it does not."""
+        e = self.entry_for(mid)
+        maps = [leg["map"] for leg in e["transit"]] if e and e.get("plain") else []
+        return len(maps) - maps.index(here) if here in maps else None
+
+    def continues_from(self, here, exclude=()):
+        """Queued areas, not yet done, that can be walked on to from inside `here`."""
+        if not self.chain_areas:
+            return []
+        try:
+            done = game.vanquished_ids()
+        except Exception:
+            done = set()
+        return [m for m in self.queue if m not in exclude and m not in done
+                and self.results.get(m, {}).get("attempts", 0) < MAX_ATTEMPTS
+                and self.doors_from(m, here) is not None]
+
     def hops(self, mid):
         """How many doors must be walked through to reach an area (0 = straight out of an
         outpost you have). None = no way there yet."""
@@ -195,7 +237,7 @@ class Campaign:
                 self._hops[mid] = 0 if game.map_unlocked(ent["outpost"]) else None
                 return self._hops[mid]
             if legs is None:
-                t = self.travel.get(mid)
+                t = self.entry_for(mid)
                 ok = t and t["plain"] and t["outpost"] in self.unlocked()
                 self._hops[mid] = len(t["transit"]) if ok else None
             else:
@@ -254,6 +296,16 @@ class Campaign:
             plan[slot] = None
             return None
         self.unlocked(refresh=True)
+        # Standing in an area that the route to a queued area passes through (the last area was
+        # left without going back to town): carry on to the nearest of those.
+        try:
+            in_area = game.map_id() if game.map_ready() and game.is_explorable() else 0
+        except Exception:
+            in_area = 0
+        onward = [m for m in self.continues_from(in_area) if m in left] if in_area else []
+        if onward:
+            plan[slot] = min(onward, key=lambda m: (self.doors_from(m, in_area), self.queue.index(m)))
+            return plan[slot]
         try:
             here = game.map_world_pos(game.map_id())
         except Exception:

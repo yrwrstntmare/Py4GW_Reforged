@@ -34,6 +34,8 @@ FLOW_FOW = "fow"
 ExchangeAction = tuple[str, tuple[float, float], int]
 # kind, expected_map_id, point, target_map_id, dialog_id
 FarmRouteAction = tuple[str, int, tuple[float, float], int, int]
+# exit point on the farm map, neighbour map id, exit point back on the neighbour map
+FarmPathEnd = tuple[tuple[float, float], int, tuple[float, float]]
 
 
 @dataclass(frozen=True)
@@ -77,6 +79,14 @@ class FarmDefinition:
     outpost_path: tuple[tuple[float, float], ...] = ()
     setup_actions: tuple[FarmRouteAction, ...] = ()
     reset_actions: tuple[FarmRouteAction, ...] = ()
+
+    # Optional two-ended farm map for route_loop farms. farm_path_ends[0] is
+    # the portal beside farm_path[0], farm_path_ends[1] the portal beside
+    # farm_path[-1]. When set, every loop walks farm_path away from whichever
+    # portal the player is nearer, rezones through the far portal and comes
+    # back, so the direction never depends on MapID alone. reset_actions is
+    # not used by such farms.
+    farm_path_ends: tuple[FarmPathEnd, FarmPathEnd] | None = None
 
     challenge_delay_ms: int = 0
     entry_position: tuple[float, float] | None = None
@@ -2146,10 +2156,20 @@ FARMS: tuple[FarmDefinition, ...] = (
         outpost_map_id=139,
         farm_map_id=45,
         exit_point=None,
+        # Reed Bog is walked end to end between the Ettin's Back portal and
+        # The Falls portal; see farm_path_ends.
         farm_path=(
-            (-6209.0, -7007.0),
-            (-6386.0, -6729.0),
-            (-6209.0, -7007.0),
+            (6486.0, 5756.0),
+            (6549.0, 4401.0),
+            (5876.0, 1861.0),
+            (5517.0, -980.0),
+            (5676.0, -3250.0),
+            (4496.0, -5081.0),
+            (880.0, -4679.0),
+            (-610.0, -9270.0),
+            (-2117.0, -8397.0),
+            (-2362.0, -6768.0),
+            (-6317.0, -7134.0),
         ),
         clear_radius='Earshot',
         setup_actions=(
@@ -2165,23 +2185,10 @@ FARMS: tuple[FarmDefinition, ...] = (
             ('aggro', 44, (-21120.0, -11460.0), 0, 0),
             ('aggro', 44, (-22648.0, -11461.0), 0, 0),
             ('exit', 44, (-22800.0, -11440.0), 45, 0),
-            ('aggro', 45, (6486.0, 5756.0), 0, 0),
-            ('aggro', 45, (6549.0, 4401.0), 0, 0),
-            ('aggro', 45, (5876.0, 1861.0), 0, 0),
-            ('aggro', 45, (5517.0, -980.0), 0, 0),
-            ('aggro', 45, (5676.0, -3250.0), 0, 0),
-            ('aggro', 45, (4496.0, -5081.0), 0, 0),
-            ('aggro', 45, (880.0, -4679.0), 0, 0),
-            ('aggro', 45, (-610.0, -9270.0), 0, 0),
-            ('aggro', 45, (-2117.0, -8397.0), 0, 0),
-            ('aggro', 45, (-2362.0, -6768.0), 0, 0),
-            ('aggro', 45, (-6317.0, -7134.0), 0, 0),
-            ('exit', 45, (-6550.0, -8100.0), 46, 0),
-            ('exit', 46, (18250.0, 4300.0), 45, 0),
         ),
-        reset_actions=(
-            ('exit', 45, (-6550.0, -8100.0), 46, 0),
-            ('exit', 46, (18150.0, 4300.0), 45, 0),
+        farm_path_ends=(
+            ((7881.0, 6911.0), 44, (-22800.0, -11440.0)),
+            ((-6550.0, -8100.0), 46, (18150.0, 4300.0)),
         ),
         nicholas_item_name='Maguuma Spider Web',
         items_for_5_gifts=5,

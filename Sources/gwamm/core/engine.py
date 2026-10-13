@@ -34,6 +34,9 @@ class Config:
     retreat_when_losing = False  # several of the party down: the living pull right back. Off: the recordings show
                                  # the heroes die on the run and the leader is left alone, which helps nobody
     record_fights = True         # keep a second-by-second record of every fight (gwamm_logs/fights) to learn from
+    draw_path = False            # draw the route being walked on the ground in the game world
+    focus_target = True          # keep the called target until it dies (melee loses swings on every switch);
+                                 # only an enemy raising the dead, or a nearer hurt one when ours drifted off, moves it
     pull_ranged = True           # a leader with a ranged weapon wakes a group by hitting one of it from weapon
                                  # range, outside everyone's notice range, instead of walking up to it
     summon_stones = False        # call a summoned ally (summoning stone) whenever none is out; needs consumables on

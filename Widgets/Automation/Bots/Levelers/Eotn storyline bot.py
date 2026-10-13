@@ -19,9 +19,6 @@ from Py4GWCoreLib.enums_src.Multiboxing_enums import SharedCommandType
 from Py4GWCoreLib.native_src.internals.types import Vec2f
 from Py4GWCoreLib.py4gwcorelib_src.BehaviorTree import BehaviorTree
 from Py4GWCoreLib.routines_src.BehaviourTrees import BT as RoutinesBT
-from Py4GWCoreLib.routines_src.behaviourtrees_src.constants.lists import (
-    CONSUMABLE_UPKEEPS,
-)
 from Sources.ApoSource.ApoBottingLib import wrappers as BT
 from Py4GWCoreLib import Agent, ConsoleLog, GLOBAL_CACHE, Player, Utils
 from Py4GWCoreLib.Context import GWContext
@@ -132,12 +129,13 @@ def _pacifist(name: str = "Configure Pacifist") -> BehaviorTree:
 def _set_heroai_widget_enabled(enabled: bool, name: str) -> BehaviorTree:
     """Turn the real HeroAI widget on or off for a stretch of the route.
 
-    _aggressive()/_pacifist() only ever toggled headless HeroAI's enabled flag, and this bot now forces
-    headless off permanently, so neither one touches the real widget's combat behavior at all anymore.
-    That matters for sections like running with a bundle item that drops on skill use (e.g. the
-    Crystalline Key): the widget auto-casting a skill such as Death's Charge makes the character drop it.
-    This disables the widget outright for that stretch rather than relying on a toggle that no longer
-    reaches it. It is a configuration call on our own orchestration (ConfigureWidget), not a change to
+    _aggressive()/_pacifist() toggle headless HeroAI. The bot starts with headless off, _aggressive()
+    turns it back on (BottingTree then disables the local HeroAI widget while headless drives combat
+    and movement pauses), and _pacifist() turns it off again. Neither reliably disables the widget for
+    a stretch where no skills may be cast. That matters for sections like running with a bundle item
+    that drops on skill use (e.g. the Crystalline Key): the widget auto-casting a skill such as
+    Death's Charge makes the character drop it. This disables the widget outright for that stretch.
+    It is a configuration call on our own orchestration (ConfigureWidget), not a change to
     anything HeroAI itself decides.
     """
 
@@ -1737,6 +1735,7 @@ def CompleteAGateTooFarLevel1B() -> BehaviorTree:
     return BT.Sequence(
         name="A Gate Too Far Level 1B",
         children=[
+            _aggressive(),
             BT.Move([
                 (-6278.53, 6122.15),
                 (-6094.21, 4341.61),
@@ -1755,6 +1754,7 @@ def CompleteAGateTooFarLevel2() -> BehaviorTree:
     return BT.Sequence(
         name="A Gate Too Far Level 2",
         children=[
+            _aggressive(),
             BT.Move(Vec2f(17054.0, 6568.0)),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Move(Vec2f(13357.0, 11594.0)),
@@ -1774,6 +1774,7 @@ def CompleteAGateTooFarLevel3() -> BehaviorTree:
     return BT.Sequence(
         name="A Gate Too Far Level 3",
         children=[
+            _aggressive(),
             BT.Move(Vec2f(6360.0, 16486.0)),
             BT.WaitUntilOutOfCombat(timeout_ms=120_000),
             BT.Move(Vec2f(5233.0, 12570.0)),
@@ -3208,13 +3209,8 @@ def _configure_eotn_bot(tree: BottingTree) -> None:
         looting_enabled=True,
         resurrection_scroll=True,
         auto_inventory_handler_enabled=True,
-        consumable_upkeeps=tuple(
-            int(model_id)
-            for model_id in CONSUMABLE_UPKEEPS
-        ),
         heroai_state_logging=False,
         enable_party_wipe_recovery=True,
-        enable_shrine_blessing_service=True,
     )
     # headless_heroai_enabled defaults to True on every fresh BottingTree instance, which is every
     # module reload - there is no persisted setting to flip instead. Set the attribute directly rather

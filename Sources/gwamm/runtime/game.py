@@ -1024,9 +1024,45 @@ def hero_positions():
     return out
 
 
+def _party_account_options():
+    """(party position, HeroAI options) for every multibox account in the leader's party,
+    leader included at position 0. These are the shared-memory options HeroAI's own flag
+    buttons write to: an account's FlagPos/IsFlagged is its personal flag, and the leader's
+    AllFlag/IsFlagged is the party-wide flag every follower account obeys."""
+    from Py4GWCoreLib import GLOBAL_CACHE
+    out = []
+    try:
+        me = GLOBAL_CACHE.ShMem.GetAccountDataFromEmail(str(Player.GetAccountEmail() or ""))
+        party_id = int(me.AgentPartyData.PartyID) if me else 0
+        for account, options in GLOBAL_CACHE.ShMem.GetAllActiveAccountHeroAIPairs(sort_results=False):
+            if options is not None and int(account.AgentPartyData.PartyID) == party_id:
+                out.append((int(account.AgentPartyData.PartyPosition), options))
+    except Exception:
+        pass
+    return sorted(out, key=lambda pair: pair[0])
+
+
+def _flag_account(options, x, y):
+    options.FlagPos.x, options.FlagPos.y = float(x), float(y)
+    options.IsFlagged = True
+    try:
+        options.FlagFacingAngle = Agent.GetRotationAngle(Player.GetAgentID())
+    except Exception:
+        pass
+
+
 def flag_all_heroes(x, y):
-    """The party-wide flag: every hero (and henchman) goes to this spot and stays."""
+    """The party-wide flag: every hero (and henchman) goes to this spot and stays. Multibox
+    accounts in the party get HeroAI's own party-wide flag, set on the leader's options."""
     Party.Heroes.FlagAllHeroes(x, y)
+    for position, options in _party_account_options():
+        if position == 0:
+            options.AllFlag.x, options.AllFlag.y = float(x), float(y)
+            options.IsFlagged = True
+            try:
+                options.FlagFacingAngle = Agent.GetRotationAngle(Player.GetAgentID())
+            except Exception:
+                pass
 
 
 def flag_heroes_spread(places, usable=None):
@@ -1053,6 +1089,16 @@ def flag_heroes_spread(places, usable=None):
             done += 1
         except Exception:
             continue
+    if done and places:
+        # Multibox accounts in the party take the places after the heroes (the middle one when
+        # there are not enough), so they hang back with them instead of following the leader in.
+        others = [options for position, options in _party_account_options() if position > 0]
+        spare = list(places[done:])
+        for i, options in enumerate(others):
+            x, y = spare[i] if i < len(spare) else places[0]
+            if usable is not None and not usable(x, y):
+                x, y = places[0]
+            _flag_account(options, x, y)
     return done
 
 
@@ -1090,6 +1136,11 @@ def unflag_heroes(agent_ids=()):
     except Exception:
         pass
     Party.Heroes.UnflagAllHeroes()
+    for _position, options in _party_account_options():
+        options.IsFlagged = False
+        options.FlagPos.x = options.FlagPos.y = 0.0
+        options.AllFlag.x = options.AllFlag.y = 0.0
+        options.FlagFacingAngle = 0.0
 
 
 def heroes_flagged():

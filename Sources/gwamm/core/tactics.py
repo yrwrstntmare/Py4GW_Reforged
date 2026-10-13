@@ -167,6 +167,13 @@ def role_of(model):
     return ROLES.get(model, "")
 
 
+# Focus mode (pick_target): leave the current target only when it is further than FOCUS_DRIFT and
+# another enemy, FOCUS_CLOSER nearer, is already below FOCUS_HURT_HP of its health.
+FOCUS_DRIFT = 900.0
+FOCUS_CLOSER = 300.0
+FOCUS_HURT_HP = 0.85
+
+
 def threat(e, player_xy):
     """Higher = kill sooner. e: dict(id, xy, hp 0-1, level, boss, caster, prof).
     Order of concern: whoever keeps the others alive, then bosses (they hit hardest and carry
@@ -191,14 +198,31 @@ def threat(e, player_xy):
     return s
 
 
-def pick_target(enemies, player_xy, current=None, reach=1500.0):
+def pick_target(enemies, player_xy, current=None, reach=1500.0, focus=False):
     """The enemy to call, or None. Keeps the current call unless another is clearly worse to
-    leave alone (so the party does not swap targets every second)."""
+    leave alone (so the party does not swap targets every second).
+
+    focus: stay on the current call until it dies. A melee leader loses every swing it spent
+    when the call moves, and the threat scores shift constantly as it walks and things get
+    hurt. The only reasons to leave it: an enemy raising the dead, or the current one has
+    drifted out of reach while a nearer enemy is already hurt."""
     near = [e for e in enemies if math.hypot(e["xy"][0] - player_xy[0], e["xy"][1] - player_xy[1]) <= reach]
     if not near:
         return None
     best = max(near, key=lambda e: threat(e, player_xy))
     cur = next((e for e in near if e["id"] == current), None)
+    if focus and cur is not None:
+        raising = [e for e in near if e.get("casting") == "raise" and e["id"] != cur["id"]]
+        if raising:
+            return max(raising, key=lambda e: threat(e, player_xy))["id"]
+
+        def gap(e):
+            return math.hypot(e["xy"][0] - player_xy[0], e["xy"][1] - player_xy[1])
+        if gap(cur) > FOCUS_DRIFT:
+            hurt = [e for e in near if e.get("hp", 1.0) < FOCUS_HURT_HP and gap(e) < gap(cur) - FOCUS_CLOSER]
+            if hurt:
+                return min(hurt, key=gap)["id"]
+        return cur["id"]
     if cur is not None and threat(best, player_xy) < threat(cur, player_xy) + 15.0:
         return cur["id"]
     return best["id"]

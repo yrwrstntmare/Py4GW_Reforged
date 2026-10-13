@@ -19,7 +19,7 @@ bot = Botting(
     bot_name=BOT_NAME,
     upkeep_hero_ai_active=True,
     upkeep_auto_loot_active=False,
-    upkeep_morale_active=True,
+    upkeep_morale_active=False,
 )
 
 
@@ -922,7 +922,10 @@ def Unlock_asuran_scan(bot: Botting) -> None:
     bot.Move.XYAndDialog(25203, -10694, 0x837901)  # Grenth (take quest)
 
     bot.Map.Travel(target_map_name="Gadd's Encampment")
-    bot.Move.XYAndExitMap(-9690, -19524, target_map_name="Sparkfly Swamp")
+    # XYAndExitMap's 10s map-load wait starts at the loading screen and can
+    # expire before Sparkfly finishes loading; allow a longer arrival window.
+    bot.Move.XY(-9690, -19524)
+    bot.Wait.ForMapLoad(target_map_name="Sparkfly Swamp", timeout_ms=30000)
     # This script used ApplyNow; keep it identical
     bot.Properties.ApplyNow("pause_on_danger", "active", True)
     bot.Properties.ApplyNow("halt_on_death", "active", True)
@@ -1393,7 +1396,10 @@ def Unlock_previous_skills(bot: Botting) -> None:
     bot.Move.XYAndDialog(25203, -10694, 0x837901)  # Grenth (take quest)
 
     bot.Map.Travel(target_map_name="Gadd's Encampment")
-    bot.Move.XYAndExitMap(-9690, -19524, target_map_name="Sparkfly Swamp")
+    # XYAndExitMap's 10s map-load wait starts at the loading screen and can
+    # expire before Sparkfly finishes loading; allow a longer arrival window.
+    bot.Move.XY(-9690, -19524)
+    bot.Wait.ForMapLoad(target_map_name="Sparkfly Swamp", timeout_ms=30000)
     # This script used ApplyNow; keep it identical
     bot.Properties.ApplyNow("pause_on_danger", "active", True)
     bot.Properties.ApplyNow("halt_on_death", "active", True)

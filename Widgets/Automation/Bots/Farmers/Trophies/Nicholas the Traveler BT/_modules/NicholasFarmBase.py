@@ -25,6 +25,7 @@ from .NicholasFarms import (
     FLOW_ROUTE_LOOP,
     FLOW_TWO_MAP,
     FarmDefinition,
+    FarmPathEnd,
 )
 
 
@@ -2300,6 +2301,193 @@ def _route_loop_action_steps(
     return steps
 
 
+# farm key -> index of the farm_path_ends portal the current walk started at.
+# Kept outside the blackboard because a planner step restart clears it.
+_FARM_PATH_START_END: dict[str, int] = {}
+
+
+def _squared_distance_to_player(point: tuple[float, float]) -> float:
+    player_x, player_y = Player.GetXY()
+    return (float(point[0]) - player_x) ** 2 + (float(point[1]) - player_y) ** 2
+
+
+def _nearest_farm_path_end(ends: tuple[FarmPathEnd, FarmPathEnd]) -> int:
+    """Index of the farm-map portal the player is standing nearer to."""
+    near_start = _squared_distance_to_player(ends[0][0])
+    near_end = _squared_distance_to_player(ends[1][0])
+    return 0 if near_start <= near_end else 1
+
+
+def _farm_path_start_end(
+    farm: FarmDefinition,
+    ends: tuple[FarmPathEnd, FarmPathEnd],
+) -> int:
+    start_end = _FARM_PATH_START_END.get(str(farm.key))
+    if start_end is None:
+        start_end = _nearest_farm_path_end(ends)
+        _FARM_PATH_START_END[str(farm.key)] = start_end
+    return start_end
+
+
+def _farm_path_ends_steps(
+    farm: FarmDefinition,
+    ends: tuple[FarmPathEnd, FarmPathEnd],
+    *,
+    clear_area_radius: float,
+) -> list[tuple[str, Callable[[], BehaviorTree]]]:
+    """
+    Walk a two-ended farm map, rezone through the far portal and come back.
+
+    The direction is decided from the player position at the first waypoint,
+    right after landing beside one of the portals, and is remembered for the
+    rest of the walk. Mid-map step restarts therefore cannot flip direction.
+    A party landing beside farm_path_ends[1] walks the path backwards.
+    """
+    farm_map_id = int(farm.farm_map_id)
+    neighbour_map_ids = tuple(int(end[1]) for end in ends)
+    point_count = len(farm.farm_path)
+    steps: list[tuple[str, Callable[[], BehaviorTree]]] = []
+
+    for index in range(point_count):
+        name = f"Farm Path - Point {index + 1:02d}"
+
+        def _point_subtree(
+            _node: BehaviorTree.Node,
+            index: int = index,
+            name: str = name,
+        ) -> BehaviorTree:
+            if index == 0:
+                # Fresh landing: always re-read which portal we arrived at.
+                _FARM_PATH_START_END.pop(str(farm.key), None)
+            start_end = _farm_path_start_end(farm, ends)
+
+            if index == 0:
+                PySystem.Console.Log(
+                    MODULE_NAME,
+                    (
+                        f"{farm.name}: walking farm path "
+                        f"{'forward' if start_end == 0 else 'backward'}."
+                    ),
+                    PySystem.Console.MessageType.Info,
+                )
+
+            point_index = index if start_end == 0 else point_count - 1 - index
+            walk = BT.VanquishNode(
+                [farm.farm_path[point_index]],
+                name=name,
+                clear_area_radius=clear_area_radius,
+                pause_on_combat=True,
+                flag_heroes_to_waypoint=False,
+                move_tolerance=175.0,
+                log=False,
+            )
+            return _with_nicholas_loot_orchestrator(
+                farm,
+                walk,
+                name=name,
+            )
+
+        def _point(
+            name: str = name,
+            point_subtree: Callable[[BehaviorTree.Node], BehaviorTree] = _point_subtree,
+        ) -> BehaviorTree:
+            return _map_guarded_node(
+                name=name,
+                map_id=farm_map_id,
+                child=BehaviorTree(
+                    BehaviorTree.SubtreeNode(
+                        subtree_fn=point_subtree,
+                        name=f"{name} - Direction",
+                    )
+                ),
+                skip_if_in_maps=neighbour_map_ids,
+            )
+
+        steps.append((name, _point))
+
+    def _exit_subtree(_node: BehaviorTree.Node) -> BehaviorTree:
+        # Leave through the portal opposite the one this walk started at.
+        point, neighbour_map_id, _return_point = ends[
+            1 - _farm_path_start_end(farm, ends)
+        ]
+        return _map_transition_node(
+            name="Farm Path - Exit",
+            from_map_id=farm_map_id,
+            target_map_id=int(neighbour_map_id),
+            point=point,
+            timeout_ms=60_000,
+            skip_if_in_maps=neighbour_map_ids,
+            after_children=(BT.Wait(2_000),),
+        )
+
+    def _exit() -> BehaviorTree:
+        return _with_resign_fallback(
+            farm,
+            name="Farm Path - Exit",
+            child=BehaviorTree(
+                BehaviorTree.SubtreeNode(
+                    subtree_fn=_exit_subtree,
+                    name="Farm Path - Exit - Portal",
+                )
+            ),
+        )
+
+    def _return() -> BehaviorTree:
+        return _with_resign_fallback(
+            farm,
+            name="Farm Path - Return",
+            child=BT.Selector(
+                name="Farm Path - Return",
+                children=[
+                    _map_transition_node(
+                        name=f"Farm Path - Return From {neighbour_map_id}",
+                        from_map_id=int(neighbour_map_id),
+                        target_map_id=farm_map_id,
+                        point=return_point,
+                        timeout_ms=60_000,
+                        after_children=(BT.Wait(2_000),),
+                    )
+                    for _point, neighbour_map_id, return_point in ends
+                ],
+            ),
+        )
+
+    steps.extend([
+        ("Farm Path - Exit", _exit),
+        ("Farm Path - Return", _return),
+        (
+            "Farm Path - Refresh Runtime",
+            lambda: _refresh_farm_runtime_after_entry(farm),
+        ),
+    ])
+    return steps
+
+
+def _with_resign_fallback(
+    farm: FarmDefinition,
+    *,
+    name: str,
+    child: BehaviorTree,
+) -> BehaviorTree:
+    """Same fallback as route_loop reset exits: resign and rebuild the route."""
+    return BT.Selector(
+        name=name,
+        children=[
+            child,
+            BT.Sequence(
+                name=f"{name} - Resign Fallback",
+                children=[
+                    return_to_outpost_if_needed(farm),
+                    BT.ClearBlackboardValue(
+                        _PORTAL_READY_KEY,
+                        log=True,
+                    ),
+                ],
+            ),
+        ],
+    )
+
+
 def build_nicholas_exchange(farm: FarmDefinition) -> BehaviorTree:
     """
     Travel to Nicholas and exchange the selected weekly item on all accounts.
@@ -2967,6 +3155,16 @@ def build_execution_steps(
                 ),
             )
         )
+
+        if farm.farm_path_ends is not None:
+            steps.extend(
+                _farm_path_ends_steps(
+                    farm,
+                    farm.farm_path_ends,
+                    clear_area_radius=clear_radius,
+                )
+            )
+            return steps
 
         steps.extend(
             _vanquish_point_steps(

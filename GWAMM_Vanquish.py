@@ -630,6 +630,7 @@ def draw_options():
     cfg.retreat_when_losing = PyImGui.checkbox("Pull right back when several of the party are down", cfg.retreat_when_losing)
     cfg.route_hints = PyImGui.checkbox("Use the area's known route as a guide (and as the way round when blocked)", cfg.route_hints)
     cfg.edge_pass = PyImGui.checkbox("After the vanquish, also clear map cells beside exits (takes extra time)", cfg.edge_pass)
+    cfg.draw_path = PyImGui.checkbox("Draw path: show the route being walked on the ground", cfg.draw_path)
     cfg.call_targets = PyImGui.checkbox("Call targets: healers, bosses and casters first", cfg.call_targets)
     cfg.auto_reconnect = PyImGui.checkbox("Reconnect by itself when the connection drops (presses Yes on the game's prompt)", cfg.auto_reconnect)
     cfg.keep_at_it = PyImGui.checkbox("Testing: keep at the fight in front of us (deaths and wipes do not send the party elsewhere; never give the area up)", cfg.keep_at_it)
@@ -747,6 +748,18 @@ def draw_campaign():
         ex = PyImGui.checkbox("Exit game when current queue ends", c.exit_when_done)
         if ex != c.exit_when_done:
             c.exit_when_done = ex
+            c.save()
+        ch = PyImGui.checkbox("Walk on to the next queued area when connected (keeps the current bar/team)", c.chain_areas)
+        if ch != c.chain_areas:
+            c.chain_areas = ch
+            c.save()
+        PyImGui.text("START OUTPOST: " + (game.map_name(c.start_outpost) if c.start_outpost else "each area's default"))
+        if PyImGui.button("Use the outpost I'm in"):
+            c.start_outpost, c._hops = game.map_id(), {}
+            c.save()
+        PyImGui.same_line(0.0, -1.0)
+        if PyImGui.button("Use defaults"):
+            c.start_outpost, c._hops = 0, {}
             c.save()
         m = PyImGui.slider_int("Most signets to carry", c.max_signets, 0, 2)
         n = PyImGui.slider_int("Signets when I have no boss list for the area", c.nodata_signets, 0, 2)
@@ -880,6 +893,41 @@ def draw_main():
             finally:
                 PyImGui.end_tab_bar()
     PyImGui.end()
+
+
+_ENGINE_PATH_KEY = "gwamm_engine_path"
+_published = {"points": None}                # the exact list last written, to tell ours from a Move node's
+
+
+def draw_path_on_ground(tree):
+    """Draw the route being walked on the game's terrain, with Reforged's own move-path drawer.
+
+    That drawer reads the path a Move node puts on the blackboard. The recorded walks between
+    areas use Move nodes, so they publish their own; the vanquish engine walks on its own
+    (route_ahead, the line on the map window), so its route is published here while no Move
+    node is walking. Reforged's window draws the path itself when it is open."""
+    tree.draw_move_path_enabled = bool(session.cfg.draw_path)
+    if not tree.draw_move_path_enabled:
+        return
+    bb = tree.blackboard
+    ours = bb.get(_ENGINE_PATH_KEY) and bb.get("move_path_points") is _published["points"]
+    if bb.get(_ENGINE_PATH_KEY) and not ours:
+        bb[_ENGINE_PATH_KEY] = False             # a Move node has written its own path since
+    move_node_walking = bb.get("move_state") in ("running", "paused") and not ours
+    if not move_node_walking:
+        eng = session.engine
+        points = []
+        if tree.IsStarted() and eng is not None and game.is_explorable():
+            points = [(float(p[0]), float(p[1])) for p in (eng.route_ahead or [])]
+        if points:
+            _published["points"] = points
+            bb.update({"move_state": "running", "move_path_points": points, "move_path_index": 0,
+                       "move_path_count": len(points), "move_current_waypoint": points[0],
+                       "move_current_waypoint_index": 0, "move_target": points[-1], _ENGINE_PATH_KEY: True})
+        elif bb.get(_ENGINE_PATH_KEY):
+            bb.update({"move_state": "", "move_path_points": [], _ENGINE_PATH_KEY: False})
+    if not View.show_reforged:
+        tree.DrawMovePathIfEnabled()
 
 
 def draw_map():
@@ -1116,6 +1164,10 @@ def main():
             except Exception:
                 report("reforged window")
         _t3 = time.perf_counter()
+        try:
+            draw_path_on_ground(tree)
+        except Exception:
+            report("draw path")
         try:
             draw_map()
         except Exception:

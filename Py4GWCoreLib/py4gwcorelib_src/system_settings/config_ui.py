@@ -168,6 +168,18 @@ def build_window(controller) -> "ImGui.SidebarWindow":
                 win.add_section(group, "Title On Map Load",
                                 (lambda e=_err: PyImGui.text_colored("Failed to build: %s" % e, ERR_COLOR)))
             try:
+                from Py4GWCoreLib.py4gwcorelib_src.system_settings.blessings import config_ui as blessings_ui
+
+                blessings_ui.add_sections(win, group)
+            except Exception as exc:
+                import traceback
+
+                _log("Map & Missions / Blessings section failed to build: %r" % (exc,))
+                _log(traceback.format_exc())
+                _err = str(exc)
+                win.add_section(group, "Blessings",
+                                (lambda e=_err: PyImGui.text_colored("Failed to build: %s" % e, ERR_COLOR)))
+            try:
                 from Py4GWCoreLib.py4gwcorelib_src.system_settings.travel_on_character_load import config_ui as travel_ui
 
                 travel_ui.add_sections(win, group)
