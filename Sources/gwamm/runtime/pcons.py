@@ -209,6 +209,17 @@ class Pcons:
             return
         self._next = now + 3.0
         cfg, log = self.session.cfg, self.session.log
+        # Not while dead or in the first seconds back: an item used as the party was raised at a
+        # shrine did nothing, and the same Essence was used again 17 s later (Talus Chute).
+        try:
+            from . import game as _g
+            if _g.player_dead_safe():
+                self._dead_at = now
+                return
+        except Exception:
+            pass
+        if now - self.__dict__.get("_dead_at", 0.0) < 6.0:
+            return
         if not cfg.pcons_on:
             self.note = "off"
             return

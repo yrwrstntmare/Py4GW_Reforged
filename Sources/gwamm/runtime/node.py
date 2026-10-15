@@ -133,11 +133,30 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             gx, gy = self.__dict__.get("_loot_gave_up_xy", (1e9, 1e9))
             if math.hypot(x - gx, y - gy) < 1500.0:
                 return False                 # gave up on the drops here: not again until we have moved on
-            self._loot_since = now
+            self._loot_since, self._loot_idle_since = now, None
             self._drop_child()
             s.log.event("looting", player=[round(x), round(y)], wanted=game.loot_wanted())
+        # HeroAI's pick-up job can be cut short (a cast between pickups) and not start again:
+        # gold lying 5 away was waited on for 20 s and left behind, with no job running. When the
+        # job has been gone for 3 s and something wanted still lies here, pick it up ourselves.
+        if now - self.__dict__.get("_loot_job_polled", 0.0) >= 0.5:
+            self._loot_job_polled = now
+            self._loot_job = game.pickup_running() or bool(self.blackboard.get("LOOTING_ACTIVE", False))
+        if not self.__dict__.get("_loot_job", True):
+            idle = self.__dict__.get("_loot_idle_since")
+            if idle is None:
+                idle = self._loot_idle_since = now
+            if now - idle >= 3.0 and now - self.__dict__.get("_loot_own_t", 0.0) >= 1.5:
+                self._loot_own_t = now
+                got = game.pick_up_nearest_loot()
+                if got and self.__dict__.get("_loot_own_id") != got:
+                    self._loot_own_id = got
+                    s.log.event("looting", own_pickup=got, player=[round(x), round(y)])
+        else:
+            self._loot_idle_since = now
         if now - self._loot_since < LOOT_HOLD_S:
             return True
+        self._loot_idle_since = None
         self._loot_gave_up_xy, self._loot_since, self._loot_busy = (x, y), 0.0, False
         try:
             left = game.loot_left()
@@ -1349,8 +1368,17 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if obj is not None:
             ox, oy = obj.pos[0], obj.pos[1]
             d = math.hypot(eng.player_xy[0] - ox, eng.player_xy[1] - oy)
+            # Progress by the way still to walk, not the straight line: going round a loop that
+            # swings 1,000 east and west of the line "got nearer" on every swing and the check
+            # never fired (Sage Lands: up and down one ramp for two minutes, way left 43-45 k).
+            ra = getattr(eng, "route_ahead", None) or []
+            if len(ra) >= 2 and math.hypot(ra[-1][0] - ox, ra[-1][1] - oy) < 1500.0:
+                d = sum(math.hypot(b[0] - a[0], b[1] - a[1]) for a, b in zip(ra, ra[1:]))
             prog = self.__dict__.get("_obj_prog")
-            if prog is None or prog[0] != key or prog[4] != kills:
+            if prog is None or prog[0] != key or prog[4] != kills or d > prog[1] + 3000.0:
+                # (a new plan much longer than the best so far - a join was cut, a wall put up -
+                # starts the count again: measured against the old, shorter way, the objective
+                # was given up 30 s after a cut, Sage Lands)
                 prog = self._obj_prog = [key, d, now, now, kills]
             elif d < prog[1] - 300.0:
                 prog[1], prog[2] = d, now
@@ -1370,10 +1398,40 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         hist.clear()
         self._loop_found(eng, key, px, py, len(spots), now)
 
+    @staticmethod
+    def _doors(eng):
+        """Every place a walk must keep its distance from, less the portal props nothing backs
+        up as a door (eng.doubted: they keep a small ring only)."""
+        doubted = getattr(eng, "doubted", None) or ()
+        out = (list(getattr(eng, "portals", ())) + [tuple(e[:2]) for e in getattr(eng, "exits", ())]
+               + [tuple(e[:2]) for e in getattr(eng, "removed_exits", ())]
+               + [tuple(d[:2]) for d in (getattr(eng, "doors", None) or ())])
+        if doubted:
+            out = [d for d in out if not any(abs(d[0] - q[0]) < 50.0 and abs(d[1] - q[1]) < 50.0 for q in doubted)]
+        return out
+
+    def _direct_unsafe(self, eng, pos):
+        """A walk left to the game's own pathing goes where the game likes, doors included: not
+        at a spot near a door, nor along a line over one. (Ettin's Back: steps to a map cell were
+        cut short at a doorway, the loop handed the walk to the game, and it walked out.)"""
+        from ..core.geometry import segment_clear_of
+        doors = self._doors(eng)
+        if not doors or self.transit is not None:
+            return False
+        if any(math.hypot(pos[0] - d[0], pos[1] - d[1]) < 1000.0 for d in doors):
+            return True
+        return not segment_clear_of(eng.player_xy, pos, doors, 450.0)
+
     def _direct_start(self, eng, obj, key, now):
         """Let the game's own pathing walk at the objective. Where the area's known route runs
         from near here to near it, walk that stretch of the route point by point first (it is
         the way people go)."""
+        if self._direct_unsafe(eng, obj.pos):
+            eng.mem.blocked[key] = eng.cfg.max_failures
+            if eng.objective is not None and eng.objective.key == key:
+                eng.objective = None
+            self.session.log.event("step_loop", key=key, gave_up=True, why="a walk left to the game would pass a door")
+            return
         from ..core.geometry import route_chain
         chain = route_chain(getattr(eng, "_route_src", None), eng.player_xy, obj.pos)
         self._direct_chain = [tuple(p) for p in chain] + [(obj.pos[0], obj.pos[1])] if chain else None
@@ -1393,6 +1451,20 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         if eng.nav.stacked(px, py) and not any(math.hypot(px - wx, py - wy) < 300.0 for wx, wy in eng.walls):
             eng.walls.append((px, py))       # a climb the map allows and the game does not: route round it
             eng.player_node = None
+        # A loop where the planned way changes level close by: the join is what cannot be
+        # walked (a ramp the map joins at both ends, a branch the party cannot step off). Take
+        # it out and plan again before anything else.
+        try:
+            cut = eng.cut_climb((px, py))
+        except Exception:
+            cut = None
+        if cut is not None:
+            self.session.log.event("climb_cut", player=[round(px), round(py)], at=[round(cut[0]), round(cut[1])],
+                                   why=why, key=key)
+            loops[key] -= 1                  # not counted against the objective: the map was wrong
+            self._obj_prog = None
+            self.session.note_climb_cut(cut)
+            return
         if loops[key] == 1 and obj is not None:
             self._direct_start(eng, obj, key, now)
         else:
@@ -1409,15 +1481,54 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         # every step in the area we are working keeps its end off the doors, not only while foes
         # remain: walking for map cells after the last kill took the party out through a door
         # twice (53, 54), and the area was written down as left, not done
-        if (self.transit is None and eng is not None and key[0] != "escape"
+        # Escapes too: a "step clear" from the shrine in Diessa Lowlands walked the party out into
+        # the outpost beside it.
+        if (self.transit is None and eng is not None
                 and not (eng.objective is not None and eng.objective.kind == "goto")):
-            from ..core.geometry import keep_off_doors
-            doors = list(getattr(eng, "portals", ())) + [tuple(e[:2]) for e in getattr(eng, "exits", ())] \
-                + [tuple(e[:2]) for e in getattr(eng, "removed_exits", ())]
+            from ..core.geometry import keep_off_doors, segment_clear_of
+            doors = self._doors(eng)
             nx, ny = keep_off_doors((x, y), eng.player_xy, doors)
             if (nx, ny) != (x, y):
                 self.session.log.event("door_kept_off", key=key, wanted=[round(x), round(y)], now=[round(nx), round(ny)])
                 x, y = nx, ny
+            # The step end is clear of the doors, but the game walks to it in a straight line, and
+            # that line can run over a doorway: 44, 26, 98 and 41 were all left that way, walking
+            # to map cells across a door (the end 1,000-1,900 past it). Walk to the furthest point
+            # of our own route that can be reached in a straight line clear of every door, or stop
+            # short of the door on the line.
+            px, py = eng.player_xy
+            if doors and not segment_clear_of((px, py), (x, y), doors, 450.0):
+                pick = None
+                for q in (getattr(eng, "route_ahead", None) or [])[1:]:
+                    if math.hypot(q[0] - px, q[1] - py) > math.hypot(x - px, y - py) + 200.0:
+                        break
+                    if segment_clear_of((px, py), q, doors, 450.0) and not any(
+                            math.hypot(q[0] - d[0], q[1] - d[1]) < 700.0 for d in doors):
+                        pick = q
+                if pick is None or math.hypot(pick[0] - px, pick[1] - py) < 150.0:
+                    L = math.hypot(x - px, y - py) or 1.0
+                    t = 1.0
+                    while t > 0.0 and not segment_clear_of((px, py), (px + (x - px) * t, py + (y - py) * t), doors, 450.0):
+                        t -= 0.05
+                    pick = (px + (x - px) * max(t, 0.0), py + (y - py) * max(t, 0.0))
+                self.session.log.event("door_line_cut", key=key, wanted=[round(x), round(y)], now=[round(pick[0]), round(pick[1])])
+                x, y = pick
+            # Nothing left of the step: the way to this objective runs over a door from here.
+            # Walking "to" our own spot was judged stalled at once and a wall was marked under
+            # our feet, again and again (Frozen Forest: 3 minutes and 49 such steps by a door).
+            # Put the objective aside instead; the plan picks another, and a later reset of the
+            # given-up list brings it back.
+            if (math.hypot(x - eng.player_xy[0], y - eng.player_xy[1]) < 150.0
+                    and math.hypot(step[0] - eng.player_xy[0], step[1] - eng.player_xy[1]) > 300.0
+                    and key and key[0] not in ("escape", "teleport", "step")):
+                self.session.log.event("door_blocks_step", key=key, wanted=[round(step[0]), round(step[1])],
+                                       player=[round(eng.player_xy[0]), round(eng.player_xy[1])])
+                eng.mem.blocked[key] = eng.cfg.max_failures
+                if eng.objective is not None and eng.objective.key == key:
+                    eng.objective = None
+                self._drop_child()
+                self._key, self._target = None, None
+                return
         # Map cells can be slivers of ground: stand on the exact spot, not somewhere near it.
         exact = self.session.engine.objective is not None and self.session.engine.objective.kind == "carto"
         tol = 150.0
@@ -1476,11 +1587,28 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         short = self._target is not None and math.hypot(px - self._target[0], py - self._target[1]) < 400.0
         if short and walking and self._stuck_n < 2:
             return                           # standing at the step's end, not caught on the way to it
-        if (walking or self._stuck_n >= 2) and self._target is not None and eng.nav.stacked(px, py):
+        # The "two levels here" excuse holds twice. A third stall on the same spot is not the walk
+        # aiming at the wrong level: it is scenery (Sage Lands: ten "stacked" stalls in one place,
+        # the same step every 25 s, until the area was given up as pinned for 10 minutes).
+        if (walking or self._stuck_n >= 2) and self._target is not None and self._stuck_n < 3 and eng.nav.stacked(px, py):
             # Two levels on top of each other here (a bridge): the walk was aimed at the other
             # level, nothing is in the way. Marking it walled the bridge off for good in Bahdok
             # Caverns. Let the game's own pathing take us at the objective instead.
             obj = eng.objective
+            # First: is the planned way changing level right here? Then that join is the
+            # trouble (the map joins a bridge or ramp to the ground beside it where no one can
+            # climb): take it out and plan again, rather than send the walk at it once more.
+            try:
+                cut = eng.cut_climb((px, py))
+            except Exception:
+                cut = None
+            if cut is not None:
+                s.log.event("climb_cut", player=[round(px), round(py)], at=[round(cut[0]), round(cut[1])],
+                            target=list(self._target), times_here=self._stuck_n)
+                self._direct = None
+                self._obj_prog = None
+                self.session.note_climb_cut(cut)
+                return
             # The map joins the two levels here but the party cannot climb between them: keep
             # paths off this spot for the rest of the visit (not saved: it is not scenery), so the
             # planner finds the real way up (Bahdok: the ramp round the west side).
@@ -1489,7 +1617,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 if eng._wall_cuts((px, py), (px, py)):
                     eng.soft_walls.add((px, py))     # the only way through: care, not a wall
                 eng.player_node = None
-            if obj is not None and getattr(self, "_direct", None) is None:
+            if obj is not None and getattr(self, "_direct", None) is None and not self._direct_unsafe(eng, obj.pos):
                 self._direct = (now + 25.0, (obj.pos[0], obj.pos[1]), self._key)
                 self._direct_chain = None
             s.log.event("wall", player=[round(px), round(py)], target=list(self._target), stacked=True,
@@ -1512,6 +1640,14 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             spot = eng.add_wall((px, py), self._target, detour=self._stuck_n >= 2)
             if walking and eng.add_snag(spot):
                 s.save_snags()               # scenery does not move: remember it for every later run here
+            if self._stuck_n >= 3 and self._key is not None and self._key[0] not in ("escape", "step", "teleport"):
+                # Stopped here three times on the way to the same thing, and the planner still
+                # routes through (the spot is its only way): set that objective aside. Waiting
+                # out the 10-minute "pinned" limit threw away the whole area instead.
+                eng.mem.blocked[self._key] = eng.cfg.max_failures
+                if eng.objective is not None and eng.objective.key == self._key:
+                    eng.objective = None
+                s.log.event("step_loop", key=self._key, gave_up=True, why="stopped 3 times at the same spot")
             away = spot or (eng.walls[-1] if eng.walls else None)
             self._escape = eng.escape_point((px, py), away, goal=self._target if walking else None)
             s.log.event("wall", player=[round(px), round(py)], target=list(self._target),
@@ -1554,8 +1690,11 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 done_in_game = self.target_map_id in game.vanquished_ids()
             except Exception:
                 done_in_game = False
-            if self.transit is None and left.get("xy"):
-                # walked out through a door mid-run: that point is a door, remember it
+            if self.transit is None and left.get("xy") and s.near_listed_door(left["xy"]):
+                # walked out through a door mid-run: that point is a door, remember it. Only next
+                # to a portal or arrival point the game lists: a map travel (by the queue or by
+                # hand) also changes the map mid-run, and one such left a "door" in the middle of
+                # Flame Temple Corridor whose ring cut the area in half (22 regions -> 9).
                 try:
                     if s.learn_exit(self.target_map_id, left["xy"]):
                         s.log.event("door_learnt", map_id=self.target_map_id, at=[round(left["xy"][0]), round(left["xy"][1])])
@@ -1672,6 +1811,13 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         s.log.observe(eng, {"combat_flag": bool(self.blackboard.get("COMBAT_ACTIVE", False)),
                             "killed": game.foes_killed(), "running": True,
                             "riding": getattr(self.__dict__.get("_ride_ground"), "riding", None)})
+        if not game.player_dead_safe():
+            try:
+                s.gear.tick(eng, self.transit, bool(self.blackboard.get("COMBAT_ACTIVE", False)))
+            except Exception as e:
+                if not getattr(self, "_gear_err", False):
+                    self._gear_err = True
+                    s.log.event("gear", error=repr(e))
         if self.transit is None and not game.player_dead_safe():
             try:
                 s.pcons.tick(eng)
@@ -1788,6 +1934,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 self._go_back(eng, s, now, spot, "raised where the ground killed us")
             self._recover_until = now + 14.0 if hot else 0.0
             s.log.event("revived", player=[round(eng.player_xy[0]), round(eng.player_xy[1])], riding=game.is_junundu())
+            self._dead_left = None           # a new start: bodies given up on before are judged afresh
             # Raised with little energy (a shrine after a wipe): do not walk into the next fight
             # until it is back. (Eastern Frontier: raised by the entry shrine next to a camp,
             # straight back in at low energy, died 7 times there, morale 85 -> 40.)
@@ -1928,10 +2075,16 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             # reckoning until one of them is up again. Before, the wait simply began again, and
             # the leader and one hero stood by six bodies for ten minutes (Resplendent Makuun).
             # Carrying on is also the way back: if the two of them fall, all return at a shrine.
+            # The dead are counted only within 4500 of us, so walking on made the count drop, which
+            # read as "one is up again": the wait began again and the party was walked 4300 back
+            # to the same two bodies every two minutes for half an hour (Diessa 0.50.78). Now the
+            # given-up bodies are remembered by where they lie; one is let go only when we stand
+            # near that spot and it is no longer there. Only a body not on that list stops us.
+            fresh_dead = cond["dead_allies"]
             left = self.__dict__.get("_dead_left")
-            if left is not None and cond["dead_allies"] < left:
-                left = self._dead_left = None
-            why = ("someone is dead" if cond["dead_allies"] and left is None else
+            if left is not None:
+                fresh_dead = self._dead_not_given_up(eng, px, py, cond["dead_allies"])
+            why = ("someone is dead" if fresh_dead else
                    "health" if cond["hp"] < (0.4 if self._riding() else min(0.97, cfg.rest_hp + 0.04 * eng.caution())) else
                    "energy" if cond["energy"] < min(0.9, cfg.rest_energy + 0.08 * eng.caution()) else
                    "party health" if cond["ally_hp"] < min(0.95, cfg.rest_ally_hp + 0.05 * eng.caution()) else "")
@@ -1970,7 +2123,11 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                     self._idle_at = now          # resting is not being stuck: the first step after a
                     return S.RUNNING             # rest was "stalled" at once and a wall was marked ahead
                 if cond["dead_allies"] and s.resting == "someone is dead":
-                    self._dead_left = cond["dead_allies"]
+                    try:
+                        spots = [tuple(b) for b in game.dead_ally_positions(4500.0)]
+                    except Exception:
+                        spots = []
+                    self._dead_left = list(self.__dict__.get("_dead_left") or []) + spots
                     s.log.event("dead_left", dead=cond["dead_allies"], waited=round(now - self._rest_since),
                                 player=[round(px), round(py)],
                                 note="nobody could raise them: carrying on without them until one is up again")
@@ -2075,6 +2232,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                 s.result = ("no progress: %d foes left and none killed for %d minutes (out of reach?)"
                             % (eng.foes_remaining, NO_PROGRESS_S // 60))
                 s.log.event("finished", result=s.result, status=eng.status())
+                s.dump_failure(s.result)
                 return S.FAILURE
 
         if self._child is None or now - self._last_plan >= REPLAN_S:
@@ -2107,6 +2265,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
                             % (eng.foes_remaining or 0, len(eng.walls))) if eng.walls else \
                     "stopped: nothing left to search but foes remain"
                 s.log.event("finished", result=s.result, status=eng.status())
+                s.dump_failure(s.result)
                 return S.FAILURE
             # a step with no objective behind it (a way out just after a wipe): its own key.
             # (Diessa: eng.objective was None here, the error repeated and the area was dropped.)
@@ -2173,6 +2332,7 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
             if self._stuck_since and now - self._stuck_since > STUCK_GIVE_UP_S and self.transit is None:
                 s.result = "stuck: pinned in one place for %d minutes" % (STUCK_GIVE_UP_S // 60)
                 s.log.event("finished", result=s.result, status=eng.status())
+                s.dump_failure(s.result)
                 return S.FAILURE
             return S.RUNNING
 
@@ -2210,6 +2370,8 @@ class AdaptiveNode(FightMixin, PullMixin, BlessingMixin, CaptureMixin, BehaviorT
         elif not inside:
             self._left_exit_zone = True
 
+        if self._child is None:
+            return S.RUNNING             # the step was not started (set aside at a door): plan again next tick
         self._child.root.blackboard = self.blackboard
         state = self._child.root.tick()
         if state == S.SUCCESS:

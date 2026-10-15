@@ -119,6 +119,27 @@ class CrossNode(BehaviorTree.Node):
                                        portal=list(self._alt), player=[round(px), round(py)])
         if getattr(self, "_alt", None):
             first = beyond = self._alt
+        if self._stage == 0:
+            # Caught on scenery on the way to the door (Druids Overlook: on a rock right after
+            # arriving, the game's straight walk at the portal going nowhere): when the leader
+            # has not moved for 3 s, walk our own route there in short hops, round the rock.
+            prog = self.__dict__.get("_prog")
+            if prog is None or math.hypot(px - prog[1], py - prog[2]) > 80.0:
+                self._prog = prog = (now, px, py)
+            hops = self.__dict__.get("_hops") or []
+            while hops and math.hypot(px - hops[0][0], py - hops[0][1]) < 150.0:
+                hops.pop(0)
+            if now - prog[0] > 3.0 and now - self.__dict__.get("_hops_t", 0.0) > 3.0:
+                hops = self._own_way((px, py), first)
+                self._hops_t, self._prog = now, (now, px, py)
+                self.session.log.event("cross_stuck", from_map=self.from_map, player=[round(px), round(py)],
+                                       door=[round(first[0]), round(first[1])], hops=len(hops))
+            self._hops = hops
+            if hops:
+                if now - self._last_move >= 0.6:
+                    self._last_move = now
+                    game.move_to(hops[0][0], hops[0][1])
+                return S.RUNNING
         if now - self._last_move >= 1.2:
             self._last_move = now
             if self._stage == 0:
@@ -142,3 +163,16 @@ class CrossNode(BehaviorTree.Node):
                 reach = n + 600.0 + 400.0 * min(6, int((now - self._t0) / 8.0))
                 game.move_to(first[0] + dx / n * reach, first[1] + dy / n * reach)
         return S.RUNNING
+
+    def _own_way(self, start, goal):
+        """Points to walk through from here to the door over this map's ground (our own graph,
+        which goes round the scenery the game's straight walk is caught on). [] if unknown."""
+        try:
+            if not self.session.ensure_engine() or self.session.map_id != game.map_id():
+                return []
+            eng = self.session.engine
+            from ..core.geometry import nav_waypoints
+            plane = getattr(eng, "player_plane", None)
+            return [tuple(p) for p in nav_waypoints(eng.nav, start, goal, start_plane=plane, gap=300.0)]
+        except Exception:
+            return []

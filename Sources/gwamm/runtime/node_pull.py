@@ -160,7 +160,11 @@ class PullMixin:
             if self._alone():
                 st["phase"] = None
                 return False
-            if (not cfg.pull_groups or cfg.multibox or self.transit is not None or self._cap is not None
+            # Crossing an area, a group in the way is usually just walked into. A party of four
+            # cannot take a hard-mode group of six that way (Diessa Lowlands on the way to Flame
+            # Temple Corridor: wiped by the same group three times): small parties pull it.
+            small_party = (self.__dict__.get("_party_size") or 8) <= 4
+            if (not cfg.pull_groups or cfg.multibox or (self.transit is not None and not small_party) or self._cap is not None
                     or now < st["cool"] or eng.objective is None or eng.objective.kind != "cluster"
                     or (not waiting and nearest is not None and nearest < 1050.0)):   # (not the combat flag: it is on with enemies merely in sight)
                 if waiting:
@@ -168,7 +172,8 @@ class PullMixin:
                 return False
             view = self._pull_view(eng)
             # a weakened party takes on less: the limit shrinks with death penalty
-            limit = tactics.take_limit(cfg.pull_max_take, min(game.my_morale(), (game.my_morale() + game.party_low_morale()) / 2.0))
+            full_take = tactics.for_party(cfg.pull_max_take, self.__dict__.get("_party_size") or 8)
+            limit = tactics.take_limit(full_take, min(game.my_morale(), (game.my_morale() + game.party_low_morale()) / 2.0))
             # Once stopped to look, keep looking from further out than it took to stop: without
             # that, a group hovering at the edge of the range switched the wait off and on, and
             # every "off" let the normal walk carry the party a little closer.
@@ -254,7 +259,7 @@ class PullMixin:
             if now - self._dither[1] > 45.0:
                 self._dither = (key, now)
                 if not (easy or everything <= limit + 3 or cfg.keep_at_it
-                        or not tactics.put_off_helps(everything, limit, cfg.pull_max_take)):
+                        or not tactics.put_off_helps(everything, limit, full_take)):
                     eng.postpone(plan["target_xy"], 480.0)
                     s.log.event("pull", stage="postponed", total=plan["total"], waited=45)
                     st.update(phase=None, cool=now + 5.0)
@@ -280,7 +285,7 @@ class PullMixin:
                 self._avoided_at = recent
                 # And at full strength nothing gets better by leaving: it is taken on now, pulled
                 # back to the camp like any other, instead of walked away from and back to.
-                later_helps = tactics.put_off_helps(plan["total"], limit, cfg.pull_max_take)
+                later_helps = tactics.put_off_helps(plan["total"], limit, full_take)
                 if plan["total"] <= limit + 2 or len(recent) >= 2 or not later_helps:
                     s.log.event("pull", stage="taking_it_on", total=plan["total"], limit=limit, put_off_lately=len(recent),
                                 later_helps=later_helps)
@@ -289,7 +294,7 @@ class PullMixin:
                     self._avoided_at.append(now)
                     # one crowd, more than the party should take, and it cannot be split
                     eng.postpone(plan["target_xy"], 480.0)
-                    s.log.event("pull", stage="avoided", total=plan["total"], limit=limit, full_limit=cfg.pull_max_take,
+                    s.log.event("pull", stage="avoided", total=plan["total"], limit=limit, full_limit=full_take,
                                 put_off_lately=len(recent), at=[round(plan["target_xy"][0]), round(plan["target_xy"][1])])
                     st.update(phase=None, cool=now + 5.0)
                     return False

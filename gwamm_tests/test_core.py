@@ -42,6 +42,16 @@ def test_cartography():
     print("cartography ok")
 
 
+def test_segment_clear_of():
+    """A straight walk over a doorway is caught; one beside it, or away from it, is not."""
+    from Sources.gwamm.core.geometry import segment_clear_of
+    door = [(-22839, -11521)]
+    assert not segment_clear_of((-21247, -11202), (-24773, -11574), door, 450)   # map 44's zone-out
+    assert segment_clear_of((-21247, -10000), (-24773, -10000), door, 450)
+    assert segment_clear_of((-22800, -11400), (-20000, -11000), door, 450)        # leaving it
+    assert not segment_clear_of((-22600, -11300), (-23300, -11700), door, 450)    # walking into it
+
+
 def test_world_gate_fix():
     """A gate filed under another area than the one it leads to is put right: the way to Cursed
     Lands from Beetletun went out into Watchtower Coast and stopped there."""
@@ -378,6 +388,141 @@ def test_route_chain():
     assert route_chain(route, (20000, 20000), (-3700, -12000)) == []
 
 
+
+
+def test_camp_for_unreachable_foe():
+    """A foe the plan cannot walk to: wait on the nearest reachable ground to where it has been,
+    for a limited time, then give it up (CAMP_TRIES per foe)."""
+    import math
+    from simulate import load
+    from Sources.gwamm.core import engine as E
+    from Sources.gwamm.core.memory import Enemy
+    traps, start, _b = load()
+    eng = E.Engine(traps, start)
+    eng.update(start, [], 5, 0.0)
+    far = max(range(len(eng.nav.nodes)), key=lambda i: math.hypot(eng.nav.nodes[i][0] - start[0], eng.nav.nodes[i][1] - start[1])
+              if eng.rm.reachable[i] else -1)
+    fx, fy = eng.nav.nodes[far]
+    eng.mem.enemies[901] = Enemy(901, (fx + 300.0, fy), 0.0, False)
+    obj = eng._camp()
+    assert obj is not None and obj != "wait" and obj.kind == "camp", obj
+    assert math.hypot(obj.pos[0] - fx - 300.0, obj.pos[1] - fy) <= E.CAMP_REACH
+    eng.player_xy = obj.pos
+    assert eng._camp() == "wait"
+    eng._now += E.CAMP_SECONDS + 1.0
+    nxt = eng._camp()                       # the wait ran out: a second try, then none
+    assert nxt == "wait" or getattr(nxt, "kind", None) == "camp", nxt
+    eng._camp_cur = None
+    eng._now += 1.0
+    assert eng._camp() is None              # two tries spent on that foe
+    # a waiting spot whose walk was given up is dropped, not walked to for ever (Ettin's Back)
+    eng.mem.enemies[902] = Enemy(902, (fx - 300.0, fy), 0.0, False)
+    eng.player_xy = start
+    obj = eng._camp()
+    assert getattr(obj, "kind", None) == "camp", obj
+    eng.mem.blocked[obj.key] = eng.cfg.max_failures
+    assert eng._camp() is None
+    # never a waiting spot beside a door
+    eng2 = E.Engine(traps, start, exits=[(fx, fy)])
+    eng2.update(start, [], 5, 0.0)
+    eng2.mem.enemies[903] = Enemy(903, (fx, fy), 0.0, False)
+    o2 = eng2._camp()
+    assert o2 is None or math.hypot(o2.pos[0] - fx, o2.pos[1] - fy) >= E.CAMP_DOOR_GAP, o2
+
+
+def test_for_party():
+    """Crowd sizes set for 8 shrink with the area's party (Diessa: 4 in the party)."""
+    from Sources.gwamm.core.tactics import for_party
+    assert for_party(9, 8) == 9 and for_party(9, 4) == 4 and for_party(9, 6) == 6
+    assert for_party(9, 2) == 3 and for_party(9, 0) == 9 and for_party(9, 12) == 9
+
+
+def test_cut_climb():
+    """A level join the party cannot climb is taken out: the next plan does not cross there."""
+    from Sources.gwamm.core.engine import Engine
+    from Sources.gwamm.core.geometry import loose_links
+    # two levels side by side (trapezoid: plane, x top-left, x top-right, y top, x bottom-left, x bottom-right, y bottom)
+    traps = [(0, 0.0, 3000.0, 3000.0, 0.0, 3000.0, 0.0), (1, 3000.0, 6000.0, 3000.0, 3000.0, 6000.0, 0.0)]
+    eng = Engine(traps, (500.0, 1500.0), links=loose_links(traps))
+    nav = eng.nav
+    a = nav.nearest_node(2900.0, 1500.0)
+    b = nav.nearest_node(5500.0, 1500.0)
+    route = nav.path(a, b)
+    assert route and nav.node_plane(route[0]) != nav.node_plane(route[-1])
+    eng.route_nodes = route
+    assert eng.cut_climb((2900.0, 1500.0), spread=5000.0) is not None
+    assert not nav.path(a, b)                       # every join between the two is gone
+    eng2 = Engine(traps, (500.0, 1500.0), links=loose_links(traps))
+    assert eng2.cut_joins_at(3000.0, 1500.0, spread=5000.0) > 0
+    assert not eng2.nav.path(eng2.nav.nearest_node(2900.0, 1500.0), eng2.nav.nearest_node(5500.0, 1500.0))
+
+
+def test_support_by_main_effect():
+    """A healer is judged by what its skill is for, not a side effect (Phoenix made every fire
+    caster a 'healer' and the first target of each fight; Frozen Soil read as a resurrection)."""
+    from Sources.gwamm.core.tactics import supports_allies, raises_dead
+    phoenix = ("Spell. A fiery Phoenix rises at your location and flies out to your target , exploding on impact. "
+               "This explosion strikes your target and nearby foes for 60 fire damage. If you are Overcast , "
+               "allies in the blast radius are healed for 80 Health.")
+    frozen = ("Nature Ritual. Create a level 10 spirit. Non-spirit creatures within its range cannot activate "
+              "resurrection skills. This spirit dies after 90 seconds.")
+    orison = "Spell. Heal target ally for 70 Health."
+    gift = ("Spell. All of your other Healing Prayers skills are disabled for 5 seconds. Target other ally is "
+            "healed for 150 Health.")
+    res = "Signet. Resurrect target party member. That party member is returned to life with 100% Health."
+    assert not supports_allies(phoenix) and not raises_dead(frozen) and not supports_allies(frozen)
+    assert supports_allies(orison) and supports_allies(gift) and raises_dead(res)
+    from Sources.gwamm.core import tactics
+    tactics.ROLES[987654] = "caster"
+    assert not tactics.learn_role(987654, "healer", 67)          # one Shatter Hex: still a caster
+    assert not tactics.learn_role(987654, "healer", 67)
+    assert tactics.learn_role(987654, "healer", 281)             # a second, different support skill
+    tactics.ROLES.pop(987654, None)
+
+
+def test_gear_choice():
+    """Weapon sets: the main set unless another is clearly better for the foes at hand, and
+    back to the main set when the reason is gone."""
+    from Sources.gwamm.core import gear
+    wand = {"id": 1, "type": 22, "req_attr": 10, "req": 9, "energy": 0, "armor": (0, 0),
+            "mods": [("HalvesCastingTimeAttribute", 10, 20)]}
+    focus = {"id": 2, "type": 12, "req_attr": 10, "req": 9, "energy": 12, "armor": (0, 0), "mods": []}
+    spear = {"id": 3, "type": 36, "req_attr": 0, "req": 0, "energy": 0, "armor": (0, 0), "mods": []}
+    shield = {"id": 4, "type": 24, "req_attr": 10, "req": 9, "energy": 0, "armor": (16, 8),
+              "mods": [("ArmorPlusVsSpecies", "Charr", 10)]}
+    items = [wand, focus, spear, shield]
+    attrs = {10: 12}
+    charr = gear.profile([("Charr Flame Wielder", "Elementalist")] * 4 + [("Charr Axe Fiend", "Warrior")] * 6)
+    other = gear.profile([("Grawl Ulodyte", "Warrior")] * 5)
+    assert abs(charr["species"]["Charr"] - 1.0) < 1e-9 and abs(charr["physical"] - 0.6) < 1e-9
+    # held wand + focus (the main set): among Charr the shield set is far ahead
+    pick = gear.choose(items, [1, 2], [1, 2], charr, attrs)
+    assert pick is not None and pick[1]["id"] == 4, pick
+    # nothing special about grawl: stay with the main set
+    assert gear.choose(items, [1, 2], [1, 2], other, attrs) is None
+    # holding the shield set among grawl: back to the main set
+    back = gear.choose(items, [1, 4], [1, 2], other, attrs)
+    assert back is not None and back[4] == "main set" and {back[0]["id"], back[1]["id"]} == {1, 2}
+    # no foes seen yet: no change
+    assert gear.choose(items, [1, 2], [1, 2], gear.profile([]), attrs) is None
+
+def test_hold_give_up():
+    """Nothing to plan: no step towards giving up while a foe is close (up to 90 s), and at
+    most one every 30 s (Griffon's Mouth: all spent in 2 s mid-fight, 4 foes left)."""
+    from types import SimpleNamespace as NS
+    from Sources.gwamm.core.engine import Engine
+    foe = NS(alive=True, lost=False, xy=(500.0, 0.0))
+    e = NS(player_xy=(0.0, 0.0), mem=NS(enemies={1: foe}), _now=100.0, note="")
+    hold = lambda: Engine._hold_give_up(e)
+    assert hold()                                   # fighting: wait
+    e._now = 200.0
+    assert not hold()                               # 90 s on: may go on
+    foe.alive = False
+    e._hold_since, e._giveup_t, e._now = None, 195.0, 210.0
+    assert hold()                                   # one step 15 s ago: wait
+    e._now = 230.0
+    assert not hold()
+
 def test_keep_off_doors():
     """A step that would end on a door is pulled back out of its reach."""
     import math
@@ -388,6 +533,13 @@ def test_keep_off_doors():
     assert keep_off_doors((10000.0, 0.0), (0.0, 0.0), [door]) == (10000.0, 0.0)
     t = keep_off_doors(door, (23000.0, -4517.0), [door])            # dead on it: back towards us
     assert t[0] < door[0]
+    # standing on the door (an arrival point): a step away from it is left alone, never put
+    # onto the door (the leader's own spot)
+    t = keep_off_doors((24133.0, -4000.0), door, [door])
+    assert t == (24133.0, -4000.0)
+    # inside its reach, a step that would go nearer is held at our distance, not dropped on us
+    t = keep_off_doors((24100.0, -4500.0), (24133.0, -4100.0), [door])
+    assert abs(math.hypot(t[0] - door[0], t[1] - door[1]) - 417.0) < 2.0
 
 
 def test_choose_teleporter():
@@ -1013,6 +1165,7 @@ if __name__ == "__main__":
     test_carto_missing()
     test_carto_edge_spot()
     test_world_gate_fix()
+    test_segment_clear_of()
     test_elites()
     test_full_runs()
     test_route_and_trap_together()
@@ -1025,6 +1178,12 @@ if __name__ == "__main__":
     test_foot_way_keeps_off_sulfur()
     test_route_chain()
     test_keep_off_doors()
+    test_hold_give_up()
+    test_gear_choice()
+    test_support_by_main_effect()
+    test_cut_climb()
+    test_for_party()
+    test_camp_for_unreachable_foe()
     test_choose_teleporter()
     test_teleporter_sets()
     test_rank_teleporters()

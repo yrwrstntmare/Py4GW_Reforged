@@ -188,10 +188,22 @@ class SetupMixin:
         steps += [self._action("Your bar", lambda: game.load_bar_template(bar)), BT.Wait(duration_ms=2000),
                   self._action("Report team", lambda: log.event(
                       "campaign", map_id=self.map_id, phase="team", team=team.name, heroes_wanted=wanted_heroes,
-                      heroes_now=game.party_hero_ids(), signets_on_bar=game.capture_signets(), signets_wanted=signets))]
+                      heroes_now=game.party_hero_ids(), signets_on_bar=game.capture_signets(), signets_wanted=signets)),
+                  self._action("Report gear", self._report_gear)]
         if signets > 0:
             steps.append(BehaviorTree.SubtreeNode(name="TopUpSignets", subtree_fn=lambda _n: self._buy_tree(bar, signets)))
         return BT.Sequence(name=f"Team:{self.map_id}", children=steps)
+
+    def _report_gear(self):
+        """Once per session: log what is worn and in the Equipment Pack (read only)."""
+        if getattr(self.session, "_gear_reported", False):
+            return
+        self.session._gear_reported = True
+        try:
+            items = game.gear_report()
+            self.session.log.event("gear", items=items)
+        except Exception as e:
+            self.session.log.event("gear", error=repr(e))
 
     def _to_trainer(self):
         """Walk to the skill trainer and open the shop. Our own route, in short hops, then

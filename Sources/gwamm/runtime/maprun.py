@@ -443,7 +443,25 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
             pass
         bad = set(map(tuple, self.campaign.__dict__.setdefault("_bad_town_exits", {}).get(str(game.map_id()), [])))
         portals = [p for p in portals if (round(p[0]), round(p[1])) not in bad] or portals
-        ref = (tagged[0] if tagged else None) or hint or (px, py)
+        # Only portals we can walk to from here. An outpost that shares its map file with the
+        # area outside (Druids Overlook in Sage Lands' file) lists every portal of that area,
+        # and the arrival point "for Sage Lands" sits by one of them, 30,000 away on the far
+        # side of the outpost's walls: the leader walked into a wall for minutes, while the
+        # outpost's own door stood 1,200 away.
+        reach = self._walkable_from_here(portals + [tuple(t) for t in tagged])
+        if reach:
+            ok = [p for p in portals if tuple(p) in reach]
+            if ok:
+                portals = ok
+                tagged = [t for t in tagged if tuple(t) in reach]
+        ref_pick = (tagged[0] if tagged else None) or hint or (px, py)
+        ref = ref_pick
+        if reach and tagged == [] and hint is not None and tuple(hint) not in reach:
+            ref = (px, py)                       # the world map's door is on the other side too
+        if reach and ref == (px, py):
+            # nearest by the walk, not as the crow flies
+            portals.sort(key=lambda p: reach.get(tuple(p), 1e12))
+            ref = tuple(portals[0])
         self.session.log.event("campaign", map_id=self.map_id, phase="leave_town", portals=[list(p) for p in portals],
                                hint=list(hint) if hint else None, arrival_for_target=[list(t) for t in tagged],
                                player=[round(px), round(py)])
@@ -455,6 +473,35 @@ class MapRunNode(SetupMixin, BehaviorTree.Node):
         self._town_exit = (game.map_id(), (round(x), round(y)))
         return BehaviorTree(CrossNode(self.session, {"xy": [x, y], "beyond": [x, y], "expect": leg["expect"]},
                                       game.map_id(), timeout_s=120.0))
+
+    def _walkable_from_here(self, points):
+        """{point: walking distance} for those of `points` the leader can walk to from where he
+        stands, over this map's ground. {} when the ground is not known."""
+        try:
+            s = self.session
+            if not s.ensure_engine() or s.map_id != game.map_id():
+                return {}
+            from ..core.geometry import nav_waypoints
+            nav, here = s.engine.nav, game.player_xy()
+            out = {}
+            for p in points:
+                pts = nav_waypoints(nav, here, (p[0], p[1]), gap=400.0)
+                if not pts:
+                    continue
+                # the route must really end at the point (nearest ground within 500)
+                if math.hypot(pts[-1][0] - p[0], pts[-1][1] - p[1]) > 500.0:
+                    continue
+                g = nav.nearest_node(p[0], p[1])
+                if g is None or math.hypot(nav.nodes[g][0] - p[0], nav.nodes[g][1] - p[1]) > 500.0:
+                    continue
+                prev, length = here, 0.0
+                for q in pts:
+                    length += math.hypot(q[0] - prev[0], q[1] - prev[1])
+                    prev = q
+                out[(p[0], p[1])] = length
+            return out
+        except Exception:
+            return {}
 
     def _enters_from_area(self, legs):
         """True when the last step into the area is a door out of another explorable area: no
@@ -652,6 +699,14 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
             if game.map_ready() and game.is_explorable():
                 here = game.map_id()
                 at = [i for i, leg in enumerate(self._legs) if leg["do"] == "door" and leg.get("through") == here]
+                # A recorded route names areas by the gate that leads into them ("gate", expect):
+                # standing in one, the legs after that gate are what is left. (Diessa Lowlands on
+                # the way to Flame Temple Corridor: a wipe in Diessa sent the party back to
+                # Grendich Courthouse and every group it had killed came back, three times.)
+                gate_at = [i + 1 for i, leg in enumerate(self._legs)
+                           if leg["do"] == "gate" and leg.get("expect") == here and i + 1 < len(self._legs)]
+                if gate_at and (not at or gate_at[-1] > at[-1]):
+                    at = gate_at
                 if at:
                     home = next((leg["outpost"] for leg in self._legs if leg["do"] == "travel"), None)
                     self._home = home if home is not None else getattr(self, "_home", None)
@@ -755,6 +810,17 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
                     self.session.log.event("campaign", map_id=self.map_id, phase="leave_town", wrong_exit=list(xy),
                                            led_to=here, town=town)
                 self._outcome = f"door led to {game.map_name(here)}, expected {game.map_name(expect)}"
+                want_name, got_name = str(game.map_name(expect)), str(game.map_name(here))
+                if got_name.startswith(want_name) and got_name != want_name:
+                    # The door opens the area's other version (Talmark Wilderness from The Black
+                    # Curtain opens its War in Kryta twin; the story decides which). Every way in
+                    # uses that door, and the area was tried over and over all morning: take it off
+                    # the queue with a note instead.
+                    self._outcome = (f"the door into {want_name} opens {got_name} for this character "
+                                     f"(story state): taken off the queue")
+                    self.campaign.__dict__.setdefault("_variant_blocked", set()).add(self.map_id)
+                    self._finish()
+                    return S.RUNNING
                 # in an area too (Talmark Wilderness from The Black Curtain opened its War in Kryta
                 # twin): the next way in starts with a map travel, which works from out here
                 if self._switch_route(self._outcome):
@@ -820,6 +886,21 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
         if need_gate:                    # only an outpost with its own gate into this area will do
             options = [(o, leg) for o, leg in options
                        if any(g.get("to_map") == self.map_id for g in c.world.gates.get(o, []))]
+        # A door the world data puts off this map's ground is no way in: the walk stops at once
+        # with "door not on this map's ground" (Traveler's Vale -> Shiverpeak Arena, every visit).
+        eng = getattr(self.session, "engine", None)
+        if eng is not None and options:
+            def on_ground(leg):
+                try:
+                    gx, gy = leg["xy"]
+                    i = eng.nav.nearest_node(gx, gy, allowed=eng.rm.reachable)
+                    return i is not None and math.hypot(eng.nav.nodes[i][0] - gx, eng.nav.nodes[i][1] - gy) <= 1500.0
+                except Exception:
+                    return True
+            off = [o for o, leg in options if not on_ground(leg)]
+            if off:
+                self.session.log.event("campaign", map_id=self.map_id, phase="unlock_skipped", door_off_ground=off)
+                options = [(o, leg) for o, leg in options if o not in off]
         if not options:
             return False
         o, leg = min(options, key=lambda t: (t[1]["xy"][0] - px) ** 2 + (t[1]["xy"][1] - py) ** 2)
@@ -838,6 +919,10 @@ self.map_id, f"gave up after being sent back to town {n} times", self._started)
 
     def _finish(self):
         """Leave the area (if we are in one) before the next item in the queue."""
+        try:
+            self.session.gear.restore("area finished")      # the main set goes home with the party
+        except Exception as e:
+            self.session.log.event("gear", error=repr(e))
         if self.stay and self._outcome != "complete":
             self._conclude()                 # a hand-started run that did not finish: stay put, keep the progress
         elif game.map_ready() and game.is_explorable():

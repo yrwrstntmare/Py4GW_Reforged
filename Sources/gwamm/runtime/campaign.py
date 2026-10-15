@@ -319,6 +319,8 @@ class Campaign:
         r["result"] = result
         r["minutes"] = round((time.time() - started) / 60.0, 1)
         r["when"] = time.strftime("%Y-%m-%d %H:%M")
+        if "taken off the queue" in str(result):
+            r["attempts"] = MAX_ATTEMPTS
         if mid in self.queue and (result == "complete" or r["attempts"] >= MAX_ATTEMPTS):
             self.queue.remove(mid)
         self.save()

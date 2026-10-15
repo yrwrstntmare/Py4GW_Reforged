@@ -248,6 +248,95 @@ def equip_items(item_ids):
             continue
 
 
+def gear_report():
+    """What the leader has on and carries in the Equipment Pack, with each item's upgrades as the
+    game words them: [{bag, id, type, name, mods}]. Read only - nothing is moved. (Groundwork
+    for swapping to the right gear per area: first see what there is.)"""
+    from Py4GWCoreLib.Item import Item
+    out = []
+    for bag in (22, 5):                       # equipped items, Equipment Pack
+        for i in _items_in(bag):
+            try:
+                try:
+                    Item.RequestName(i)
+                    name = Item.GetName(i) if Item.IsNameReady(i) else ""
+                except Exception:
+                    name = ""
+                try:
+                    mods = [str(m) for m in Item.Mods.GetDescriptions(i)][:12]
+                except Exception as e:
+                    mods = [f"unreadable: {e!r}"]
+                out.append({"bag": "equipped" if bag == 22 else "equipment_pack", "id": int(i),
+                            "type": Item.GetItemType(i)[1], "name": name, "mods": mods})
+            except Exception:
+                continue
+    return out
+
+
+GEAR_TYPES = {2, 5, 12, 15, 22, 24, 26, 27, 32, 35, 36}     # weapons, focus items, shields
+
+
+def gear_items(bags=(22, 5)):
+    """Weapons, focus items and shields worn and in the Equipment Pack, as core.gear wants them."""
+    from Py4GWCoreLib.Item import Item
+    out = []
+    for bag in bags:
+        for i in _items_in(bag):
+            try:
+                t = _item_type(i)
+                if t not in GEAR_TYPES:
+                    continue
+                req_attr, req = Item.Properties.GetRequirement(i)
+                try:
+                    energy = int(Item.Properties.GetEnergy(i) or 0)
+                except Exception:
+                    energy = 0
+                try:
+                    armor = tuple(int(v or 0) for v in Item.Properties.GetShieldArmor(i))
+                except Exception:
+                    armor = (0, 0)
+                mods = []
+                for m in Item.Mods.GetMods(i):
+                    try:
+                        sub = Item.Mods.GetSubtype(i, m)
+                        vals = Item.Mods.GetValues(i, m)
+                        if sub is None:
+                            sub_out = None
+                        elif m.name in ("ArmorPlusVsSpecies", "DamagePlusVsSpecies", "ArmorPlusVsDamage"):
+                            sub_out = getattr(sub, "name", str(sub))       # "Charr", "Fire", ...
+                        else:
+                            sub_out = int(sub)                             # an attribute id
+                        mods.append((m.name, sub_out, vals[0] if vals else 0))
+                    except Exception:
+                        continue
+                out.append({"id": int(i), "type": t, "bag": bag, "req_attr": int(req_attr) if req else None,
+                            "req": int(req or 0), "energy": energy, "armor": armor, "mods": mods})
+            except Exception:
+                continue
+    return out
+
+
+def held_gear_ids():
+    """Ids of the weapon / focus / shield in the leader's hands now."""
+    return [i for i in _items_in(22) if _item_type(i) in GEAR_TYPES]
+
+
+def item_where(item_id):
+    """Bag number holding this item (22 = worn), or 0 if it is nowhere in the inventory."""
+    for bag in (22, 1, 2, 3, 4, 5):
+        if int(item_id) in [int(i) for i in _items_in(bag)]:
+            return bag
+    return 0
+
+
+def leader_attributes():
+    """{attribute id: level} of the leader."""
+    try:
+        return dict(Agent.GetAttributesDict(Player.GetAgentID()))
+    except Exception:
+        return {}
+
+
 def holds_ranged():
     """Does the leader hold a bow or a spear?"""
     try:
@@ -351,6 +440,14 @@ def leader_ranged():
         return False
 
 
+_TRACKER_PRIMARY = {}
+
+
+def tracker_primary(model):
+    """The profession the Enemy Tracker data gives an enemy type ("Elementalist", ...), or ""."""
+    return _TRACKER_PRIMARY.get(int(model or 0), "")
+
+
 def tracker_roles():
     """What the Enemy Tracker widget (Widgets/System) has learnt about enemy types, as
     {model id: "healer" | "caster" | "fighter"}. That widget watches every enemy near the
@@ -393,6 +490,11 @@ def tracker_roles():
         skills = record.get("observed_skills") or {}
         heals = sum(1 for key in skills if tactics.supports_allies((texts.get(str(key)) or {}).get("desc_full", "")))
         primary = str(record.get("inferred_primary") or "")
+        for model in record.get("model_ids") or ():
+            try:
+                _TRACKER_PRIMARY[int(model)] = primary
+            except (TypeError, ValueError):
+                pass
         if heals >= 2 or (heals >= 1 and primary == "Monk"):
             role = "healer"
         elif primary in ("Monk", "Ritualist", "Mesmer", "Elementalist", "Necromancer"):
@@ -728,6 +830,28 @@ def loot_wanted(radius=1012.0):
         return len(LootFilters().GetLootArray(radius))
     except Exception:
         return 0
+
+
+def pick_up_nearest_loot(radius=1012.0):
+    """Pick up the nearest drop your Loot Filters want ourselves: the same Interact call as
+    talking to someone (on a drop, the client walks to it and picks it up). For when HeroAI's
+    pick-up job was cut short (a cast between pickups) and nothing started it again.
+    Returns the item agent id, or 0 when there is nothing to pick up."""
+    try:
+        from Py4GWCoreLib.py4gwcorelib_src.system_settings.loot_filters import LootFilters
+        px, py = Player.GetXY()
+        best, best_d = 0, None
+        for aid in LootFilters().GetLootArray(radius):
+            x, y = Agent.GetXY(aid)
+            d = (x - px) ** 2 + (y - py) ** 2
+            if best_d is None or d < best_d:
+                best, best_d = int(aid), d
+        if best and Agent.IsValid(best):
+            Player.Interact(best, False)
+            return best
+    except Exception:
+        pass
+    return 0
 
 
 def loot_left(radius=1012.0):

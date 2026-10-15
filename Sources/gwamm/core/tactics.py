@@ -1,6 +1,7 @@
 """Fight decisions. Pure Python, fixed rules (no learning): which enemy to call, and when and
 where to fall back so a big pull strings out instead of landing on the party all at once."""
 import math
+import re
 
 HEALER, CASTER_PROF = (3, 8), (4, 5, 6)      # monk, ritualist / necromancer, mesmer, elementalist
 
@@ -64,19 +65,47 @@ def _load_roles():
 ROLES = _load_roles()
 
 
+def main_effect(description):
+    """What a skill is FOR: the sentence after its type ("Spell.", "Elite Enchantment Spell.")
+    - plus the next one when the first only sets something up (a ritual's "Create a level 10
+    spirit.", a well's "Exploit nearest corpse...") or the next begins "Also". Side effects
+    later in the text are left out: "If you are Overcast, allies in the blast radius are
+    healed" made every Phoenix caster a healer, and so the first target in every fight
+    (Charr flame casters among them)."""
+    import re
+    parts = [p.strip() for p in re.split(r"(?<=[.!])\s+", (description or "").strip()) if p.strip()]
+    if not parts:
+        return ""
+    body = parts[1:] if len(parts) > 1 and len(parts[0].split()) <= 4 else parts
+    if not body:
+        return ""
+    out = body[0]
+    if len(body) > 1:
+        nxt = body[1].lower()
+        # the second sentence still says what the skill does ("Target other ally is healed",
+        # after Gift of Health's own cost) unless it is a side effect on a condition ("If you
+        # are Overcast..."), a by-product of the caster's own actions ("Whenever you cast...")
+        # or more for the caster ("you also gain").
+        if not (nxt.startswith("if ") or nxt.startswith("whenever you") or re.search(r"\byou (also )?gain", nxt)):
+            out += " " + body[1]
+    return out.lower()
+
+
 def raises_dead(description):
     """A resurrection: kill whoever casts it before anything else (Restore Life says "returned
-    to life", not "resurrect")."""
-    d = (description or "").lower()
+    to life", not "resurrect"). Judged by the skill's main effect: Frozen Soil, which STOPS
+    resurrection, was read as one and made its caster the first target of every fight."""
+    d = main_effect(description)
+    if re.search(r"cannot (activate )?(be )?resurrect", d):
+        return False
     return "resurrect" in d or "returned to life" in d or "return to life" in d
 
 
 def heals_allies(description):
     """A skill that restores or protects someone else on its side (not a self-heal), judged
     from its full description text."""
-    import re
-    d = (description or "").lower()
-    if raises_dead(d):
+    d = main_effect(description)
+    if raises_dead(description):
         return True
     helps = re.search(r"\bheals?\b|\bhealed\b|health regeneration|damage (is )?reduc|negates?|prevents?", d)
     others = re.search(r"\ball(y|ies)\b|party", d)
@@ -88,9 +117,8 @@ def supports_allies(description):
     condition or hex removal for allies. Broader than heals_allies (which feeds the role
     table built from the Enemy Tracker): a monk casting Aegis or Reversal of Fortune is the
     one to kill first just as much as one casting Orison of Healing."""
-    import re
-    d = (description or "").lower()
-    if heals_allies(d):
+    d = main_effect(description)
+    if heals_allies(description):
         return True
     if re.search(r"\bsteals? (up to )?(\[|\d)", d) or not re.search(
             r"\b(target (other )?ally|other ally|party members?|all(y|ies)|adjacent creatures)\b", d):
@@ -100,14 +128,25 @@ def supports_allies(description):
                           r"heal yourself and all", d))
 
 
-def learn_role(model, role):
+_SUPPORT_SEEN = {}
+
+
+def learn_role(model, role, skill=None):
     """A role seen in the fight itself (an enemy casting a heal is a healer), for types neither
-    our table nor the Enemy Tracker knew. Returns True when it is new."""
+    our table nor the Enemy Tracker knew. Returns True when it is new.
+    A type already known as a caster or fighter becomes a healer only after two DIFFERENT
+    support skills: one Shatter Hex made the Charr mesmers "healers" and the first target ahead
+    of the real monks."""
     model = int(model or 0)
     if not model or not role or ROLES.get(model) == role:
         return False
     if ROLES.get(model) and role != "healer":
         return False                     # a healer sighting may upgrade a type; nothing downgrades one
+    if role == "healer" and ROLES.get(model) in ("caster", "fighter"):
+        seen = _SUPPORT_SEEN.setdefault(model, set())
+        seen.add(skill)
+        if len(seen) < 2:
+            return False
     ROLES[model] = role
     return True
 
@@ -570,6 +609,14 @@ def put_off_helps(total, limit, full_limit):
     it takes at full strength), since the fights in between work that off. At full strength the
     same crowd is still there when the party comes back, and the walk is extra."""
     return total > limit and limit < full_limit
+
+
+def for_party(count, party_size, floor=3):
+    """A crowd size set for a full party of 8, scaled to this area's party. A party of four
+    took the same 9 a party of eight does (Diessa Lowlands, hard mode, 4 in the party): pulls
+    of 4 or fewer cost the leader 1 death in 38, pulls of 5-6 cost 9 in 23."""
+    size = party_size if party_size and party_size > 0 else 8
+    return max(floor, int(count * min(8, size) / 8.0))
 
 
 def take_limit(max_take, morale):

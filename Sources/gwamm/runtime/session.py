@@ -48,6 +48,8 @@ class Session:
         self.resumed = ""
         from .pcons import Pcons
         self.pcons = Pcons(self)
+        from .gear_swap import GearSwap
+        self.gear = GearSwap(self)
         self.party, self.party_note = {"players": 1, "heroes": 0, "henchmen": 0}, ""
         self.load_options()
         self.transit = None          # crossing an area: {"xy": door point}; None = normal vanquish
@@ -101,9 +103,16 @@ class Session:
 
     def load_learned_roles(self):
         """Enemy roles learnt in earlier fights (healers seen healing), kept between runs."""
+        # Saved since 0.50.89 with "_v": 2. Earlier files were learnt with a test that took side
+        # effects ("if Overcast, allies are healed") for healing: 123 enemy types, every one a
+        # "healer", so Charr flame casters and the like went first in every fight. Those are
+        # not read; roles are learnt again with the corrected test.
         try:
             with open(self._roles_path()) as f:
-                return {int(k): v for k, v in json.load(f).items()}
+                data = json.load(f)
+            if data.get("_v") != 2:
+                return {}
+            return {int(k): v for k, v in data.items() if k != "_v"}
         except Exception:
             return {}
 
@@ -111,6 +120,7 @@ class Session:
         try:
             data = {str(k): v for k, v in self.load_learned_roles().items()}
             data[str(int(model))] = role
+            data["_v"] = 2
             with open(self._roles_path(), "w") as f:
                 json.dump(data, f)
         except Exception:
@@ -216,6 +226,38 @@ class Session:
             data = self._load_snags()
             data[str(self.map_id)] = [[round(p[0]), round(p[1])] for p in self.engine.snags]
             with open(self._snag_path(), "w") as f:
+                json.dump(data, f)
+        except Exception:
+            pass
+
+    def _climb_path(self):
+        return os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "climb_cuts.json")
+
+    def _load_climb_cuts(self):
+        try:
+            with open(self._climb_path(), encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def note_climb_cut(self, xy):
+        """A level join the party could not use, cut this visit. Counted per map: one cut on
+        two different visits is put in at the start of every visit after (Sage Lands: the same
+        bridge end stopped the party on three visits, a minute or two each time)."""
+        if xy is None or self.map_id is None:
+            return
+        try:
+            data = self._load_climb_cuts()
+            spots = data.setdefault(str(self.map_id), [])
+            visit = getattr(self, "_built_at", None)
+            for sp in spots:
+                if math.hypot(sp[0] - xy[0], sp[1] - xy[1]) < 300.0:
+                    if sp[3] != str(visit):
+                        sp[2], sp[3] = sp[2] + 1, str(visit)
+                    break
+            else:
+                spots.append([round(xy[0]), round(xy[1]), 1, str(visit)])
+            with open(self._climb_path(), "w") as f:
                 json.dump(data, f)
         except Exception:
             pass
@@ -400,6 +442,58 @@ class Session:
         except Exception as e:
             self.log.event("resume", used=False, error=repr(e))
 
+    def dump_failure(self, why):
+        """An area left with foes remaining: write what is needed to work out why, offline -
+        the ground the plan used, the doors, walls and snags, every foe still known (with where
+        it has walked) and the ground never searched. gwamm_logs/fail_<map>.json, one per map,
+        the latest kept. (Griffon's Mouth was left with 4 to go and its map file could not be
+        read afterwards, so nothing could be checked.)"""
+        try:
+            import json
+            from ..core.memory import SEARCHED
+            eng, geo = self.engine, getattr(self, "_geo", None)
+            if eng is None or geo is None:
+                return
+            mid, traps, links, exits = geo
+            rm, mem = eng.rm, eng.mem
+            foes = [{"id": e.id, "xy": [round(e.xy[0]), round(e.xy[1])], "lost": bool(e.lost), "boss": bool(e.boss),
+                     "trail": [[round(x), round(y)] for x, y in (e.trail or [])]}
+                    for e in mem.enemies.values() if e.alive]
+            unsearched = [[round(eng.nav.nodes[r.node][0]), round(eng.nav.nodes[r.node][1])]
+                          for rid, r in enumerate(rm.regions) if mem.region_state(rid) != SEARCHED]
+            unreached = [[round(x), round(y)] for i, (x, y) in enumerate(eng.nav.nodes) if not rm.reachable[i]][::5]
+            data = {"map_id": mid, "why": why, "version": __version__, "player": list(eng.player_xy),
+                    "foes_remaining": eng.foes_remaining, "known_foes": foes, "unsearched_regions": unsearched,
+                    "unreachable_nodes_sample": unreached, "walls": [list(w) for w in eng.walls],
+                    "snags": [list(w) for w in eng.snags], "hazards": [list(h) for h in eng.hazards],
+                    "exits": [list(e) for e in exits], "status": eng.status(), "traps": traps, "links": links}
+            path = os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", f"fail_{mid}.json")
+            with open(path, "w") as f:
+                json.dump(data, f)
+            self.log.event("fail_dump", file=f"fail_{mid}.json", known_foes=len(foes), unsearched=unsearched[:12],
+                           foes_at=[f["xy"] for f in foes][:12])
+        except Exception as e:
+            try:
+                self.log.event("fail_dump", error=repr(e))
+            except Exception:
+                pass
+
+    def _save_links(self, mid, links):
+        """The game's own joins between ground levels, once per map (gwamm_logs/links/<map>.json):
+        the saved map files lack them, and without them a route can only be checked offline
+        with guessed joins (Sage Lands: the guess joined a whole ramp side, the game far less)."""
+        try:
+            import json
+            folder = os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "links")
+            path = os.path.join(folder, f"{mid}.json")
+            if os.path.exists(path):
+                return
+            os.makedirs(folder, exist_ok=True)
+            with open(path, "w") as f:
+                json.dump({"map_id": mid, "links": [list(l) for l in links]}, f)
+        except Exception:
+            pass
+
     def _dump_geometry(self, mid, traps, links):
         try:
             import json
@@ -440,7 +534,16 @@ class Session:
             # what the game lists (portals full, spawn points small); then the world map's doors
             # (a door we came through gets the full ring and is never narrowed: see Engine._unfence_cuts)
             found = [(p[0], p[1], self.cfg.exit_avoid_radius) for p in self._learned_exits(mid)] + game.read_exits()
-            found += [(p[0], p[1], self.cfg.exit_avoid_radius, "out") for p in self._zoned_out_doors(mid)]
+            # Doors walked out through - but only those next to something the game lists as a portal
+            # or arrival point: earlier versions also wrote one down where a map travel happened.
+            listed = [(e[0], e[1]) for e in found] + [tuple(p[:2]) for p in game.read_travel_portals()]
+            outs = self._zoned_out_doors(mid)
+            kept = [p for p in outs if not listed or any(math.hypot(p[0] - x, p[1] - y) <= 1200.0 for x, y in listed)]
+            if len(kept) < len(outs):
+                self.log.event("door_ignored", map_id=mid,
+                               doors=[[round(p[0]), round(p[1])] for p in outs if p not in kept],
+                               why="not next to any portal or arrival point the game lists")
+            found += [(p[0], p[1], self.cfg.exit_avoid_radius, "out") for p in kept]
             if self.world is not None:
                 doors = list(self.world.exits_of(mid))
                 if doors:
@@ -452,6 +555,31 @@ class Session:
                              and not any(math.hypot(e[0] - x, e[1] - y) < 1500.0 for x, y in doors) else e
                              for e in found]
                 found += [(p[0], p[1], game.PORTAL_RING) for p in doors]
+            # Portal props the game lists that nothing else backs up. A map file is often shared
+            # by several areas and missions, and the list holds every portal prop in the file:
+            # Flame Temple Corridor showed 23, with a cluster of four full rings on its own ground
+            # in one corner (red circles; steps kept 700 off each, lines 450). A real door has the
+            # other side's arrival point just inside it, or we came in / went out by it, or the
+            # world map lists it. A portal with none of those within 1500 is shrunk to a spawn-
+            # sized ring and is no longer treated as a door when steps are checked.
+            all_portals = game.read_travel_portals()
+            backing = ([(e[0], e[1]) for e in found if len(e) > 2 and e[2] == game.SPAWN_RING     # arrival points
+                        and not any(math.hypot(e[0] - q[0], e[1] - q[1]) < 50.0 for q in all_portals)]
+                       + [tuple(p[:2]) for p in self._learned_exits(mid)]
+                       + [tuple(p[:2]) for p in self._zoned_out_doors(mid)])
+            if self.world is not None:
+                backing += [tuple(p[:2]) for p in self.world.exits_of(mid)]
+            doubted = []
+            if backing:
+                doubted = [q for q in all_portals
+                           if not any(math.hypot(q[0] - x, q[1] - y) < 1500.0 for x, y in backing)]
+                if doubted:
+                    found = [(e[0], e[1], game.SPAWN_RING)
+                             if len(e) > 2 and e[2] == game.PORTAL_RING
+                             and any(math.hypot(e[0] - q[0], e[1] - q[1]) < 50.0 for q in doubted) else e
+                             for e in found]
+            portals_ok = [q for q in all_portals if q not in doubted]
+            self.portals_doubted = [[round(q[0]), round(q[1])] for q in doubted]
             not_doors = self.load_not_doors().get(str(mid), [])
             self.exit_candidates = list(found)
             if not_doors:
@@ -465,6 +593,7 @@ class Session:
                 links, self.nav_note = [], f"level links unreadable: {e!r}"
             else:
                 self.nav_note = f"{len(links)} level links"
+                self._save_links(mid, links)
             guide, hints, actions, self.route_note = None, None, None, ""
             if goto is None and (self.cfg.use_routes or self.cfg.route_hints) and self.cfg.do_vanquish:
                 try:
@@ -486,9 +615,15 @@ class Session:
                 except Exception as e:
                     self.route_note = f"route unreadable: {e!r}"
             self.engine = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=links, guide=guide, hints=hints,
-                                 portals=game.read_travel_portals(),
+                                 portals=portals_ok,
                                  guide_actions=actions)
+            self._geo = (mid, traps, links, found)
             self.pcons.reset()
+            try:
+                if game.is_explorable():
+                    self.gear.new_area()
+            except Exception as e:
+                self.log.event("gear", error=repr(e))
             try:                                     # enemy types the Enemy Tracker widget knows and we do not
                 from ..core import tactics
                 self.tracker_roles = tactics.add_roles(game.tracker_roles())
@@ -507,7 +642,7 @@ class Session:
                 from ..core.geometry import loose_links
                 extra = links + loose_links(traps)
                 wider = Engine(traps, game.player_xy(), self.cfg, projection, found, goto=goto, links=extra, guide=guide, hints=hints,
-                               portals=game.read_travel_portals(),
+                               portals=portals_ok,
                                guide_actions=actions)
                 share2 = sum(wider.rm.reachable) / max(1, len(wider.nav.nodes))
                 self.nav_note += f"; only {share:.0%} reachable, {share2:.0%} after joining touching levels"
@@ -516,13 +651,21 @@ class Session:
                 if share < 0.6:
                     self._dump_geometry(mid, traps, links)
             try:
-                self.engine.doors = self._learned_exits(mid) + game.read_travel_portals()
+                self.engine.doors = self._learned_exits(mid) + portals_ok
+                self.engine.doubted = [tuple(q) for q in doubted]
             except Exception:
                 self.engine.doors = []
             self.engine.hazards = list(self._load_hazards().get(str(mid), []))
             self.engine.snags = [tuple(p) for p in self._load_snags().get(str(mid), [])]
+            try:
+                for cx, cy, n, _v in self._load_climb_cuts().get(str(mid), []):
+                    if n >= 2:
+                        self.engine.cut_joins_at(cx, cy)
+            except Exception:
+                pass
             self.engine.hard_spots = [[float(p[0]), float(p[1]), int(p[2])] for p in self._load_hard().get(str(mid), [])]
             self._built_for = want
+            self._built_at = round(time.time())
             self.exits_found = len(found)
             self.exits = self.engine.exits                            # only the ones that matter here
             self.map_id = mid
@@ -538,7 +681,7 @@ class Session:
                                                                  "coverable": len(eng.carto.coverable)},
                            hazards=len(eng.hazards), rings_narrowed=getattr(eng, "narrowed_exits", []),
                            rings_removed=getattr(eng, "removed_exits", []), rings_route_dropped=getattr(eng, "walked_through", []),
-                           build_seconds=round(time.perf_counter() - _build_t0, 2), nav_note=self.nav_note, route_note=self.route_note, exits_found=self.exits_found, exit_note=game.exit_note, learned_note=self.learned_note,
+                           build_seconds=round(time.perf_counter() - _build_t0, 2), portals_doubted=getattr(self, "portals_doubted", []), nav_note=self.nav_note, route_note=self.route_note, exits_found=self.exits_found, exit_note=game.exit_note, learned_note=self.learned_note,
                            foes=game.foes_remaining(), killed=game.foes_killed(),
                            professions=list(game.player_professions()), signets=game.capture_signets(),
                            config={k: getattr(self.cfg, k) for k in dir(self.cfg) if not k.startswith("_")},
@@ -594,6 +737,17 @@ class Session:
             return False
         return True
 
+    def near_listed_door(self, xy, reach=1200.0):
+        """Is this spot next to a portal or arrival point the game lists for this map?"""
+        pts = [tuple(e[:2]) for e in (getattr(self, "exit_candidates", None) or ())]
+        try:
+            pts += [tuple(p[:2]) for p in game.read_travel_portals()]
+        except Exception:
+            pass
+        if not pts:
+            return True                  # nothing listed to judge by: trust the walk out
+        return any(math.hypot(xy[0] - x, xy[1] - y) <= reach for x, y in pts)
+
     def _zoned_out_doors(self, mid):
         """Doors the party once walked out through by mistake (known_exits.json, "out")."""
         path = os.path.join(PySystem.Console.get_projects_path(), "gwamm_logs", "known_exits.json")
@@ -615,14 +769,25 @@ class Session:
         except Exception:
             known = {}
         points = [tuple(p) for p in known.get(str(mid), [])]
-        self.learned_note = f"{len(points)} remembered arrival points"
+        # An arrival point stands next to something the game lists (a portal, or the arrival
+        # spot of the area beyond). A start 15 s into the area, after walking 1,700 (the script
+        # reloaded), was written down as one and drew a big ring mid-path in Flame Temple
+        # Corridor. Points with nothing listed near them are not used, nor learnt.
+        try:
+            listed = [tuple(e[:2]) for e in game.read_exits()] + [tuple(p[:2]) for p in game.read_travel_portals()]
+        except Exception:
+            listed = []
+        near = lambda x, y: not listed or any(math.hypot(x - a, y - b) <= 1500.0 for a, b in listed)
+        dropped = [p for p in points if not near(p[0], p[1])]
+        points = [p for p in points if near(p[0], p[1])]
+        self.learned_note = f"{len(points)} remembered arrival points" + (f" ({len(dropped)} ignored: nothing listed near)" if dropped else "")
         try:
             uptime = game.instance_uptime_ms()
-            if game.is_explorable() and 0 < uptime < ARRIVAL_WINDOW_MS:
+            if game.is_explorable() and 0 < uptime < ARRIVAL_WINDOW_MS and near(*game.player_xy()):
                 x, y = game.player_xy()
                 if all((x - px) ** 2 + (y - py) ** 2 > 400.0 ** 2 for px, py in points):
                     points.append((x, y))
-                    known[str(mid)] = [list(p) for p in points]
+                    known[str(mid)] = [list(p) for p in points + dropped]
                     os.makedirs(os.path.dirname(path), exist_ok=True)
                     with open(path, "w", encoding="utf-8") as f:
                         json.dump(known, f)

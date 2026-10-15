@@ -323,6 +323,24 @@ def nav_waypoints(nav, start_xy, goal_xy, start_plane=None, goal_plane=None, gap
     return out
 
 
+def segment_clear_of(a, b, points, radius):
+    """True when the straight walk a -> b never comes within `radius` of any of `points`
+    (a point the party already stands by is not counted while the walk leads away from it)."""
+    ax, ay = a
+    dx, dy = b[0] - ax, b[1] - ay
+    L2 = dx * dx + dy * dy
+    for p in points:
+        px, py = p[0], p[1]
+        k = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
+        near = math.hypot(ax + k * dx - px, ay + k * dy - py)
+        start = math.hypot(px - ax, py - ay)
+        if start < radius and near >= start - 25.0:
+            continue                     # standing by it already and not walking any closer: fine
+        if near < radius:
+            return False
+    return True
+
+
 def planes_near(nav, xy, radius=600.0):
     """The ground pieces (levels) with walkable ground within `radius` of a spot."""
     return sorted({nav.node_plane(i) for i in nav.nodes_within(xy[0], xy[1], radius)})
@@ -396,10 +414,26 @@ def keep_off_doors(target, player, doors, radius=700.0):
     been dropped, the party zoned out and the area was lost.) Unchanged when no door is close."""
     tx, ty = float(target[0]), float(target[1])
     for d in doors or ():
-        if math.hypot(tx - d[0], ty - d[1]) >= radius:
+        here = math.hypot(tx - d[0], ty - d[1])
+        if here >= radius:
             continue
         dx, dy = player[0] - d[0], player[1] - d[1]
-        gap = math.hypot(dx, dy) or 1.0
+        gap = math.hypot(dx, dy)
+        if gap < radius:
+            # Already inside its reach (arrived on it, raised at a shrine beside it): a step that
+            # gets no nearer is fine, and one that would is held at our own distance, in its own
+            # direction. Pulling it out to `radius` on our side put it on the door itself when we
+            # stood there - a step of length 0, "stalled", a wall marked under our feet, every
+            # arrival (Diessa; Frozen Forest, 4 minutes of it).
+            if here >= gap - 25.0:
+                continue
+            ux, uy = (tx - d[0], ty - d[1]) if here > 1.0 else (dx, dy)
+            if ux * dx + uy * dy < 0.0:
+                tx, ty = float(player[0]), float(player[1])   # beyond the door: no step that way
+                continue
+            n = math.hypot(ux, uy) or 1.0
+            tx, ty = d[0] + ux / n * gap, d[1] + uy / n * gap
+            continue
         tx, ty = d[0] + dx / gap * radius, d[1] + dy / gap * radius
     return tx, ty
 

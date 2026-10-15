@@ -45,6 +45,7 @@ class Config:
     pull_groups = False          # bring the nearest group back to the parked party instead of walking into it
     pull_min_group = 4           # ...when it has at least this many members
     pull_max_take = 9            # more than this would come at once: hold off and look again, do not start it
+    gear_swap = True             # change to a better weapon set from the Equipment Pack for the foes at hand (runtime/gear_swap.py)
     pull_wait_seconds = 40.0     # how long to stand off waiting for a patrol to move on before doing something else
     heroes_first = False         # (off: wasted more time than it saved in live runs) before a fight, send the heroes in ahead so they take the first hits, not you
     call_targets = True          # call healers, bosses and casters first so the party focuses them
@@ -117,6 +118,14 @@ class Config:
 # 1 when the area is going badly, 2 always; morale items are simply on or off. All start off.
 for _item in _consumables.CATALOGUE:
     setattr(Config, _item.setting, 0 if _item.kind == _consumables.EFFECT else False)
+
+
+CAMP_SECONDS = 240.0     # longest wait in one spot for a foe the party cannot walk to
+CAMP_TRIES = 2           # waits per foe
+CAMP_REACH = 2500.0      # the waiting spot must be this close to where the foe has been
+CAMP_ARRIVED = 250.0
+CAMP_MAX = 4             # waits per area visit
+CAMP_DOOR_GAP = 1200.0   # a waiting spot keeps this far from every door
 
 
 class Objective:
@@ -1090,6 +1099,10 @@ class Engine:
             return False
         if obj.kind == "goto":
             return math.hypot(obj.pos[0] - self.player_xy[0], obj.pos[1] - self.player_xy[1]) > 300.0
+        if obj.kind == "camp":
+            cur = getattr(self, "_camp_cur", None)
+            return (cur is not None and cur["key"] == obj.key and self._vanquish_active()
+                    and math.hypot(obj.pos[0] - self.player_xy[0], obj.pos[1] - self.player_xy[1]) > CAMP_ARRIVED)
         if obj.kind == "guide":
             return self._vanquish_active() and obj.key[1] == self.guide_i
         if obj.kind == "region":
@@ -1169,7 +1182,21 @@ class Engine:
         if current is None and vanquishing and self.cfg.retour:
             self._retour()               # fights and detours make the old order stale
         cands = self._candidates()
+        if not cands and vanquishing:
+            camp = self._camp()
+            if camp == "wait":
+                self.objective = None
+                return None
+            if camp is not None:
+                cands = [camp]
+        if cands:
+            self._hold_since = None
+        elif vanquishing and self._hold_give_up():
+            self.objective = None
+            return None
         if not cands:
+            if vanquishing:
+                self._giveup_t = self._now
             if vanquishing and self.mem.escalation < self.cfg.max_escalations:
                 self.mem.tighten_search()
                 self._retour()
@@ -1198,6 +1225,112 @@ class Engine:
                 best = current
         self.objective = best
         return best
+
+    def _camp(self):
+        """Foes remain that the plan cannot walk to (up a ledge, across a gap, on ground the map
+        does not join), and nothing else is left to do. Many of those walk a beat: wait for them
+        on the reachable ground nearest where they have been, and fight them when they come.
+        Returns an Objective to walk there, "wait" once there, or None (nobody worth waiting
+        for: then the search widens as before). At most CAMP_SECONDS per wait, CAMP_TRIES per foe;
+        the fight itself is HeroAI's, as anywhere else. A foe that never comes in reach, or an
+        attack that never lands (an obstructed target does not turn on us), simply runs the
+        wait out."""
+        mem, nav, now = self.mem, self.nav, self._now
+        tried = self.__dict__.setdefault("_camp_tried", {})
+        cur = getattr(self, "_camp_cur", None)
+        if cur is not None and mem.blocked.get(cur["key"], 0) >= self.cfg.max_failures:
+            # the walk to the waiting spot failed (or runs over a door): that spot is no good
+            for o in mem.enemies.values():
+                if o.alive and math.hypot(o.xy[0] - cur["seen"][0], o.xy[1] - cur["seen"][1]) < 1500.0:
+                    tried[o.id] = CAMP_TRIES
+            self._camp_cur = cur = None
+        if cur is not None:
+            e = mem.enemies.get(cur["foe"])
+            over = (cur["arrived"] is not None and now - cur["arrived"] > CAMP_SECONDS) or now - cur["set"] > 3 * CAMP_SECONDS
+            if e is None or not e.alive or over:
+                self._camp_cur = cur = None
+        if cur is None:
+            if getattr(self, "camps", 0) >= CAMP_MAX:
+                return None
+            px, py = self.player_xy
+            best = None
+            doors = ([tuple(d[:2]) for d in self.exits] + [tuple(d[:2]) for d in getattr(self, "removed_exits", ())]
+                     + list(self.portals) + [tuple(d[:2]) for d in (getattr(self, "doors", None) or ())])
+            for e in mem.enemies.values():
+                if not e.alive or tried.get(e.id, 0) >= CAMP_TRIES:
+                    continue
+                for x, y in list(getattr(e, "trail", None) or []) + [e.xy]:
+                    i = nav.nearest_node(x, y, allowed=self.rm.reachable)
+                    if i is None:
+                        continue
+                    nx, ny = nav.nodes[i]
+                    if any(math.hypot(nx - d[0], ny - d[1]) < CAMP_DOOR_GAP for d in doors):
+                        continue                 # never wait in a doorway: the step there is cut off
+                                                 # and the walk loops (Ettin's Back: 11,600 times)
+                    gap = math.hypot(nx - x, ny - y)
+                    if gap > CAMP_REACH:
+                        continue
+                    key = (gap, math.hypot(nx - px, ny - py))
+                    if best is None or key < best[0]:
+                        best = (key, e, (nx, ny), (x, y))
+            if best is None:
+                return None
+            _k, e, spot, seen = best
+            if self._walk_distance(spot) == math.inf:
+                tried[e.id] = CAMP_TRIES             # no way to that spot either
+                return None
+            for o in mem.enemies.values():                # its group waits with it: one wait for all of them
+                if o.alive and math.hypot(o.xy[0] - seen[0], o.xy[1] - seen[1]) < 1500.0:
+                    tried[o.id] = tried.get(o.id, 0) + 1
+            tried[e.id] = max(tried.get(e.id, 0), 1)
+            cur = self._camp_cur = {"foe": e.id, "key": ("camp", e.id), "spot": spot, "set": now, "arrived": None,
+                                    "seen": seen}
+            self.camps = getattr(self, "camps", 0) + 1
+        spot = cur["spot"]
+        if math.hypot(spot[0] - self.player_xy[0], spot[1] - self.player_xy[1]) <= CAMP_ARRIVED:
+            if cur["arrived"] is None:
+                cur["arrived"] = now
+            # It came, but nothing dies: the fight is not happening (a target across an
+            # obstruction does not turn on us, and HeroAI goes on attacking it). 30 s of that
+            # ends the wait instead of standing out the full time.
+            px, py = self.player_xy
+            near = any(o.alive and not o.lost and math.hypot(o.xy[0] - px, o.xy[1] - py) < 1300.0
+                       for o in mem.enemies.values())
+            left = self.foes_remaining
+            if not near or left != cur.get("left"):
+                cur["near_since"], cur["left"] = (now if near else None), left
+            elif cur.get("near_since") is None:
+                cur["near_since"] = now
+            elif now - cur["near_since"] > 30.0:
+                self._camp_cur = None
+                self.note = "a foe came close while waiting but the fight went nowhere (obstructed?): not waiting there again"
+                return None
+            self.note = ("waiting up to %d s for a foe the party cannot walk to: seen at (%d, %d); waiting at (%d, %d)"
+                         % (CAMP_SECONDS, cur["seen"][0], cur["seen"][1], spot[0], spot[1]))
+            return "wait"
+        self.note = "going to wait where a foe the party cannot walk to comes closest (%d, %d)" % (spot[0], spot[1])
+        return Objective("camp", cur["key"], spot, self.rm.region_at(*spot), 1.0)
+
+    def _hold_give_up(self):
+        """Nothing to plan, but too soon to spend another step towards giving up. Every search
+        widening and fresh start used to be spent within the same second while the party stood on
+        a patch the map does not join, fighting the last five foes: four tightenings and two whole
+        re-searches in 2 s, then "blocked" and the area was left with 4 to go (Griffon's Mouth).
+        Now: never while a live foe is close (finish the fight first), and at most one step every
+        30 s, so the party has time to walk somewhere the plan can start from."""
+        px, py = self.player_xy
+        if getattr(self, "_hold_since", None) is None:
+            self._hold_since = self._now
+        if self._now - self._hold_since < 90.0 and any(
+                e.alive and not e.lost and math.hypot(e.xy[0] - px, e.xy[1] - py) < 2500.0
+                for e in self.mem.enemies.values()):
+            self.note = "nothing reachable to plan from here; finishing the fight first"
+            return True
+        last = getattr(self, "_giveup_t", None)
+        if last is not None and self._now - last < 30.0:
+            self.note = "nothing to plan from here; waiting before widening the search again"
+            return True
+        return False
 
     def _retour(self):
         """Re-plan the visiting order over what is still unsearched, starting from here."""
@@ -1274,7 +1407,10 @@ class Engine:
             self.cut_off = getattr(self, "cut_off", 0) + 1
             px, py = self.player_xy
             fence = getattr(self.nav, "forbidden", None)
-            here = self.player_node
+            # Judged by the ground right underfoot: player_node is the nearest node we may use,
+            # so it is never inside a ring, and a shrine inside a door's ring (Diessa, by the
+            # Ascalon door) read as "ground not joined".
+            here = self.nav.nearest_node(px, py)
             fenced = bool(fence and here is not None and fence[here])
             self.note = ("no way found from where the leader stands (%s); stepping back onto known ground"
                          % ("inside an exit's keep-clear ring" if fenced else "ground not joined to the rest"))
@@ -1309,6 +1445,7 @@ class Engine:
             route = self._soft_route(here, goal, pen)
             if route:
                 self.route_ahead = [self.nav.nodes[i] for i in route]
+                self.route_nodes = list(route)
                 self.soft_paths = getattr(self, "soft_paths", 0) + 1
                 k, left = 0, self.cfg.step_length
                 while k + 1 < len(route) and left > 0:
@@ -1448,6 +1585,7 @@ class Engine:
             left = min(left, 600.0)      # and near scenery we were caught on: the game's own walk between two
                                          # far points cuts the corner we are trying to go round
         self.route_ahead = [self.nav.nodes[i] for i in route]
+        self.route_nodes = list(route)
         if not route:
             return self._no_path_step(obj, radius, here, goal, pen)
         short = left < self.cfg.step_length
@@ -1521,6 +1659,65 @@ class Engine:
                         and self.nav.line_clear((px, py), (x, y))):
                     side, side_d = (x, y), to_goal
         return side or back
+
+    def cut_climb(self, player_xy, reach=1200.0, spread=250.0):
+        """The party keeps stopping where the planned way changes level (a ramp or bridge the
+        map joins to the ground beside it, where the game will not let anyone climb): take that
+        join out of the map for the rest of the visit, so the plan finds the real way up or
+        down. (Sage Lands: the way to a group on the ground below ran up onto a bridge and
+        "down" its side, the party stopped there again and again; a wall there only made the
+        same way a little dearer, since it was the only one the map offered.)
+        Cuts every level change between the same two levels within `spread` of the first one
+        on the route within `reach` of the party. Returns the point cut, or None."""
+        nav, route = self.nav, getattr(self, "route_nodes", None) or []
+        px, py = player_xy
+        hit = None
+        for a, b in zip(route, route[1:]):
+            pa, pb = nav.node_plane(a), nav.node_plane(b)
+            if pa == pb:
+                continue
+            (ax, ay), (bx, by) = nav.nodes[a], nav.nodes[b]
+            if min(math.hypot(ax - px, ay - py), math.hypot(bx - px, by - py)) <= reach:
+                hit = ((ax + bx) / 2.0, (ay + by) / 2.0, {pa, pb})
+            break
+        if hit is None:
+            return None
+        hx, hy, planes = hit
+        # Kept narrow: a wide cut also took out the real end of the bridge next to it, and the
+        # way west then ran 44,000 round the south (Sage Lands). Further joins along the same
+        # edge are cut one by one as the party stops at each.
+        cut = 0
+        for u in nav.nodes_within(hx, hy, spread):
+            pu = nav.node_plane(u)
+            if pu not in planes:
+                continue
+            keep = []
+            for v, w in nav.adj[u]:
+                if nav.node_plane(v) != pu and nav.node_plane(v) in planes:
+                    cut += 1
+                    continue
+                keep.append((v, w))
+            nav.adj[u] = keep
+        if not cut:
+            return None
+        self.cut_climbs = getattr(self, "cut_climbs", []) + [(round(hx), round(hy))]
+        self.player_node = None
+        self.__dict__.pop("_walk_cache", None)
+        self.objective = None
+        return (hx, hy)
+
+    def cut_joins_at(self, x, y, spread=250.0):
+        """Take out every level change within `spread` of (x, y) (a join cut on two earlier
+        visits, see Session.climb_cuts). Returns how many links were removed."""
+        nav, cut = self.nav, 0
+        for u in nav.nodes_within(x, y, spread):
+            pu = nav.node_plane(u)
+            keep = [(v, w) for v, w in nav.adj[u] if nav.node_plane(v) == pu]
+            cut += len(nav.adj[u]) - len(keep)
+            nav.adj[u] = keep
+        if cut:
+            self.cut_climbs = getattr(self, "cut_climbs", []) + [(round(x), round(y))]
+        return cut
 
     def add_wall(self, player_xy, target, detour=True):
         """The party was pinned here while walking at `target`: something the ground data does
@@ -1614,7 +1811,7 @@ class Engine:
             "fog_cells": sum(len(t[3]) for t in self.carto_targets),
             "blocked": [k for k, v in self.mem.blocked.items() if v >= self.cfg.max_failures],
             "walked": round(self.mem.walked),
-            "escalation": self.mem.escalation,
+            "escalation": self.mem.escalation, "camps": getattr(self, "camps", 0),
             "deaths": self.deaths,
             "carto_stand_cells": len(self.carto.stand) if self.carto else 0,
             "carto_given_up": self.carto_given_up,

@@ -26,6 +26,9 @@ class FightMixin:
             return
         px, py = eng.player_xy
         foes = [e.xy for e in eng.mem.enemies.values() if e.alive and not e.lost]
+        given_up = self.__dict__.get("_dead_left") or ()
+        bodies = [b for b in bodies                  # never back to bodies a full wait did not raise
+                  if not any(math.hypot(b[0] - sx, b[1] - sy) < 250.0 for sx, sy in given_up)]
         safe = [b for b in bodies if not any(math.hypot(fx - b[0], fy - b[1]) < 1300.0 for fx, fy in foes)]
         if not safe:
             return
@@ -41,6 +44,29 @@ class FightMixin:
             st["logged"] = now
             self.session.log.event("raise_dead", bodies=len(bodies), safe=len(safe), distance=round(d),
                                    player=[round(px), round(py)])
+
+    def _dead_not_given_up(self, eng, px, py, dead_near):
+        """How many of the dead within reach are not bodies we already waited for in vain.
+        Given-up bodies are kept by where they lie (a body does not move): one is let go when we
+        stand near its spot and nobody lies there any more (raised). A drop in the count alone
+        means nothing - the count only reaches 4500, so it drops whenever we walk on."""
+        spots = list(self.__dict__.get("_dead_left") or [])
+        if not dead_near and not spots:
+            self._dead_left = None
+            return 0
+        try:
+            bodies = game.dead_ally_positions(4500.0)
+        except Exception:
+            return 0
+        keep = []
+        for sx, sy in spots:
+            near_spot = math.hypot(sx - px, sy - py) < 2500.0
+            lying = any(math.hypot(bx - sx, by - sy) < 250.0 for bx, by in bodies)
+            if lying or not near_spot:
+                keep.append((sx, sy))
+        self._dead_left = keep or None
+        return sum(1 for bx, by in bodies
+                   if not any(math.hypot(bx - sx, by - sy) < 250.0 for sx, sy in keep))
 
     # ---- heroes first ----
     def _alone(self):
@@ -261,7 +287,7 @@ class FightMixin:
                 return True
         # too many at once: back up along the ground already cleared, once per cooldown
         # only while the pull is still on its way: once they are on top of us, turning our back costs more
-        if (fall_ok and len(near) >= cfg.crowd_size and closest > 700.0
+        if (fall_ok and len(near) >= tactics.for_party(cfg.crowd_size, size, 4) and closest > 700.0
                 and now - st["fell_back_at"] > cfg.fall_back_cooldown and not busy):
             st["fell_back_at"] = now                          # counted even if no spot, so we do not retry every second
             if back_off("big pull on its way", cfg.fall_back_distance, 5.0):
@@ -304,7 +330,7 @@ class FightMixin:
                     prof = next((b.profession for b in area if name and (b.boss.lower() in name or name in b.boss.lower())), 0)
                 if casting and tactics.role_of(model) != "healer":
                     # seen keeping its side alive: a healer, now and for the rest of the run
-                    if tactics.learn_role(model, "healer"):
+                    if tactics.learn_role(model, "healer", cast):
                         s.note_learned_role(model, "healer", cast)
                 infos.append({"id": e.id, "xy": e.xy, "hp": d[0], "level": d[1], "caster": d[2], "boss": e.boss, "prof": prof,
                               "role": tactics.role_of(model), "casting": casting,
